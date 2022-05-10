@@ -42,6 +42,7 @@ def savings_accounts_flows(df):
         )
     )
 
+
 @aggregator
 @hh.timer
 def income(df):
@@ -60,6 +61,7 @@ def income(df):
             month_income=lambda df: df.year_income / 12,
         )
         .drop(columns=['inc', 'year'])
+        .set_index(['user_id', 'ym'])
     )
 
 
