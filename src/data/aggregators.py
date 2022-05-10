@@ -22,6 +22,7 @@ def aggregator(func):
     return func
 
 
+@aggregator
 @hh.timer
 def savings_accounts_flows(df):
     """Saving accounts flows variables."""
