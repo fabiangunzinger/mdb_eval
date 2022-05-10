@@ -43,7 +43,11 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
     args = parse_args(argv)
-    df = io.read_parquet(args.filepath).pipe(aggregate_data)
+    print('Reading', args.filepath)
+    df = io.read_parquet(args.filepath)
+    print('Processing')
+    df.pipe(aggregate_data)
+    print('Writing to disk...')
     io.write_parquet(df, 's3://3di-project-eval/eval_111.parquet')
 
     
