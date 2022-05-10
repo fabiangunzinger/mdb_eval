@@ -58,6 +58,7 @@ def income(df):
         .sum()
         .groupby(["user_id", "year"])
         .transform("mean")
+        .droplevel('year')
     )
 
 
