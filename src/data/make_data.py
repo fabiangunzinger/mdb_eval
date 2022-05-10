@@ -64,5 +64,5 @@ def main(argv=None):
     
 
 if __name__ == '__main__':
-    main(['s3://3di-data-mdb/clean/mdb_clean_111.parquet'])
+    main()
 
