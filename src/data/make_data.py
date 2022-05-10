@@ -16,9 +16,10 @@ import src.data.creators as cr
 import src.data.selectors as sl
 import src.data.validators as vl
 
+
 @hh.timer
 def read(filepath, **kwargs):
-    return io.read_paquet(filepath, **kwargs)
+    return io.read_parquet(filepath, **kwargs)
 
 
 @hh.timer
