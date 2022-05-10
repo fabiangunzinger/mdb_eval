@@ -47,22 +47,16 @@ def savings_accounts_flows(df):
 @aggregator
 @hh.timer
 def income(df):
-    """Month and year income."""
+    """Mean monthly income by calendar year."""
     is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
     income_pmts = df.amount.where(is_income_pmt, 0).mul(-1).rename("inc")
     year = df.date.dt.year.rename("year")
-    group_cols = [df.user_id, year, df.ym]
+    group_cols = [df.user_id, df.ym, year]
 
     return (
         income_pmts.groupby(group_cols)
         .sum()
-        .reset_index()
-        .assign(
-            year_income=lambda df: df.groupby(["user_id", "year"]).inc.transform("sum"),
-            month_income=lambda df: df.year_income / 12,
-        )
-        .drop(columns=['inc', 'year'])
-        .set_index(['user_id', 'ym'])
+        .groupby(['user_id', 'year']).transform('mean')
     )
 
 
@@ -72,7 +66,7 @@ def treatment(df):
     """Indicator for post signup period."""
     group_cols = [df.user_id, df.ym]
     t = df.date >= df.user_registration_date
-    return t.groupby(group_cols).max().rename('t')
+    return t.groupby(group_cols).max().astype('int').rename('t')
 
 
 # @aggregator
