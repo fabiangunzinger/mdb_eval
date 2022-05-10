@@ -22,16 +22,23 @@ def aggregator(func):
     return func
 
 
-@aggregator
 @hh.timer
-def txns_count(df):
-    group_cols = [df.user_id, df.ym]
+def savings_accounts_flows(df):
+    """Saving accounts flows variables."""
+    sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
+    in_out = df.is_debit.map({False: "sa_inflows", True: "sa_outflows"})
+    group_vars = [df.user_id, df.ym, in_out]
     return (
-        df.groupby(group_cols)
-        .id.size()
-        .rename("txns_count")
-        .pipe(hd.trim, how="upper", pct=1)
-        .dropna()
+        sa_flows.groupby(group_vars)
+        .sum()
+        .abs()
+        .unstack()
+        .fillna(0)
+        .apply(hd.winsorise, how="upper", pct=1)
+        .assign(
+            sa_netflows=lambda df: df.sa_inflows - df.sa_outflows,
+            has_sa_inflows=lambda df: (df.sa_inflows > 0).astype(int),
+        )
     )
 
 
@@ -183,45 +190,6 @@ def female(df):
 
 
 #@aggregator
-@hh.timer
-def savings_accounts_flows(df):
-    """Saving accounts flows variables.
-
-    Calculates in, out, and netflows, and dummies for whether there were
-    any inflows and whether there are regular inflows (defined as inflows
-    in 10 out of last 12 months).
-
-    Args:
-    df: Txn DataFrame.
-
-    Returns:
-    Series with user-month index and calculated variables.
-    """
-    sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
-    in_out = df.is_debit.map({True: "sa_inflows", False: "sa_outflows"})
-    group_vars = [df.user_id, df.ym, in_out]
-    return (
-        sa_flows.groupby(group_vars)
-        .sum()
-        .abs()
-        .unstack()
-        .fillna(0)
-        .apply(hd.winsorise, how="upper", pct=1)
-        .assign(
-            sa_netflows=lambda df: df.sa_inflows - df.sa_outflows,
-            has_sa_inflows=lambda df: (df.sa_inflows > 0).astype(int),
-            has_reg_sa_inflows=lambda df: (
-                df.groupby("user_id")
-                .has_sa_inflows.rolling(window=12, min_periods=1)
-                .sum()
-                .ge(10)
-                .astype(int)
-                .droplevel(0)
-            ),
-        )
-    )
-
-
 #@aggregator
 @hh.timer
 def benefits(df):
@@ -549,3 +517,17 @@ def grocery_shop_entropy(df):
         ],
         axis=1,
     )
+
+# @aggregator
+@hh.timer
+def txns_count(df):
+    group_cols = [df.user_id, df.ym]
+    return (
+        df.groupby(group_cols)
+        .id.size()
+        .rename("txns_count")
+        .pipe(hd.trim, how="upper", pct=1)
+        .dropna()
+    )
+
+
