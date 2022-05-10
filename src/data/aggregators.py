@@ -42,7 +42,7 @@ def savings_accounts_flows(df):
     )
 
 
-#@aggregator
+@aggregator
 @hh.timer
 def spend_txns_count(df):
     is_spend = df.tag_group.eq("spend") & df.is_debit
