@@ -40,6 +40,7 @@ def savings_accounts_flows(df):
             sa_netflows=lambda df: df.sa_inflows - df.sa_outflows,
             has_sa_inflows=lambda df: (df.sa_inflows > 0).astype(int),
         )
+        .drop(columns='sa_outflows')
     )
 
 
