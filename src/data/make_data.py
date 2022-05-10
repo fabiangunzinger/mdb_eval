@@ -12,8 +12,13 @@ import pandas as pd
 import src.helpers.helpers as hh
 import src.helpers.io as io
 import src.data.aggregators as agg
+import src.data.creators as cr
 import src.data.selectors as sl
 import src.data.validators as vl
+
+@hh.timer
+def read(filepath, **kwargs):
+    return io.read_paquet(filepath, **kwargs)
 
 
 @hh.timer
@@ -21,6 +26,11 @@ def aggregate_data(df):
     return pd.concat(
         (func(df) for func in agg.aggregator_funcs), axis=1, join="inner"
     ).reset_index()
+
+
+@hh.timer
+def create_vars(df):
+    return functools.reduce(lambda df, f: f(df), cr.creator_funcs, df)
 
 
 @hh.timer
@@ -44,7 +54,7 @@ def main(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
     print('Reading', args.filepath)
-    df = io.read_parquet(args.filepath)
+    df = read(args.filepath)
     print('Processing')
     df = df.pipe(aggregate_data)
     print('Writing to disk...')
