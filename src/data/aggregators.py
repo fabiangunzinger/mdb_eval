@@ -42,83 +42,34 @@ def savings_accounts_flows(df):
         )
     )
 
-
 @aggregator
 @hh.timer
-def spend_txns_count(df):
-    is_spend = df.tag_group.eq("spend") & df.is_debit
-    group_cols = [df.user_id, df.ym]
-    return is_spend.groupby(group_cols).sum().rename("txns_count_spend")
-
-
-#@aggregator
-@hh.timer
-def txn_volume(df):
-    group_cols = [df.user_id, df.ym]
-    abs_amount = df.amount.abs()
-    return (
-        abs_amount.groupby(group_cols)
-        .sum()
-        .rename("txns_volume")
-        .pipe(hd.trim, how="upper", pct=1)
-        .dropna()
-    )
-
-
-#@aggregator
-@hh.timer
-def txns_counts_by_account_type(df):
-    group_cols = [df.user_id, df.ym, df.account_type]
-    return (
-        df.groupby(group_cols, observed=True)
-        .size()
-        .unstack()
-        .fillna(0)
-        .loc[:, ["savings", "current"]]
-        .rename(columns=lambda x: f"txns_count_{x[0]}a")
-    )
-
-
-#@aggregator
-@hh.timer
-def category_nunique(df):
-    """Number of unique categories spent on per user-month."""
-    is_spend = df.tag_group.eq("spend") & df.is_debit
-    cat_vars = ["tag", "tag_spend", "merchant"]
-    group_cols = [df.user_id, df.ym]
-    return (
-        df[cat_vars]
-        .where(is_spend, np.nan)
-        .groupby(group_cols)
-        .nunique()
-        .rename(columns=lambda x: "nunique_" + x)
-    )
-
-
-#@aggregator
-@hh.timer
-def pct_credit(df):
-    """Proportion of month spend paid by credit card."""
-    group_cols = [df.user_id, df.ym]
-
-    is_spend = df.tag_group.eq("spend") & df.is_debit
-    spend = df.amount.where(is_spend, np.nan).groupby(group_cols).sum()
-
-    is_cc_spend = is_spend & df.account_type.eq("credit card")
-    cc_spend = df.amount.where(is_cc_spend, np.nan).groupby(group_cols).sum()
-
-    return cc_spend.div(spend).mul(100).rename("pct_credit")
-
-
-#@aggregator
-@hh.timer
 def income(df):
+    """Month and year incomes."""
+    is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
+    income_pmts = df.amount.where(is_income_pmt, 0).mul(-1).rename("inc")
+    year = df.date.dt.year.rename("year")
+    group_cols = [df.user_id, year, df.ym]
+
+    return (
+        income_pmts.groupby(group_cols)
+        .sum()
+        .reset_index()
+        .assign(
+            year_income=lambda df: df.groupby(["user_id", "year"]).inc.transform("sum"),
+            month_income=lambda df: df.year_income / 12,
+        )
+        .drop(columns=['inc', 'year'])
+    )
+
+
+# @aggregator
+@hh.timer
+def old_income(df):
     """Income variables.
 
     Incomes are multiplied by -1 to get positive numbers (credits are negative
-    in dataset), and expressed in '000s to ease coefficient comparison.
-
-    `month_income_effective` is sum of income payment in a given month.
+    in dataset).
 
     `year_income` is sum of income payments in calendar year, scaled to
     12-month incomes to account for user-years with incomplete data.
@@ -173,7 +124,23 @@ def income(df):
     ).dropna()
 
 
-#@aggregator
+# @aggregator
+@hh.timer
+def pct_credit(df):
+    """Proportion of month spend paid by credit card."""
+    group_cols = [df.user_id, df.ym]
+
+    is_spend = df.tag_group.eq("spend") & df.is_debit
+    spend = df.amount.where(is_spend, np.nan).groupby(group_cols).sum()
+
+    is_cc_spend = is_spend & df.account_type.eq("credit card")
+    cc_spend = df.amount.where(is_cc_spend, np.nan).groupby(group_cols).sum()
+
+    return cc_spend.div(spend).mul(100).rename("pct_credit")
+
+
+# @aggregator
+# @aggregator
 @hh.timer
 def age(df):
     """Adds user age at time of transaction."""
@@ -182,7 +149,7 @@ def age(df):
     return age.groupby(group_cols).first().rename("age")
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def female(df):
     """Dummy for whether user is a women."""
@@ -190,8 +157,8 @@ def female(df):
     return df.groupby(group_cols).is_female.first()
 
 
-#@aggregator
-#@aggregator
+# @aggregator
+# @aggregator
 @hh.timer
 def benefits(df):
     """Dummy indicating (non-family) benefit receipt."""
@@ -202,7 +169,7 @@ def benefits(df):
     return benefits.groupby(group_cols).sum().lt(0).astype(int).rename("has_benefits")
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def pension(df):
     """Dummy for whether user receives pension in current month."""
@@ -213,7 +180,7 @@ def pension(df):
     return pensions.groupby(group_cols).sum().lt(0).astype(int).rename("has_pension")
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def has_rent_payments(df):
     """Dummies for rent payments.
@@ -233,7 +200,7 @@ def has_rent_payments(df):
     )
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def has_mortgage_payments(df):
     """Dummies for mortgage payments.
@@ -256,7 +223,7 @@ def has_mortgage_payments(df):
     )
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def loan_funds_and_repayments(df):
     """Dummies for receiving and repaying loans."""
@@ -291,7 +258,7 @@ def loan_funds_and_repayments(df):
     return pd.concat([loan_funds, loan_repayment], axis=1)
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def region(df):
     """Region and urban dummy."""
@@ -299,7 +266,7 @@ def region(df):
     return df.groupby(group_cols)[["region_name", "is_urban"]].first()
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def generation(df):
     """Generation of user.
@@ -332,7 +299,7 @@ def generation(df):
     )
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def overdraft_fees(df):
     """Dummy for whether overdraft fees were paid."""
@@ -343,7 +310,7 @@ def overdraft_fees(df):
     return od_fees.groupby(group_cols).count().gt(0).astype(int).rename("has_od_fees")
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def month_spend(df):
     """Total monthly spend.
@@ -362,7 +329,7 @@ def month_spend(df):
     )
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def month_spend_txn_value_and_counts(df):
     """Monthly value and count of spend txns per category.
@@ -454,7 +421,7 @@ def _cat_count_std(base_values):
     return base_values.std(1)
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def cat_based_entropy(df):
     """Calculate entropy based on category txn base values."""
@@ -478,7 +445,7 @@ def cat_based_entropy(df):
     return pd.concat(scores, axis=1)
 
 
-#@aggregator
+# @aggregator
 @hh.timer
 def grocery_shop_entropy(df):
     """Returns Shannon entropy based on grocery merchant counts."""
@@ -519,6 +486,7 @@ def grocery_shop_entropy(df):
         axis=1,
     )
 
+
 # @aggregator
 @hh.timer
 def txns_count(df):
@@ -532,3 +500,9 @@ def txns_count(df):
     )
 
 
+# @aggregator
+@hh.timer
+def spend_txns_count(df):
+    is_spend = df.tag_group.eq("spend") & df.is_debit
+    group_cols = [df.user_id, df.ym]
+    return is_spend.groupby(group_cols).sum().rename("txns_count_spend")
