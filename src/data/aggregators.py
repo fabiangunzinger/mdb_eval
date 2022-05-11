@@ -24,28 +24,6 @@ def aggregator(func):
 
 @aggregator
 @hh.timer
-def savings_accounts_flows(df):
-    """Saving accounts flows variables."""
-    sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
-    in_out = df.is_debit.map({False: "sa_inflows", True: "sa_outflows"})
-    group_vars = [df.user_id, df.ym, in_out]
-    return (
-        sa_flows.groupby(group_vars)
-        .sum()
-        .abs()
-        .unstack()
-        .fillna(0)
-        .apply(hd.winsorise, how="upper", pct=1)
-        .assign(
-            sa_netflows=lambda df: df.sa_inflows - df.sa_outflows,
-            has_sa_inflows=lambda df: (df.sa_inflows > 0).astype(int),
-        )
-        .drop(columns="sa_outflows")
-    )
-
-
-@aggregator
-@hh.timer
 def income(df):
     """Mean monthly income by calendar year."""
     is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
@@ -59,6 +37,37 @@ def income(df):
         .groupby(["user_id", "year"])
         .transform("mean")
         .droplevel('year')
+    )
+
+
+@aggregator
+@hh.timer
+def savings_accounts_flows(df):
+    """Saving accounts flows variables."""
+    is_sa_flow = (
+        df.account_type.eq("savings")
+        & df.amount.abs().ge(5)
+        & ~df.tag_auto.str.contains("interest", na=False)
+        & ~df.desc.str.contains(r"save\s?the\s?change", na=False)
+    )
+    sa_flows = df.amount.where(is_sa_flow == 1, 0)
+    in_out = df.is_debit.map({False: "sa_inflows", True: "sa_outflows"})
+    month_income = income(df)
+    group_vars = [df.user_id, df.ym, in_out]
+    return (
+        sa_flows.groupby(group_vars)
+        .sum()
+        .abs()
+        .unstack()
+        .fillna(0)
+        .apply(hd.winsorise, how="upper", pct=1)
+        .assign(
+            sa_netflows=lambda df: df.sa_inflows - df.sa_outflows,
+            has_pos_netflows=lambda df: (df.sa_netflows > 0).astype(int),
+            sa_netflows_norm=lambda df: df.sa_netflows / month_income,
+            sa_inflows_norm=lambda df: df.sa_inflows / month_income,
+            sa_outflows_norm=lambda df: df.sa_outflows / month_income
+        )
     )
 
 
