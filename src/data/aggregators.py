@@ -29,9 +29,23 @@ def numeric_ym(df):
     """Numeric ym variable for use in R."""
     group_cols = [df.user_id, df.ym]
     g = df.ym.groupby(group_cols).first()
-    yr = g.dt.year.astype('string')
-    mt = g.dt.month.astype('string').apply('{:0>2}'.format)
-    return (yr + mt).astype('int').rename('ymn')
+    yr = g.dt.year.astype("string")
+    mt = g.dt.month.astype("string").apply("{:0>2}".format)
+    return (yr + mt).astype("int").rename("ymn")
+
+
+@aggregator
+@hh.timer
+def txns_count(df):
+    group_cols = [df.user_id, df.ym]
+    return df.groupby(group_cols).id.size().rename("txns_count").dropna()
+
+
+@aggregator
+@hh.timer
+def txn_volume(df):
+    group_cols = [df.user_id, df.ym]
+    return df.amount.abs().groupby(group_cols).sum().rename("txns_volume").dropna()
 
 
 @aggregator
@@ -47,8 +61,7 @@ def income(df):
         .sum()
         .groupby(["user_id", "year"])
         .transform("mean")
-        .droplevel('year')
-        .pipe(hd.winsorise, how="upper", pct=1)
+        .droplevel("year")
     )
 
 
@@ -56,13 +69,13 @@ def income(df):
 @hh.timer
 def savings_accounts_flows(df):
     """Saving accounts flows variables."""
-    is_sa_flow = (
-        df.account_type.eq("savings")
-        & df.amount.abs().ge(5)
-        & ~df.tag_auto.str.contains("interest", na=False)
-        & ~df.desc.str.contains(r"save\s?the\s?change", na=False)
-    )
-    sa_flows = df.amount.where(is_sa_flow == 1, 0)
+    # is_sa_flow = (
+    #     df.account_type.eq("savings")
+    #     & df.amount.abs().ge(5)
+    #     & ~df.tag_auto.str.contains("interest", na=False)
+    #     & ~df.desc.str.contains(r"save\s?the\s?change", na=False)
+    # )
+    sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
     in_out = df.is_debit.map({True: "outflows", False: "inflows"})
     month_income = income(df)
     group_vars = [df.user_id, df.ym, in_out]
@@ -78,10 +91,9 @@ def savings_accounts_flows(df):
             inflows_norm=lambda df: df.inflows / month_income,
             outflows_norm=lambda df: df.outflows / month_income,
             has_pos_netflows=lambda df: (df.netflows > 0).astype(int),
-            pos_netflows_norm=lambda df: df.netflows_norm * df.has_pos_netflows
+            pos_netflows_norm=lambda df: df.netflows_norm * df.has_pos_netflows,
         )
-        .replace([np.inf, -np.inf], 0)
-        .apply(hd.winsorise, how="both", pct=1)
+        .replace([np.inf, -np.inf, np.nan], 0)
     )
 
 
@@ -92,6 +104,16 @@ def treatment(df):
     group_cols = [df.user_id, df.ym]
     t = df.date >= df.user_registration_date
     return t.groupby(group_cols).max().astype("int").rename("t")
+
+
+@aggregator
+@hh.timer
+def month_spend(df):
+    """Total monthly spend."""
+    is_spend = df.tag_group.eq("spend") & df.is_debit
+    spend = df.amount.where(is_spend, np.nan)
+    group_cols = [df.user_id, df.ym]
+    return spend.groupby(group_cols).sum().rename("month_spend")
 
 
 @aggregator
@@ -133,6 +155,25 @@ def region(df):
 
 @aggregator
 @hh.timer
+def has_sa_account(df):
+    """Indicator for whether user has at least one savings account added.
+
+    We can only observe an account as added when we observe a transaction. So
+    the indicator is one when we observe at least one sa txn for the user.
+    """
+    group_cols = [df.user_id, df.ym]
+    return (
+        df.account_type.eq("savings")
+        .groupby(group_cols)
+        .max()
+        .groupby("user_id")
+        .transform("max")
+        .rename('has_sa_account')
+    )
+
+
+@aggregator
+@hh.timer
 def generation(df):
     """Generation of user.
 
@@ -162,4 +203,3 @@ def generation(df):
         .astype(gen_cats)
         .rename("generation")
     )
-
