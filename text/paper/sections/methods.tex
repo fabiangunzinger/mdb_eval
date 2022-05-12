@@ -1,0 +1,226 @@
+% !TEX root = ../eval.tex
+
+\section{Methods}%
+\label{sec:data}
+
+While we were unable to pre-register the analysis because we have had access to
+and been working with the Money Dashoard data for months, we proceeded in the
+same spirit: we first wrote a draft of the paper in the form of a pre-analysis
+plan, following \citet{olken2015promises}, then tested the entire code base --
+data pre-processing, balance checks, main analysis, and extensions -- with a 1
+percent sample, and finally ran the entire analysis.
+
+
+\subsection{Dataset}%
+\label{sub:dataset}
+
+Limitations:
+\begin{itemize}
+    \item We have more data for users that signed up later. So average user in
+        the study is not the average MDB user. If time of signup is mainly
+        driven by financial savyness, then study sample is closer to overall
+        population than MDB sample (if we rank groups as early joiners > late
+        joiners > never joiners in terms of financial sophistication). If,
+        however, signup reflects something like openness to newness, then it's
+        not necessarily correlated with financial savyness. Either way, we
+        might ignore it for now. We could test whether behaviour differs
+        between early or late adopters, but that doesn't seem important enough.
+\end{itemize}
+
+
+\subsection{Sample selection}%
+\label{sub:sample_selection}
+
+To assess the impact of MDB use on users' financial behaviour we need to
+observe their relevant financial history for a sufficiently long period of time
+prior to and after they started using the app. For our purpose here, ``relevant
+financial history'' includes the complete set of spending transactions and all
+savings account inflows and outflows, and ``sufficiently long period'' is a
+period of 6 months prior to and after signup, with the month of signup being
+the first month of the latter period.\footnote{In
+Appendix~\ref{sub:alternative_matching_method} we show results with different
+window lengths. \edit{The results are unchanged.}}
+
+Table~\ref{tab:selection} provides an overview of the precise conditions we applied to implement
+these criteria and their effect on the sample size. The set of functions that
+implement each condition can be found on \href{path-to-github}{path to github}.
+
+\begin{table}
+\centering
+\caption{Sample selection}\label{tab:selection}
+\input{\tabdir/sample_selection_111.tex}
+\end{table}
+
+
+\subsection{Treatment}%
+\label{sub:treatment}
+
+Figure~\ref{fig:treatplot_sample_raw} shows treatment assignment for a raw
+sample of random subset of 200 users. Compare to treatplot of final sample and
+talk about important implications...
+
+\begin{figure}[htpb]
+    \centering
+    \caption{Treatment assignment plot for raw sample}%
+    \includegraphics[width=0.8\linewidth]{\figdir/treatplot_sample_raw.png}
+    \label{fig:treatplot_sample_raw}
+\end{figure}
+\fignote{\textwidth}{Screenshot from the top of the Money Dashboard website, at
+\href{https://www.moneydashboard.com}{moneydashboard.com}, accessed on 29 April
+2022.}
+
+
+\subsection{Outcomes}%
+\label{sub:outcomes}
+
+\begin{table}[htpb]
+    \centering\footnotesize
+    \caption{Outcome description}
+    \label{tab:label}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X
+        >{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+    \hline\hline
+    Outcome (name in dataset) & Definition  & Rationale \\
+    \hline\\
+    \multicolumn{3}{c}{Primary outcome}\\\\
+
+    Net savings (\textit{sa\_netflows\_norm})&
+    Inflows into minus outflows out of all of a user's savings accounts divided
+    by monthly income. To capture only ``user-generated'' flows, we exclude
+    interest and ``save the change'' transactions, as well as transactions of
+    less than \pounds5 in absolute
+    value. Monthly income and raw inflows and outflows are winsorised at the 1
+    percent level.\href{https://github.com/fabiangunzinger/mdb_eval/blob/d094f8cd364f64bbe3d4e644abbff726af86de2f/src/data/aggregators.py\#L27}{\faGithub}&
+    We focus on net inflows to capture effective savings.\\\\
+
+    \multicolumn{3}{c}{Secondary outcomes}\\\\
+
+    Positive net savings dummy (\textit{has\_pos\_sa\_netflows})&
+    Dummy equal to 1 if there were positive net savings (as defined above).&
+    Captures extensive margin of savings (change in number of deposits).\\
+
+    Positive net savings (\textit{pos\_sa\_netflows})&
+    Equal to net savings if there were positive net savings.&
+    Captures intensive margin of savings (change in deposit amount).\\
+
+    ...add from text below&&\\
+
+    \hline\hline
+    \end{tabularx}
+\end{table}
+
+For a more nuanced understanding of how app use affects savings we also
+consider net-savings -- total savings account inflows minus outflows -- as a
+proportion of monthly income to see whether a willingness to save more might be
+offset by a (later) need to withdraw funds, and a dummy variable for whether a
+user has any savings account inflows in a given month to see whether the app
+helps users save at all. To investigate possible channels, we consider total
+spend, highly discretionary spend, banking charges, the total amount of
+borrowing, as well as payday borrowing, all as proportion of monthly income.
+
+\paragraph{Adjusting for multiple hypothesis tests}%
+\label{par:adjusting_for_multiple_hypothesis_tests}
+We think of our secondary outcomes as exploratory and do not make any
+adjustments for multiple hypothesis testing.\footnote{For a recent
+game-theoretically motivated discussion of when and how to correct for multiple
+hypothesis testing, see \citet{viviano2021should}.} An alternative approach,
+based on \citet{anderson2008multiple}, would be to group outcomes into
+``savings'', ``spending'', ``borrowing'', and ``fees'', and consider them as
+different dimensions of a latent variable of interest which we might call
+``financial management skills''. We do not do that for two reasons: first and
+foremost, because we think it is natural to think of the amount saved as the
+ultimate outcome and of other outcomes as providing a more nuanced
+understanding of savings behaviour or as suggesting possible channels through
+which app use affects savings. Thinking of savings as the main goal is also
+reflected in Money Dashboard's main promise, which is to help users spend less
+and save more, as shown in Figure~\ref{fig:mdb_website}. Second, as pointed out
+in \citet{carlin2017fintech}, incurring overdraft fees is not an unambiguous
+sign of a financial mistake, as the opportunity to go into overdraft confers a
+benefit to the consumer.\footnote{For further discussions on fees, see
+\citet{jorring2020financial, stango2009consumers}.}
+
+
+\subsection{Covariates}%
+\label{sub:covariates}
+
+Description of covariates.
+
+
+\subsection{Difference-in-difference}%
+\label{sub:difference_in_difference}
+
+Control group design:
+\begin{itemize}
+
+    \item We only have data for a self-selected group of people who choose to
+        use Money Dashboard. By virtue of signing up to an app that helps them
+        manage their money, these users are different from those who don't sign
+        up. As a result, we are unable to answer the question of whether use of
+        Money Dashboard helps the average person in the population as a whole
+        save more.\footnote{One way to get closer to that answer is to
+            re-weight our sample on observable demographic variables so as to
+            match the UK population as a whole. But our sample differs from the
+            population as a whole both is ways that are observable (demographic
+            variables) and unobservable (self-awareness that they need help
+            managing their money, cognitive resources to engage with the app,
+            motivation to do so). Re-weighting would only help us deal with the
+        first of these.} Instead, we are answering the question whether Money
+        Dashboard succeeds in helping its \textit{users} save more.
+
+    \item Money Dashboard can access up to three years of historic data for
+        each account a user links to their account.
+
+    \item Each user for whom we have sufficient data thus serves as both a
+        treatment unit and a potential control unit.
+
+    \item We use a difference-in-differences design to estimate the effect of
+        app use. Because we do not have a separate control group, we use the
+        per-signup data of Money Dashboard users as control periods and use
+        matching to find comparable control user for each tretment user.
+
+    \item To do this, we use the matching estimator for panel data proposed by
+        \citet{imai2021matching}. Following paper, we conduct the following
+        steps:
+
+    \item For each treated observation, we find a set of control observations
+        with that share the same treatment history for a period of $L$ periods
+        before the treatment and $F$ periods after the treatment. In our
+        baseline specification, we rely on a year's worth of data around the
+        treatment period and set $L=6$ and $F = 0, 1, 2, 3, 4, 5$.
+
+    \item Identification assumption is that potential outcomes only depend on
+        treatment status of the past L periods. In general, this means that if
+        treatment has a cumulative effect over time, the full effect is reached
+        after L periods. In our context, this means that any effect on savings
+        behaviour from usign the app is fully realised after L periods. (I
+        think this means that if we look at the treatment effect for F periods
+        forward, the effect should not become stronger after F = L).
+
+    \item tbc once implemented.
+
+
+    \item Selection of covariates: all variables that simultaneously affect
+        treatment and outcomes. No need to control for fixed effects: these
+        capture unobserved time-invariant factors that make an individual sign
+        up to MDB and affect its spending habits. Given that these are time
+        invariant, and that all users eventually sign up, there is no
+        difference between control and treatment units in these factors. Month
+        of year: should probably include, as can affect p of signup and
+        spending behaviour.
+
+\end{itemize}
+
+
+
+
+
+Is estimate causal?
+\begin{itemize}
+    \item \citet{king2006dangers} show that there are four sources of bias
+        (ommitted variable, posttreatment, interpolation, extrapolation).
+    
+    \item Discuss each in turn to argue that effect is causal (for our population
+        of interest, which are people signing up to MDB). 
+\end{itemize}
+
+

@@ -1,7 +1,10 @@
+import os
+
 import numpy as np
 import pandas as pd
 
 from IPython.display import display
+from src import config
 import src.helpers.io as io
 import src.helpers.helpers as hh
 
@@ -134,3 +137,39 @@ def user_period_data(df, user_id, period):
 
 def user_data(df, user_id):
     return df[df.user_id.eq(user_id)]
+
+
+def make_selection_table(dict):
+    """Create sample selection table."""
+    df = pd.DataFrame(dict.items(), columns=["step", "counts"])
+    df[["step", "metric"]] = df.step.str.split("@", expand=True)
+
+    df = (
+        df.groupby(["step", "metric"], sort=False)
+        .counts.sum()
+        .unstack("metric")
+        .rename_axis(columns=None)
+        .reset_index()
+    )
+
+    int_cols = ['users', 'user_months', 'txns', 'txns_volume']
+    df[int_cols] = df[int_cols].applymap('{:,.0f}'.format)
+
+    df.columns = [
+        "",
+        "Users",
+        "User-months",
+        "Txns",
+        "Txns (m\pounds)",
+    ]
+    return df
+
+
+def write_selection_table(table, sample):
+    """Export sample selection table in Latex format."""
+    filename = f"sample_selection_{sample}.tex"
+    filepath = os.path.join(config.TABDIR, filename)
+    latex_table = table.to_latex(index=False, escape=False, column_format="lrrrr")
+    with pd.option_context("max_colwidth", None):
+        with open(filepath, "w") as f:
+            f.write(latex_table)

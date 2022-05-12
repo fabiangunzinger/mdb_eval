@@ -5,14 +5,16 @@ Produces analysis dataset.
 
 import argparse
 import functools
+import os
+import re
 import sys
 
 import pandas as pd
 
+import src.helpers.data as hd
 import src.helpers.helpers as hh
 import src.helpers.io as io
 import src.data.aggregators as agg
-import src.data.creators as cr
 import src.data.selectors as sl
 import src.data.validators as vl
 
@@ -30,11 +32,6 @@ def aggregate_data(df):
 
 
 @hh.timer
-def create_vars(df):
-    return functools.reduce(lambda df, f: f(df), cr.creator_funcs, df)
-
-
-@hh.timer
 def select_sample(df):
     return functools.reduce(lambda df, f: f(df), sl.selector_funcs, df)
 
@@ -46,7 +43,8 @@ def validate_data(df):
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('filepath', help='File to be processed.')
+    parser.add_argument('inpath', help='File to be read.')
+    parser.add_argument('outpath', help='File to be written')
     return parser.parse_args(args)
 
 
@@ -54,12 +52,19 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
     args = parse_args(argv)
-    print('Reading', args.filepath)
-    df = read(args.filepath)
+    print('Reading', args.inpath)
+    df = read(args.inpath)
     print('Processing')
-    df = df.pipe(aggregate_data).pipe(create_vars)
-    print('Writing to disk...')
-    io.write_parquet(df, 's3://3di-project-eval/eval_111.parquet')
+    df = df.pipe(aggregate_data).pipe(select_sample)
+    print('Writing', args.outpath)
+    io.write_parquet(df, args.outpath)
+
+    sample = re.search(r'[X\d]{3}', args.outpath)[0]
+    selection_table = hd.make_selection_table(sl.sample_counts)
+    hd.write_selection_table(selection_table, sample)
+    with pd.option_context("max_colwidth", 25):
+        print(selection_table)
+
 
     
 
