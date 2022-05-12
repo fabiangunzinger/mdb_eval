@@ -9,6 +9,7 @@ test:
 		$(EVAL_BUCKET)/eval_111.parquet
 
 XX1:
+	@printf '\n Producing project data from XX1 piece...'
 	@python -m src.data.make_data \
 		$(MDB_BUCKET)/clean/pieces/mdb_XX1.parquet \
 		$(EVAL_BUCKET)/eval_XX1.parquet

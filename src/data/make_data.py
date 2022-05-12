@@ -53,11 +53,7 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
     args = parse_args(argv)
-    print('Reading', args.inpath)
-    df = read(args.inpath)
-    print('Processing')
-    df = df.pipe(aggregate_data).pipe(select_sample)
-    print('Writing', args.outpath)
+    df = read(args.inpath).pipe(aggregate_data).pipe(select_sample)
     io.write_parquet(df, args.outpath)
 
     sample = re.search(r'[X\d]{3}', args.outpath)[0]
