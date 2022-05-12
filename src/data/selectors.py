@@ -65,7 +65,8 @@ def year_income(df, min_income=5_000):
 @hh.timer
 def savings_account(df):
     """At least one savings account"""
-    users = df.has_sa_account.groupby(df.user_id).max().eq(1)
+    cond = df.has_sa_account.groupby(df.user_id).max().eq(1)
+    users = cond[cond].index
     return df[df.user_id.isin(users)]
 
 
