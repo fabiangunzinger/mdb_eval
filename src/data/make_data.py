@@ -47,6 +47,7 @@ def parse_args(args):
     parser.add_argument('outpath', help='File to be written')
     return parser.parse_args(args)
 
+
 @hh.timer
 def main(argv=None):
     if argv is None:
