@@ -75,7 +75,7 @@ def savings_account(df):
 @hh.timer
 def min_number_of_months(df, min_months=12):
     """At least 12 months of data"""
-    cond = df.groupby("user_id").size() >= min_months
+    cond = df.groupby("user_id").size().ge(min_months)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
