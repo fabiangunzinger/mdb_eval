@@ -31,9 +31,9 @@ Limitations:
 \subsection{Sample selection}%
 \label{sub:sample_selection}
 
-To assess the impact of MDB use on users' financial behaviour we need to
+To assess the impact of app use on users' financial behaviour we need to
 observe their relevant financial history for a sufficiently long period of time
-prior to and after they started using the app. For our purpose here, ``relevant
+prior to and after signup. For our purpose here, ``relevant
 financial history'' includes the complete set of spending transactions and all
 savings account inflows and outflows, and ``sufficiently long period'' is a
 period of 6 months prior to and after signup, with the month of signup being
@@ -49,25 +49,35 @@ implement each condition can be found on \href{path-to-github}{path to github}.
 \centering
 \caption{Sample selection}\label{tab:selection}
 \input{\tabdir/sample_selection_XX1.tex}
+\tabnote{\textwidth}{Number of users, user-months, transactions, and
+transaction volume in millions of British Pounds left in our sample after each sample selection step. Link to sample selection
+code:
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/main/src/data/selectors.py}{\faGithub}.}
 \end{table}
 
 
 \subsection{Treatment}%
 \label{sub:treatment}
 
-Figure~\ref{fig:treatplot_sample_raw} shows treatment assignment for a raw
-sample of random subset of 200 users. Compare to treatplot of final sample and
-talk about important implications...
+A user changes treatment status from untreated to treated when they start using
+the app. Figure~\ref{fig:treatplot_sample_raw} shows the treatment history for
+200 randomly selected users.
 
 \begin{figure}[htpb]
     \centering
-    \caption{Treatment assignment plot for raw sample}%
+    \caption{Treatment assignment plot}%
     \includegraphics[width=0.8\linewidth]{\figdir/treatplot_sample_raw.png}
     \label{fig:treatplot_sample_raw}
+
+    \fignote{\textwidth}{Each horizontal line shows for one of 200 randomly
+        selected users the observed pre and post signup periods in blue and
+        red, respectively. The faint vertical white lines indicate month
+        borders, whitespace indicates periods in which we do not observe the
+    user. To the left of the observed period, this is because the app cannot
+access data before that point when the user signs up; to the right, because
+they have stopped using the app.}
+
 \end{figure}
-\fignote{\textwidth}{Screenshot from the top of the Money Dashboard website, at
-\href{https://www.moneydashboard.com}{moneydashboard.com}, accessed on 29 April
-2022.}
 
 
 \subsection{Outcomes}%
@@ -143,7 +153,10 @@ benefit to the consumer.\footnote{For further discussions on fees, see
 \subsection{Covariates}%
 \label{sub:covariates}
 
-Description of covariates.
+\begin{itemize}
+    \item Motivation to save more (change in savings prior to app use? opening
+        of savings account)
+\end{itemize}
 
 
 \subsection{Difference-in-difference}%
@@ -153,19 +166,34 @@ Control group design:
 \begin{itemize}
 
     \item We only have data for a self-selected group of people who choose to
-        use Money Dashboard. By virtue of signing up to an app that helps them
-        manage their money, these users are different from those who don't sign
-        up. As a result, we are unable to answer the question of whether use of
-        Money Dashboard helps the average person in the population as a whole
-        save more.\footnote{One way to get closer to that answer is to
-            re-weight our sample on observable demographic variables so as to
-            match the UK population as a whole. But our sample differs from the
-            population as a whole both is ways that are observable (demographic
-            variables) and unobservable (self-awareness that they need help
-            managing their money, cognitive resources to engage with the app,
-            motivation to do so). Re-weighting would only help us deal with the
-        first of these.} Instead, we are answering the question whether Money
-        Dashboard succeeds in helping its \textit{users} save more.
+        use Money Dashboard. This has a couple consequences:
+
+        \begin{itemize}
+
+            \item By virtue of signing up to an app that helps them manage
+                their money, these users are different from those who don't
+                sign up. As a result, we are unable to answer the question of
+                whether use of Money Dashboard helps the average person in the
+                population as a whole save more.\footnote{One way to get closer
+                    to that answer is to re-weight our sample on observable
+                    demographic variables so as to match the UK population as a
+                    whole. But our sample differs from the population as a
+                    whole both is ways that are observable (demographic
+                    variables) and unobservable (self-awareness that they need
+                    help managing their money, cognitive resources to engage
+                    with the app, motivation to do so). Re-weighting would only
+                    help us deal with the first of these.} Instead, we are
+                    answering the question whether Money Dashboard succeeds in
+                    helping its \textit{users} save more.
+
+                \item Something precipitated users to sign up at a particular
+                    point in time but not before. To the extent that the
+                    decision to sign up is linked to a desire to save more,
+                    ``desire to save more'' is a confounding effect we cannot
+                    directly control for. We try to address this so some extent
+                    by trying to control for signs of motivation for savings
+                    (e.g. starting to save more even before app use)
+        \end{itemize}
 
     \item Money Dashboard can access up to three years of historic data for
         each account a user links to their account.
@@ -198,7 +226,6 @@ Control group design:
 
     \item tbc once implemented.
 
-
     \item Selection of covariates: all variables that simultaneously affect
         treatment and outcomes. No need to control for fixed effects: these
         capture unobserved time-invariant factors that make an individual sign
@@ -210,9 +237,90 @@ Control group design:
 
 \end{itemize}
 
+DiD identification assumptions:
+\begin{itemize}
+    \item No spillover effects: the potential outcome of unit $i$ at time $t$
+        is independent of the treatment status of other units. This is violated
+        if a user's partner or friends also use the app and, through sharing
+        their experiences or motivations, influence the user's savings
+        behaviour.
+
+    \item Carryover effects no longer than $L$ periods: a user's potential
+        outcome in period $t$ is independent of treatment status in periods
+        more than $L$ periods ago. Given that we are dealing with an absorbing
+        treatment, this is not a very strong assumption in our context, and we
+        choose $L$ based on what we think is an informative number of periods
+        to observe pre-app use behaviour.\footnote{An absorbing treatment is
+            one that cannot be reversed, and hence we only change from
+            untreated to treated once.}.
+
+    \item Parallel trends: the spending trajectory between treated and control
+        units would have continued to be parallel if the treated unit hadn't
+        started using the app. This is violated whenever an intended change in
+        savings behaviour also provided the impetus for the user to start using
+        the app, which is likely to occurr frequently. To the extent this is
+        the case, we have an ommitted variable ``motivation to save more'',
+        which both changes the user's savings behaviour and their treatment
+        status. Because of this, what we are measuring is not a pure ATT of app
+        use -- the effect of app use on savings over and above the change
+        precipitated by a change motivation -- but the effect of app use for
+        users motivated to save more.
+
+\end{itemize}
 
 
+\begin{figure}[htpb]
+    \centering
+    \caption{Match set examples}%
+    \includegraphics[width=\linewidth]{\figdir/matchset_examples.png}
+    \label{fig:matchset_examples}
 
+    \fignote{\textwidth}{}
+
+\end{figure}
+
+
+\begin{figure}[htpb]
+    \centering
+    \caption{Distribution of size of matched control units}%
+    \includegraphics[width=0.8\linewidth]{\figdir/hist_matchset_size.png}
+    \label{fig:hist_matchset_size}
+
+    \fignote{\textwidth}{In the first step of the matching proceedure, each
+        user gets assigned a set of potential control users that share the same
+        treatment history for a specified number of periods before the user
+        signs up to teh app (6 months, in our baseline specification), but that
+        do not sign up themselves for a specified number of periods after the
+        treatment user has signed up (another 6 months, in our baseline
+        specification). The figure shows the distribution of the sizes of these
+        sets of potential control users. The pink vertical bar on the left
+    shows to count of users for whom no control users cound be found.}
+
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \caption{Covariance balance}%
+    \includegraphics[width=0.8\linewidth]{\figdir/covar_balance.png}
+    \label{fig:covar_balance}
+
+    \fignote{\textwidth}{Average covariate standard deviation between treatment and
+        control units for each pre-treatment period using the entire set of
+        potential controls on the left and, on the right, the refined set of
+        controls, which, in our baseline specification, consists of the nearest
+        neighbour match based on the propensity score.}
+
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \caption{Matching estimates}%
+    \includegraphics[width=0.8\linewidth]{\figdir/match_estimates.png}
+    \label{fig:match_estimates}
+
+    \fignote{\textwidth}{}
+
+\end{figure}
 
 Is estimate causal?
 \begin{itemize}
@@ -222,5 +330,16 @@ Is estimate causal?
     \item Discuss each in turn to argue that effect is causal (for our population
         of interest, which are people signing up to MDB). 
 \end{itemize}
+
+\subsection{Code access}%
+\label{sub:code_access}
+
+We provide links to code that creates key elements of the paper such as
+variable definitions and sample selection directly in the relevant places in
+the paper so they can be accessed conveniently. The links are indicated with
+the GitHub logo, \faGithub. The hope is that this helps the
+curious reader clarify questions about subtleties they might have while reading
+the paper. The complete projects GitHub repo is at
+\href{https://github.com/fabiangunzinger/mdb\_eval}{https://github.com/fabiangunzinger/mdb\_eval}.
 
 

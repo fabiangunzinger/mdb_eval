@@ -50,13 +50,13 @@ def read_raw_data(sample="XX7", **kwargs):
 
 @hh.timer
 def read_txn_data(sample="XX7", **kwargs):
-    fp = f"s3://3di-project-entropy/txn_{sample}.parquet"
+    fp = f"s3://3di-data-mdb/clean/mdb_{sample}.parquet"
     return io.read_parquet(fp, **kwargs)
 
 
 @hh.timer
 def read_analysis_data(sample="XX7", **kwargs):
-    fp = f"s3://3di-project-entropy/analysis_{sample}.parquet"
+    fp = f"s3://3di-project-eval/eval_{sample}.parquet"
     return io.read_parquet(fp, **kwargs)
 
 
