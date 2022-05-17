@@ -10,8 +10,8 @@ pieces: $(PIECES)
 $(PIECES):
 	@printf '\nProducing project data from piece $@...\n'
 	@python -m src.data.make_data \
-		$(MDB_BUCKET)/clean/mdb_$@.parquet \
-		$(EVAL_BUCKET)/evel_$@.parquet
+		$(MDB_BUCKET)/clean/pieces/mdb_$@.parquet \
+		$(EVAL_BUCKET)/eval_$@.parquet
 
 .PHONY: test
 test:
