@@ -8,8 +8,6 @@ import collections
 import functools
 import itertools
 
-import src.helpers.helpers as hh
-
 selector_funcs = []
 sample_counts = collections.Counter()
 
@@ -52,7 +50,6 @@ def add_raw_count(df):
 
 @selector
 @counter
-@hh.timer
 def year_income(df, min_income=5_000):
     """Annual income of at least \pounds5,000"""
     cond = df.groupby("user_id").month_income.min().ge(min_income / 12)
@@ -62,7 +59,6 @@ def year_income(df, min_income=5_000):
 
 @selector
 @counter
-@hh.timer
 def savings_account(df):
     """At least one savings account"""
     cond = df.has_sa_account.groupby(df.user_id).max().eq(1)
@@ -72,7 +68,6 @@ def savings_account(df):
 
 @selector
 @counter
-@hh.timer
 def min_number_of_months(df, min_months=12):
     """At least 12 months of data"""
     cond = df.groupby("user_id").size().ge(min_months)
@@ -82,7 +77,15 @@ def min_number_of_months(df, min_months=12):
 
 @selector
 @counter
-@hh.timer
+def min_pre_signup_data(df, min_months=6):
+    """At least 6 months of pre-signup data"""
+    cond = df.groupby('user_id').tt.min().le(-6)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def month_min_spend(df, min_spend=200):
     """Monthly spend of at least \pounds200"""
     cond = df.groupby("user_id").month_spend.min().ge(min_spend)

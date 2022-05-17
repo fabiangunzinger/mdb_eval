@@ -104,6 +104,15 @@ def treatment(df):
     return t.groupby(group_cols).max().astype("int").rename("t")
 
 
+@aggregator
+@hh.timer
+def time_to_treatment(df):
+    """Number of leads or lags to signup month."""
+    group_cols = [df.user_id, df.ym]
+    ym = df.ym.view('int')
+    reg_ym = df.user_registration_date.dt.to_period('m').view('int')
+    return ym.sub(reg_ym).groupby(group_cols).first().rename('tt')
+
 
 @aggregator
 @hh.timer
