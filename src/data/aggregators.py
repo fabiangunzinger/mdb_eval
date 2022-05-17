@@ -69,12 +69,10 @@ def income(df):
 @hh.timer
 def savings_accounts_flows(df):
     """Saving accounts flows variables."""
-    # is_sa_flow = (
-    #     df.account_type.eq("savings")
-    #     & df.amount.abs().ge(5)
-    #     & ~df.tag_auto.str.contains("interest", na=False)
-    #     & ~df.desc.str.contains(r"save\s?the\s?change", na=False)
-    # )
+    is_sa_flow = (
+        df.account_type.eq("savings")
+        & df.amount.abs().gt(5)
+    )
     sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
     in_out = df.is_debit.map({True: "outflows", False: "inflows"})
     month_income = income(df)
@@ -106,6 +104,7 @@ def treatment(df):
     return t.groupby(group_cols).max().astype("int").rename("t")
 
 
+
 @aggregator
 @hh.timer
 def month_spend(df):
@@ -114,18 +113,6 @@ def month_spend(df):
     spend = df.amount.where(is_spend, np.nan)
     group_cols = [df.user_id, df.ym]
     return spend.groupby(group_cols).sum().rename("month_spend")
-
-
-@aggregator
-@hh.timer
-def pct_credit(df):
-    """Proportion of month spend paid by credit card."""
-    group_cols = [df.user_id, df.ym]
-    is_spend = df.tag_group.eq("spend") & df.is_debit
-    spend = df.amount.where(is_spend, np.nan).groupby(group_cols).sum()
-    is_cc_spend = is_spend & df.account_type.eq("credit card")
-    cc_spend = df.amount.where(is_cc_spend, np.nan).groupby(group_cols).sum()
-    return cc_spend.div(spend).mul(100).rename("pct_credit")
 
 
 @aggregator
@@ -147,15 +134,15 @@ def female(df):
 
 @aggregator
 @hh.timer
-def region(df):
+def urban(df):
     """Region and urban dummy."""
     group_cols = [df.user_id, df.ym]
-    return df.groupby(group_cols)[["region_name", "is_urban"]].first()
+    return df.groupby(group_cols).is_urban.first()
 
 
 @aggregator
 @hh.timer
-def has_sa_account(df):
+def sa_account(df):
     """Indicator for whether user has at least one savings account added.
 
     We can only observe an account as added when we observe a transaction. So
@@ -181,7 +168,9 @@ def generation(df):
     """
 
     def gen(x):
-        if 1928 <= x <= 1945:
+        if np.isnan(x):
+            gen = np.nan
+        elif 1928 <= x <= 1945:
             gen = "Post War"
         elif 1946 <= x <= 1964:
             gen = "Boomers"
@@ -202,4 +191,56 @@ def generation(df):
         .map(gen)
         .astype(gen_cats)
         .rename("generation")
+        .to_frame()
+        .assign(generation_code=lambda df: df.generation.cat.codes)
     )
+
+
+
+@aggregator
+@hh.timer
+def new_loan(df):
+    """Dummy indicating loan takeout."""
+    group_cols = [df.user_id, df.ym]
+    loan_tags = [
+        "personal loan",
+        "unsecured loan funds",
+        "payday loan",
+        "unsecured loan repayment",
+        "payday loan funds",
+        "secured loan repayment",
+    ]
+    is_loan = df.tag_auto.isin(loan_tags)
+    loans = df.id.where(is_loan & ~df.is_debit, np.nan)
+    return (
+        loans
+        .groupby(group_cols)
+        .count()
+        .gt(0)
+        .astype(int)
+        .rename("new_loan")
+    )
+
+
+@aggregator
+@hh.timer
+def unemployment_benefits(df):
+    """Dummy indicating unemployment benefit receipt."""
+    is_benefit = df.tag_auto.eq('job seekers benefits')
+    benefits = df.amount.where(is_benefit, 0)
+    group_cols = [df.user_id, df.ym]
+    return benefits.groupby(group_cols).sum().lt(0).astype(int).rename("unemp_benefits")
+
+
+@aggregator
+@hh.timer
+def pct_credit(df):
+    """Proportion of month spend paid by credit card."""
+    group_cols = [df.user_id, df.ym]
+    is_spend = df.tag_group.eq("spend") & df.is_debit
+    spend = df.amount.where(is_spend, np.nan).groupby(group_cols).sum()
+    is_cc_spend = is_spend & df.account_type.eq("credit card")
+    cc_spend = df.amount.where(is_cc_spend, np.nan).groupby(group_cols).sum()
+    return cc_spend.div(spend).mul(100).rename("pct_credit")
+
+
