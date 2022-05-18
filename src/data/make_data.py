@@ -47,8 +47,7 @@ def validate_data(df):
 
 @hh.timer
 def clean_piece(filepath):
-    # df = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
-    df = pd.read_csv(filepath).pipe(aggregate_data).pipe(select_sample)
+    df = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
     return df, sl.sample_counts
 
 
