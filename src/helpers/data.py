@@ -165,10 +165,8 @@ def make_selection_table(dict):
     return df
 
 
-def write_selection_table(table, sample):
+def write_selection_table(table, filepath):
     """Export sample selection table in Latex format."""
-    filename = f"sample_selection_{sample}.tex"
-    filepath = os.path.join(config.TABDIR, filename)
     latex_table = table.to_latex(index=False, escape=False, column_format="lrrrr")
     with pd.option_context("max_colwidth", None):
         with open(filepath, "w") as f:
