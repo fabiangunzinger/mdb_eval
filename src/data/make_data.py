@@ -43,7 +43,7 @@ def validate_data(df):
     return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
 
 
-@hh.timer
+# @hh.timer
 def clean_piece(filepath):
     df = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
     return df, sl.sample_counts
@@ -66,17 +66,17 @@ def main(argv=None):
     args = parse_args(argv)
 
     if not args.piece:
-        pieces = range(10)
+        pieces = range(2)
     else:
         pieces = [args.piece]
 
-    pieces = [get_filepath(piece) for piece in pieces]
+    filepaths = [get_filepath(piece) for piece in pieces]
 
     frames = []
     total_sample_counts = collections.Counter()
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        cleaned_pieces = executor.map(clean_piece, pieces)
+        cleaned_pieces = executor.map(clean_piece, filepaths)
         for piece in cleaned_pieces:
             df, sample_counts = piece
             frames.append(df)
