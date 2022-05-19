@@ -8,9 +8,7 @@ import collections
 import concurrent
 import functools
 import os
-import re
 import sys
-import time
 
 import pandas as pd
 
@@ -51,12 +49,29 @@ def clean_piece(filepath):
     return df, sl.sample_counts
 
 
+def get_filepath(piece):
+    return os.path.join(config.AWS_PIECES, f"mdb_XX{piece}.parquet")
+
+
+def parse_args(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--piece', help='Piece to process')
+    return parser.parse_args(args)
+
+
 @hh.timer
-def main():
-    pieces = [
-        os.path.join(config.AWS_DATA, f"pieces/mdb_XX{piece}.parquet")
-        for piece in range(10)
-    ]
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+    args = parse_args(argv)
+
+    if not args.piece:
+        pieces = range(10)
+    else:
+        pieces = [args.piece]
+
+    pieces = [get_filepath(piece) for piece in pieces]
+
     frames = []
     total_sample_counts = collections.Counter()
 
