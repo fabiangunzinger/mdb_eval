@@ -70,7 +70,7 @@ def main(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
 
-    pieces = args.piece if args.piece else range(3)
+    pieces = args.piece if args.piece else range(1)
     filepaths = [get_filepath(piece) for piece in pieces]
     total_sample_counts = collections.Counter()
     frames = []
