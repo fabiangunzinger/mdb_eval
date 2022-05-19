@@ -75,7 +75,7 @@ def main(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
 
-    pieces = args.piece if args.piece else range(10)
+    pieces = args.piece if args.piece else range(5)
     filepaths = [get_filepath(piece) for piece in pieces]
     total_sample_counts = collections.Counter()
     frames = []
@@ -86,6 +86,8 @@ def main(argv=None):
             df, sample_counts = piece
             frames.append(df)
             total_sample_counts.update(sample_counts)
+            print(frames)
+            print(total_sample_counts)
 
     
         # results = executor.map(clean_piece, filepaths)
