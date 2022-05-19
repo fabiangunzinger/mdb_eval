@@ -61,6 +61,7 @@ def parse_args(args):
 def simple_task(filepath):
     print('Processing', filepath)
     df = read_piece(filepath)
+    print('Returning', filepath)
     return df[:10]
 
 # @hh.timer
