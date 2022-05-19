@@ -45,8 +45,16 @@ def validate_data(df):
 
 @hh.timer
 def clean_piece(filepath):
-    df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
+    print('Reading', filepath)
+    df = read_piece(filepath)
+    print('Aggregating', filepath)
+    df = aggregate_data(df)
+    print('Selecting', filepath)
+    df, sample_counts = select_sample(df)
     return df, sample_counts
+
+    # df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
+    # return df, sample_counts
 
 
 def get_filepath(piece):
@@ -71,7 +79,7 @@ def main(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
 
-    pieces = args.piece if args.piece else range(2)
+    pieces = args.piece if args.piece else range(10)
     filepaths = [get_filepath(piece) for piece in pieces]
     total_sample_counts = collections.Counter()
     frames = []
@@ -89,12 +97,12 @@ def main(argv=None):
     fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
     io.write_parquet(df, fp)
 
-    # selection_table = hd.make_selection_table(total_sample_counts)
-    # fp = os.path.join(config.TABDIR, "sample_selection.tex")
-    # hd.write_selection_table(selection_table, fp)
+    selection_table = hd.make_selection_table(total_sample_counts)
+    fp = os.path.join(config.TABDIR, "sample_selection.tex")
+    hd.write_selection_table(selection_table, fp)
 
-    # with pd.option_context("max_colwidth", 25):
-        # print(selection_table)
+    with pd.option_context("max_colwidth", 25):
+        print(selection_table)
 
 
 if __name__ == "__main__":
