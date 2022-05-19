@@ -77,6 +77,8 @@ def main(argv=None):
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
         result = executor.map(simple_task, filepaths)
+        for r in result:
+            frames.append(r)
 
 
         # cleaned_pieces = executor.map(clean_piece, filepaths)
