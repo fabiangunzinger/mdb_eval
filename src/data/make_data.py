@@ -21,7 +21,7 @@ import src.data.selectors as sl
 import src.data.validators as vl
 
 
-# @hh.timer
+@hh.timer
 def read_piece(filepath, **kwargs):
     return io.read_parquet(filepath, **kwargs)
 
@@ -76,7 +76,7 @@ def main(argv=None):
     total_sample_counts = collections.Counter()
     frames = []
 
-    with concurrent.futures.ProcessPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
         results = executor.map(simple_task, filepaths)
         print('Results', results)
         for result in results:
