@@ -50,8 +50,8 @@ def clean_piece(filepath):
 
 
 def get_filepath(piece):
-    # return os.path.join(config.AWS_PIECES, f"mdb_XX{piece}.parquet")
-    return f's3://3di-project-eval/eval_XX{piece}.parquet'
+    return os.path.join(config.AWS_PIECES, f"mdb_XX{piece}.parquet")
+    # return f's3://3di-project-eval/eval_XX{piece}.parquet'
 
 
 def parse_args(args):
