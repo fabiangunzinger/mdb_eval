@@ -21,29 +21,29 @@ import src.data.selectors as sl
 import src.data.validators as vl
 
 
-@hh.timer
+# @hh.timer
 def read_piece(filepath, **kwargs):
     return io.read_parquet(filepath, **kwargs)
 
 
-@hh.timer
+# @hh.timer
 def aggregate_data(df):
     return pd.concat(
         (func(df) for func in agg.aggregator_funcs), axis=1, join="inner"
     ).reset_index()
 
 
-@hh.timer
+# @hh.timer
 def select_sample(df):
     return functools.reduce(lambda df, f: f(df), sl.selector_funcs, df)
 
 
-@hh.timer
+# @hh.timer
 def validate_data(df):
     return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
 
 
-@hh.timer
+# @hh.timer
 def clean_piece(filepath):
     df = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
     return df, sl.sample_counts
@@ -55,27 +55,22 @@ def get_filepath(piece):
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--piece', help='Piece to process')
+    parser.add_argument('-p', '--piece', help='Piece in [0,9] to process')
     return parser.parse_args(args)
 
 
-@hh.timer
+# @hh.timer
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
     args = parse_args(argv)
 
-    if not args.piece:
-        pieces = range(10)
-    else:
-        pieces = [args.piece]
-
+    pieces = args.piece if args.piece else range(10)
     filepaths = [get_filepath(piece) for piece in pieces]
-
-    frames = []
     total_sample_counts = collections.Counter()
+    frames = []
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
+    with concurrent.futures.ProcessPoolExecutor() as executor:
         cleaned_pieces = executor.map(clean_piece, filepaths)
         for piece in cleaned_pieces:
             df, sample_counts = piece
