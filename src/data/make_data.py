@@ -65,7 +65,7 @@ def simple_task(filepath):
     print('Returning', filepath)
     return df[:10]
 
-# @hh.timer
+@hh.timer
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
@@ -77,22 +77,17 @@ def main(argv=None):
     frames = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = executor.map(simple_task, filepaths)
+        results = executor.map(clean_piece, filepaths)
         print('Results', results)
         for result in results:
             print('Result', result)
-            frames.append(result)
+            df, sample_counts = result
+            frames.append(df)
+            total_sample_counts.update(sample_counts)
 
-
-        # cleaned_pieces = executor.map(clean_piece, filepaths)
-        # for piece in cleaned_pieces:
-        #     df, sample_counts = piece
-        #     frames.append(df)
-        #     total_sample_counts.update(sample_counts)
-
-        df = pd.concat(frames).reset_index(drop=True)
-        fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
-        io.write_parquet(df, fp)
+    df = pd.concat(frames).reset_index(drop=True)
+    fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
+    io.write_parquet(df, fp)
 
     # selection_table = hd.make_selection_table(total_sample_counts)
     # fp = os.path.join(config.TABDIR, "sample_selection.tex")
