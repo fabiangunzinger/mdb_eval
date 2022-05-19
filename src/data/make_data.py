@@ -21,40 +21,36 @@ import src.data.selectors as sl
 import src.data.validators as vl
 
 
-@hh.timer
 def read_piece(filepath, **kwargs):
     return io.read_parquet(filepath, **kwargs)
 
 
-@hh.timer
 def aggregate_data(df):
     return pd.concat(
         (func(df) for func in agg.aggregator_funcs), axis=1, join="inner"
     ).reset_index()
 
 
-@hh.timer
 def select_sample(df):
     return functools.reduce(lambda df, f: f(df), sl.selector_funcs, df)
 
 
-# @hh.timer
 def validate_data(df):
     return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
 
 
 @hh.timer
 def clean_piece(filepath):
-    print('Reading', filepath)
-    df = read_piece(filepath)
-    print('Aggregating', filepath)
-    df = aggregate_data(df)
-    print('Selecting', filepath)
-    df, sample_counts = select_sample(df)
-    return df, sample_counts
-
-    # df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
+    # print('Reading', filepath)
+    # df = read_piece(filepath)
+    # print('Aggregating', filepath)
+    # df = aggregate_data(df)
+    # print('Selecting', filepath)
+    # df, sample_counts = select_sample(df)
     # return df, sample_counts
+
+    df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
+    return df, sample_counts
 
 
 def get_filepath(piece):
@@ -85,14 +81,22 @@ def main(argv=None):
     frames = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = executor.map(clean_piece, filepaths)
-        print('Results', results)
-        for result in results:
-            print('Result', result)
-            df, sample_counts = result
+        results = [executor.submit(clean_piece, fp) for fp in filepaths]
+        for piece in concurrent.futures.as_completed(results):
+            df, sample_counts = piece
             frames.append(df)
             total_sample_counts.update(sample_counts)
 
+    
+        # results = executor.map(clean_piece, filepaths)
+        # print('Results', results)
+        # for result in results:
+        #     print('Result', result)
+        #     df, sample_counts = result
+        #     frames.append(df)
+        #     total_sample_counts.update(sample_counts)
+
+    print('concatenating')
     df = pd.concat(frames).reset_index(drop=True)
     fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
     io.write_parquet(df, fp)
