@@ -58,6 +58,10 @@ def parse_args(args):
     parser.add_argument('-p', '--piece', help='Piece in [0,9] to process')
     return parser.parse_args(args)
 
+def simple_task(filepath):
+    print('Processing', filepath)
+    df = read_piece(filepath)
+    return df[:10]
 
 # @hh.timer
 def main(argv=None):
@@ -71,22 +75,25 @@ def main(argv=None):
     frames = []
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        cleaned_pieces = executor.map(clean_piece, filepaths)
-        for piece in cleaned_pieces:
-            df, sample_counts = piece
-            frames.append(df)
-            total_sample_counts.update(sample_counts)
+        result = executor(simple_task, filepaths)
+
+
+        # cleaned_pieces = executor.map(clean_piece, filepaths)
+        # for piece in cleaned_pieces:
+        #     df, sample_counts = piece
+        #     frames.append(df)
+        #     total_sample_counts.update(sample_counts)
 
     df = pd.concat(frames).reset_index(drop=True)
     fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
     io.write_parquet(df, fp)
 
-    selection_table = hd.make_selection_table(total_sample_counts)
-    fp = os.path.join(config.TABDIR, "sample_selection.tex")
-    hd.write_selection_table(selection_table, fp)
+    # selection_table = hd.make_selection_table(total_sample_counts)
+    # fp = os.path.join(config.TABDIR, "sample_selection.tex")
+    # hd.write_selection_table(selection_table, fp)
 
-    with pd.option_context("max_colwidth", 25):
-        print(selection_table)
+    # with pd.option_context("max_colwidth", 25):
+        # print(selection_table)
 
 
 if __name__ == "__main__":
