@@ -76,29 +76,29 @@ def main(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
 
-    pieces = args.piece if args.piece else range(5)
+    pieces = args.piece if args.piece else range(6)
     filepaths = [get_filepath(piece) for piece in pieces]
     total_sample_counts = collections.Counter()
     frames = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = [executor.submit(clean_piece, fp) for fp in filepaths]
-        for piece in concurrent.futures.as_completed(results):
-            df, sample_counts = piece.result()
+        results = executor.map(clean_piece, filepaths)
+        print('Results', results)
+        for result in results:
+            print('Result', result)
+            df, sample_counts = result
             frames.append(df)
             total_sample_counts.update(sample_counts)
-            print(frames)
-            print(total_sample_counts)
 
-    
-        # results = executor.map(clean_piece, filepaths)
-        # print('Results', results)
-        # for result in results:
-        #     print('Result', result)
-        #     df, sample_counts = result
+        # results = [executor.submit(clean_piece, fp) for fp in filepaths]
+        # for piece in concurrent.futures.as_completed(results):
+        #     df, sample_counts = piece.result()
         #     frames.append(df)
         #     total_sample_counts.update(sample_counts)
+        #     print(frames)
+        #     print(total_sample_counts)
 
+    
     print('concatenating')
     df = pd.concat(frames).reset_index(drop=True)
     fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
