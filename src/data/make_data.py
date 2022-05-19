@@ -21,16 +21,19 @@ import src.data.selectors as sl
 import src.data.validators as vl
 
 
+@hh.timer
 def read_piece(filepath, **kwargs):
     return io.read_parquet(filepath, **kwargs)
 
 
+@hh.timer
 def aggregate_data(df):
     return pd.concat(
         (func(df) for func in agg.aggregator_funcs), axis=1, join="inner"
     ).reset_index()
 
 
+@hh.timer
 def select_sample(df):
     return functools.reduce(lambda df, f: f(df), sl.selector_funcs, df)
 
@@ -41,8 +44,13 @@ def validate_data(df):
 
 @hh.timer
 def clean_piece(filepath):
-    print('Processing', filepath)
-    df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
+    print('Reading', filepath)
+    df = read_piece(filepath)
+    print('Aggregating', filepath)
+    df = aggregate_data(df)
+    print('Selecting', filepath)
+    df, sample_counts = select_sample(df)
+    # df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
     return df, sample_counts
 
 
