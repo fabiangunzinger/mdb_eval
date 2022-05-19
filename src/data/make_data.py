@@ -49,6 +49,7 @@ def clean_piece(filepath):
     # df, sample_counts = select_sample(df)
     # return df, sample_counts
 
+    print(filepath)
     df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
     return df, sample_counts
 
