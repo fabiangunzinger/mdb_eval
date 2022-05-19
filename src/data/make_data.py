@@ -59,7 +59,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 def simple_task(filepath):
-    print('Processing', filepath)
+    print('Reading', filepath)
     df = read_piece(filepath)
     print('Returning', filepath)
     return df[:10]
@@ -76,9 +76,11 @@ def main(argv=None):
     frames = []
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        result = executor.map(simple_task, filepaths)
-        for r in result:
-            frames.append(r)
+        results = executor.map(simple_task, filepaths)
+        print('Results', results)
+        for result in results:
+            print('Result', result)
+            frames.append(result)
 
 
         # cleaned_pieces = executor.map(clean_piece, filepaths)
@@ -87,9 +89,9 @@ def main(argv=None):
         #     frames.append(df)
         #     total_sample_counts.update(sample_counts)
 
-    df = pd.concat(frames).reset_index(drop=True)
-    fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
-    io.write_parquet(df, fp)
+        df = pd.concat(frames).reset_index(drop=True)
+        fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
+        io.write_parquet(df, fp)
 
     # selection_table = hd.make_selection_table(total_sample_counts)
     # fp = os.path.join(config.TABDIR, "sample_selection.tex")
