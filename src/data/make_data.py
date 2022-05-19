@@ -84,7 +84,7 @@ def main(argv=None):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         results = [executor.submit(clean_piece, fp) for fp in filepaths]
         for piece in concurrent.futures.as_completed(results):
-            df, sample_counts = piece
+            df, sample_counts = piece.result()
             frames.append(df)
             total_sample_counts.update(sample_counts)
             print(frames)
