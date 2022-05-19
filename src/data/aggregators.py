@@ -24,7 +24,7 @@ def aggregator(func):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def numeric_ym(df):
     """Numeric ym variable for use in R."""
     group_cols = [df.user_id, df.ym]
@@ -35,21 +35,21 @@ def numeric_ym(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def txns_count(df):
     group_cols = [df.user_id, df.ym]
     return df.groupby(group_cols).id.size().rename("txns_count").dropna()
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def txn_volume(df):
     group_cols = [df.user_id, df.ym]
     return df.amount.abs().groupby(group_cols).sum().rename("txns_volume").dropna()
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def income(df):
     """Mean monthly income by calendar year."""
     is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
@@ -66,7 +66,7 @@ def income(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def savings_accounts_flows(df):
     """Saving accounts flows variables."""
     is_sa_flow = (
@@ -96,7 +96,7 @@ def savings_accounts_flows(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def treatment(df):
     """Indicator for post signup period."""
     group_cols = [df.user_id, df.ym]
@@ -105,7 +105,7 @@ def treatment(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def time_to_treatment(df):
     """Number of leads or lags to signup month."""
     group_cols = [df.user_id, df.ym]
@@ -115,7 +115,7 @@ def time_to_treatment(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def month_spend(df):
     """Total monthly spend."""
     is_spend = df.tag_group.eq("spend") & df.is_debit
@@ -125,7 +125,7 @@ def month_spend(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def age(df):
     """Adds user age at time of signup."""
     group_cols = [df.user_id, df.ym]
@@ -134,7 +134,7 @@ def age(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def female(df):
     """Dummy for whether user is a women."""
     group_cols = [df.user_id, df.ym]
@@ -142,7 +142,7 @@ def female(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def urban(df):
     """Region and urban dummy."""
     group_cols = [df.user_id, df.ym]
@@ -150,7 +150,7 @@ def urban(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def sa_account(df):
     """Indicator for whether user has at least one savings account added.
 
@@ -169,7 +169,7 @@ def sa_account(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def generation(df):
     """Generation of user.
 
@@ -207,7 +207,7 @@ def generation(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def new_loan(df):
     """Dummy indicating loan takeout."""
     group_cols = [df.user_id, df.ym]
@@ -232,7 +232,7 @@ def new_loan(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def unemployment_benefits(df):
     """Dummy indicating unemployment benefit receipt."""
     is_benefit = df.tag_auto.eq('job seekers benefits')
@@ -242,7 +242,7 @@ def unemployment_benefits(df):
 
 
 @aggregator
-@hh.timer
+# @hh.timer
 def pct_credit(df):
     """Proportion of month spend paid by credit card."""
     group_cols = [df.user_id, df.ym]
