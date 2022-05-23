@@ -3,7 +3,7 @@ import functools
 
 
 def timer(func=None, active=True):
-    def time(func):
+    def decorate(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             start = time.time()
@@ -20,4 +20,4 @@ def timer(func=None, active=True):
 
         return wrapper
 
-    return time(func) if func else time
+    return decorate(func) if func else decorate
