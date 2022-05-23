@@ -28,12 +28,6 @@ def at_least_min_year_income(df, min_income=config.MIN_YEAR_INCOME):
 
 
 @validator
-def at_least_one_savings_account(df):
-    assert df.groupby('user_id').txns_count_sa.max().gt(0).all()
-    return df
-
-
-@validator
 def min_number_of_months(df):
     assert df.groupby('user_id').size().ge(6).all()
     return df
