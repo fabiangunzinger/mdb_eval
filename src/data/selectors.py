@@ -52,7 +52,7 @@ def add_raw_count(df):
 
 @selector
 @counter
-def year_income(df, min_income=config.MIN_INCOME):
+def year_income(df, min_income=config.MIN_YEAR_INCOME):
     """Annual income of at least \pounds5,000"""
     cond = df.groupby("user_id").month_income.min().ge(min_income / 12)
     users = cond[cond].index
