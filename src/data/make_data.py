@@ -27,6 +27,7 @@ TIMER_ACTIVE = True
 
 @hh.timer(active=TIMER_ACTIVE)
 def read_piece(filepath, **kwargs):
+    print('Reading', filepath)
     return io.read_parquet(filepath, **kwargs)
 
 
