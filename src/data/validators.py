@@ -47,5 +47,5 @@ def complete_demographic_info(df):
 
 @validator
 def reasonable_age_bounds(df):
-    assert df.age.between(16, 110, inclusive='both')
+    assert df.age.between(16, 110, inclusive='both').all()
     return df

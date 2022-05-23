@@ -81,7 +81,7 @@ def min_number_of_months(df, min_months=config.MIN_TOTAL_MONTHS):
 @counter
 def min_pre_signup_data(df, min_months=config.MIN_PRE_MONTHS):
     """At least 6 months of pre-signup data"""
-    cond = df.groupby('user_id').tt.min().le(-6)
+    cond = df.groupby("user_id").tt.min().le(-6)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
@@ -91,6 +91,15 @@ def min_pre_signup_data(df, min_months=config.MIN_PRE_MONTHS):
 def month_min_spend(df, min_spend=config.MIN_MONTH_SPEND):
     """Monthly spend of at least \pounds200"""
     cond = df.groupby("user_id").month_spend.min().ge(min_spend)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def valid_registration_date(df):
+    """Valid registration date"""
+    cond = df.groupby("user_id").user_registration_date.first().ge("2010-01-01")
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
