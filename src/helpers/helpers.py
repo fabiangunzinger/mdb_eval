@@ -20,4 +20,4 @@ def timer(func=None, active=True):
 
         return wrapper
 
-    return timer(func) if func else timer
+    return time(func) if func else time
