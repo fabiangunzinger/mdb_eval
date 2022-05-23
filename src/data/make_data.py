@@ -75,6 +75,7 @@ def main(argv=None):
     args = parse_args(argv)
 
     pieces = args.piece if args.piece else range(10)
+    print(pieces)
     filepaths = [get_filepath(piece) for piece in pieces]
     total_sample_counts = collections.Counter()
     frames = []
