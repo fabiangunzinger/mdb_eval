@@ -38,6 +38,10 @@ def select_sample(df):
     return functools.reduce(lambda df, f: f(df), sl.selector_funcs, df)
 
 
+def post_process(df):
+    return df
+
+
 def validate_data(df):
     return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
 
@@ -83,7 +87,8 @@ def main(argv=None):
             total_sample_counts.update(sample_counts)
 
     df = pd.concat(frames).reset_index(drop=True)
-    fp = os.path.join(config.AWS_PROJECT, "eval.parquet")
+    fn = f"eval_{args.piece}.parquet" if args.piece else "eval.parquet"
+    fp = os.path.join(config.AWS_PROJECT,fn)
     io.write_parquet(df, fp)
 
     selection_table = hd.make_selection_table(total_sample_counts)
