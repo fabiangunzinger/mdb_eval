@@ -11,23 +11,10 @@ data:
 	@python -m src.data.make_data
 
 
-.PHONY: pieces
-pieces: $(PIECES)
-
-$(PIECES):
-	@printf '\nProducing project data from piece $@...\n'
-
-	@python -m src.data.exper $(PIECES)
-
-
-	# @python -m src.data.make_data \
-	# 	$(MDB_BUCKET)/clean/pieces/mdb_$@.parquet \
-	# 	$(EVAL_BUCKET)/eval_$@.parquet
-
 .PHONY: test
 test:
-	@printf '\n Producing project data from 111 sample...\n'
-	@python -m src.data.make_data \
-		$(MDB_BUCKET)/clean/mdb_111.parquet \
-		$(EVAL_BUCKET)/eval_111.parquet
+	@printf '\nProducing test analysis data...\n'
+	@python -m src.data.make_data --piece 0
+
+
 
