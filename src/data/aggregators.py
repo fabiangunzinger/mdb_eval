@@ -126,6 +126,14 @@ def month_spend(df):
 
 @aggregator
 # @hh.timer
+def user_registration_date(df):
+    """User registration date."""
+    group_cols = [df.user_id, df.ym]
+    return df.groupby(group_cols).user_registration_date.first()
+
+
+@aggregator
+# @hh.timer
 def age(df):
     """Adds user age at time of signup."""
     group_cols = [df.user_id, df.ym]
@@ -143,10 +151,10 @@ def female(df):
 
 @aggregator
 # @hh.timer
-def urban(df):
+def region(df):
     """Region and urban dummy."""
     group_cols = [df.user_id, df.ym]
-    return df.groupby(group_cols).is_urban.first()
+    return df.groupby(group_cols)[["region_name", "is_urban"]].first()
 
 
 @aggregator

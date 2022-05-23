@@ -38,24 +38,20 @@ def select_sample(df):
     return functools.reduce(lambda df, f: f(df), sl.selector_funcs, df)
 
 
-def post_process(df):
-    return df
-
-
-def validate_data(df):
-    return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
+@hh.timer
+def clean_piece(filepath):
+    df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
+    return df, sample_counts
 
 
 @hh.timer
-def clean_piece(filepath):
-    print('Reading', filepath)
-    df = read_piece(filepath)
-    print('Aggregating', filepath)
-    df = aggregate_data(df)
-    print('Selecting', filepath)
-    df, sample_counts = select_sample(df)
-    # df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
-    return df, sample_counts
+def transform_variables(df):
+    return functools.reduce(lambda df, f: f(df), tf.transformer_funcs, df)
+
+
+@hh.timer
+def validate_data(df):
+    return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
 
 
 def get_filepath(piece):
@@ -64,7 +60,7 @@ def get_filepath(piece):
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--piece', help='Piece in [0,9] to process')
+    parser.add_argument("-p", "--piece", help="Piece in [0,9] to process")
     return parser.parse_args(args)
 
 
@@ -86,9 +82,14 @@ def main(argv=None):
             frames.append(df)
             total_sample_counts.update(sample_counts)
 
-    df = pd.concat(frames).reset_index(drop=True)
+    df = (
+        pd.concat(frames)
+        .reset_index(drop=True)
+        .pipe(transform_variables)
+        .pipe(validate_data)
+    )
     fn = f"eval_{args.piece}.parquet" if args.piece else "eval.parquet"
-    fp = os.path.join(config.AWS_PROJECT,fn)
+    fp = os.path.join(config.AWS_PROJECT, fn)
     io.write_parquet(df, fp)
 
     selection_table = hd.make_selection_table(total_sample_counts)
