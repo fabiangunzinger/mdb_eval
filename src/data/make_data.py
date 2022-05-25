@@ -51,11 +51,13 @@ def clean_piece(filepath):
 
 @hh.timer(active=TIMER_ACTIVE)
 def transform_variables(df):
+    print('Transforming')
     return functools.reduce(lambda df, f: f(df), tf.transformer_funcs, df)
 
 
 @hh.timer(active=TIMER_ACTIVE)
 def validate_data(df):
+    print('Validating')
     return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
 
 
