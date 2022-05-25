@@ -77,25 +77,23 @@ def main(argv=None):
 
     pieces = args.piece if args.piece else range(10)
     filepaths = [get_filepath(piece) for piece in pieces]
-    total_sample_counts = collections.Counter()
-    frames = []
+    frames, total_sample_counts = [], collections.Counter()
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        results = executor.map(clean_piece, filepaths)
-        for result in results:
-            df, sample_counts = result
-            frames.append(df)
-            total_sample_counts.update(sample_counts)
+    for fp in filepaths:
+        df, sample_counts = clean_piece(fp)
+        frames.append(df)
+        total_sample_counts.update(sample_counts)
 
-    df = (
+    data = (
         pd.concat(frames)
         .reset_index(drop=True)
         .pipe(transform_variables)
         .pipe(validate_data)
     )
+
     fn = f"eval_{args.piece}.parquet" if args.piece else "eval.parquet"
     fp = os.path.join(config.AWS_PROJECT, fn)
-    io.write_parquet(df, fp)
+    io.write_parquet(data, fp)
 
     selection_table = hd.make_selection_table(total_sample_counts)
     fp = os.path.join(config.TABDIR, "sample_selection.tex")
