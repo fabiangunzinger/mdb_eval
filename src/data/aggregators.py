@@ -72,10 +72,7 @@ def income(df):
 @hh.timer(active=ACTIVE_TIMER)
 def savings_accounts_flows(df):
     """Saving accounts flows variables."""
-    is_sa_flow = (
-        df.account_type.eq("savings")
-        & df.amount.abs().gt(5)
-    )
+    is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
     sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
     in_out = df.is_debit.map({True: "outflows", False: "inflows"})
     month_income = income(df)
@@ -112,9 +109,9 @@ def treatment(df):
 def time_to_treatment(df):
     """Number of leads or lags to signup month."""
     group_cols = [df.user_id, df.ym]
-    ym = df.ym.view('int')
-    reg_ym = df.user_registration_date.dt.to_period('m').view('int')
-    return ym.sub(reg_ym).groupby(group_cols).first().rename('tt')
+    ym = df.ym.view("int")
+    reg_ym = df.user_registration_date.dt.to_period("m").view("int")
+    return ym.sub(reg_ym).groupby(group_cols).first().rename("tt")
 
 
 @aggregator
@@ -157,7 +154,11 @@ def female(df):
 def region(df):
     """Region and urban dummy."""
     group_cols = [df.user_id, df.ym]
-    return df.groupby(group_cols)[["region_name", "is_urban"]].first()
+    return (
+        df.groupby(group_cols)[["region_name", "is_urban"]]
+        .rename(columns={"region_name": "region"})
+        .first()
+    )
 
 
 @aggregator
@@ -175,7 +176,7 @@ def sa_account(df):
         .max()
         .groupby("user_id")
         .transform("max")
-        .rename('has_sa_account')
+        .rename("has_sa_account")
     )
 
 
@@ -216,7 +217,6 @@ def generation(df):
     )
 
 
-
 @aggregator
 @hh.timer(active=ACTIVE_TIMER)
 def new_loan(df):
@@ -232,21 +232,14 @@ def new_loan(df):
     ]
     is_loan = df.tag_auto.isin(loan_tags)
     loans = df.id.where(is_loan & ~df.is_debit, np.nan)
-    return (
-        loans
-        .groupby(group_cols)
-        .count()
-        .gt(0)
-        .astype(int)
-        .rename("new_loan")
-    )
+    return loans.groupby(group_cols).count().gt(0).astype(int).rename("new_loan")
 
 
 @aggregator
 @hh.timer(active=ACTIVE_TIMER)
 def unemployment_benefits(df):
     """Dummy indicating unemployment benefit receipt."""
-    is_benefit = df.tag_auto.eq('job seekers benefits')
+    is_benefit = df.tag_auto.eq("job seekers benefits")
     benefits = df.amount.where(is_benefit, 0)
     group_cols = [df.user_id, df.ym]
     return benefits.groupby(group_cols).sum().lt(0).astype(int).rename("unemp_benefits")
@@ -262,5 +255,3 @@ def pct_credit(df):
     is_cc_spend = is_spend & df.account_type.eq("credit card")
     cc_spend = df.amount.where(is_cc_spend, np.nan).groupby(group_cols).sum()
     return cc_spend.div(spend).mul(100).rename("pct_credit")
-
-
