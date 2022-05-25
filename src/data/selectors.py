@@ -52,15 +52,6 @@ def add_raw_count(df):
 
 @selector
 @counter
-def working_age(df):
-    """Working age"""
-    cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
 def year_income(df, min_income=config.MIN_YEAR_INCOME):
     """Annual income of at least \pounds5,000"""
     cond = df.groupby("user_id").month_income.min().ge(min_income / 12)
@@ -128,6 +119,15 @@ def complete_demographic_info(df):
 
 @selector
 @counter
+def working_age(df):
+    """Working age"""
+    cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def add_final_count(df):
     """Final sample
     Add count of final dataset to selection table."""
@@ -135,5 +135,5 @@ def add_final_count(df):
 
 
 @selector
-def return_counter(df):
+def return_data_and_counter(df):
     return df, sample_counts
