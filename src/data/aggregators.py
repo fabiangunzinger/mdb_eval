@@ -41,19 +41,19 @@ def numeric_ym(df):
 @hh.timer(active=ACTIVE_TIMER)
 def txns_count(df):
     group_cols = [df.user_id, df.ym]
-    return df.groupby(group_cols).id.size().rename("txns_count").dropna()
+    return df.groupby(group_cols).id.size().rename("txns_count")
 
 
 @aggregator
 @hh.timer(active=ACTIVE_TIMER)
-def txn_volume(df):
+def txns_volume(df):
     group_cols = [df.user_id, df.ym]
-    return df.amount.abs().groupby(group_cols).sum().rename("txns_volume").dropna()
+    return df.amount.abs().groupby(group_cols).sum().rename("txns_volume")
 
 
 @aggregator
 @hh.timer(active=ACTIVE_TIMER)
-def income(df):
+def month_income(df):
     """Mean monthly income by calendar year."""
     is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
     inc_pmts = df.amount.where(is_income_pmt, 0).mul(-1).rename("month_income")
@@ -75,7 +75,7 @@ def savings_accounts_flows(df):
     is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
     sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
     in_out = df.is_debit.map({True: "outflows", False: "inflows"})
-    month_income = income(df)
+    month_income = month_income(df)
     group_vars = [df.user_id, df.ym, in_out]
     return (
         sa_flows.groupby(group_vars)
@@ -155,8 +155,8 @@ def region(df):
     """Region and urban dummy."""
     group_cols = [df.user_id, df.ym]
     return (
-        df.groupby(group_cols)[["region_name", "is_urban"]]
-        .rename(columns={"region_name": "region"})
+        df.rename(columns={"region_name": "region"})
+        .groupby(group_cols)[["region", "is_urban"]]
         .first()
     )
 
@@ -233,16 +233,6 @@ def new_loan(df):
     is_loan = df.tag_auto.isin(loan_tags)
     loans = df.id.where(is_loan & ~df.is_debit, np.nan)
     return loans.groupby(group_cols).count().gt(0).astype(int).rename("new_loan")
-
-
-@aggregator
-@hh.timer(active=ACTIVE_TIMER)
-def unemployment_benefits(df):
-    """Dummy indicating unemployment benefit receipt."""
-    is_benefit = df.tag_auto.eq("job seekers benefits")
-    benefits = df.amount.where(is_benefit, 0)
-    group_cols = [df.user_id, df.ym]
-    return benefits.groupby(group_cols).sum().lt(0).astype(int).rename("unemp_benefits")
 
 
 @aggregator

@@ -52,6 +52,15 @@ def add_raw_count(df):
 
 @selector
 @counter
+def working_age(df):
+    """Working age"""
+    cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def year_income(df, min_income=config.MIN_YEAR_INCOME):
     """Annual income of at least \pounds5,000"""
     cond = df.groupby("user_id").month_income.min().ge(min_income / 12)
@@ -97,9 +106,9 @@ def month_min_spend(df, min_spend=config.MIN_MONTH_SPEND):
 
 @selector
 @counter
-def valid_registration_date(df):
-    """Valid registration date"""
-    cond = df.groupby("user_id").user_registration_date.first().ge("2010-01-01")
+def month_min_txns(df, min_txns=config.MIN_MONTH_TXNS):
+    """At least 10 txns each month"""
+    cond = df.groupby("user_id").txns_count.min().ge(min_txns)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 

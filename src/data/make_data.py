@@ -91,7 +91,7 @@ def main(argv=None):
         .pipe(validate_data)
     )
 
-    fn = f"eval_{args.piece}.parquet" if args.piece else "eval.parquet"
+    fn = f"eval_XX{args.piece}.parquet" if args.piece else "eval.parquet"
     fp = os.path.join(config.AWS_PROJECT, fn)
     io.write_parquet(data, fp)
 

@@ -40,12 +40,18 @@ def min_month_spend(df, min_spend=config.MIN_MONTH_SPEND):
 
 
 @validator
+def min_month_txns(df, min_txns=config.MIN_MONTH_TXNS):
+    assert df.txns_count.min() >= min_txns
+    return df
+
+
+@validator
 def complete_demographic_info(df):
     assert df.filter(regex='is_female|age|region').isna().sum().sum() == 0
     return df
 
 
 @validator
-def reasonable_age_bounds(df):
-    assert df.age.between(16, 110, inclusive='both').all()
+def working_age(df):
+    assert df.age.between(18, 65, inclusive='both').all()
     return df
