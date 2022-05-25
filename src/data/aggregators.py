@@ -53,7 +53,7 @@ def txns_volume(df):
 
 @aggregator
 @hh.timer(active=ACTIVE_TIMER)
-def month_income(df):
+def income(df):
     """Mean monthly income by calendar year."""
     is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
     inc_pmts = df.amount.where(is_income_pmt, 0).mul(-1).rename("month_income")
@@ -75,7 +75,7 @@ def savings_accounts_flows(df):
     is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
     sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
     in_out = df.is_debit.map({True: "outflows", False: "inflows"})
-    month_income = month_income(df)
+    month_income = income(df)
     group_vars = [df.user_id, df.ym, in_out]
     return (
         sa_flows.groupby(group_vars)
