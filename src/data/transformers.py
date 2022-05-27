@@ -28,13 +28,13 @@ def winsorise_sa_flows(df):
 
 @transformer
 def winsorise_month_income(df):
-    df['month_income'] = hd.winsorise(df.month_income, pct=0, how='upper')
+    df['month_income'] = hd.winsorise(df.month_income, pct=1, how='upper')
     return df
 
 
 @transformer
 def winsorise_month_spend(df):
-    df['month_spend'] = hd.winsorise(df.month_spend, pct=0, how='upper')
+    df['month_spend'] = hd.winsorise(df.month_spend, pct=1, how='upper')
     return df
 
 

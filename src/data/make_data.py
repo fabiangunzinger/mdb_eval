@@ -51,13 +51,11 @@ def clean_piece(filepath):
 
 @hh.timer(active=TIMER_ACTIVE)
 def transform_variables(df):
-    print('Transforming')
     return functools.reduce(lambda df, f: f(df), tf.transformer_funcs, df)
 
 
 @hh.timer(active=TIMER_ACTIVE)
 def validate_data(df):
-    print('Validating')
     return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
 
 
@@ -77,7 +75,7 @@ def main(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
 
-    pieces = args.piece if args.piece else range(10)
+    pieces = args.piece if args.piece else range(5)
     filepaths = [get_filepath(piece) for piece in pieces]
     frames, total_sample_counts = [], collections.Counter()
 
@@ -92,7 +90,6 @@ def main(argv=None):
         .pipe(transform_variables)
         .pipe(validate_data)
     )
-
     fn = f"eval_XX{args.piece}.parquet" if args.piece else "eval.parquet"
     fp = os.path.join(config.AWS_PROJECT, fn)
     io.write_parquet(data, fp)
