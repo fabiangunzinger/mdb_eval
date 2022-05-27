@@ -20,7 +20,7 @@ def selector(func):
 
 
 def counter(func):
-    """Count sample after applying function.
+    """Count sample after applying function and update selection table.
 
     First line of func docstring is used for description in selection table.
     """
@@ -134,6 +134,6 @@ def add_final_count(df):
     return df
 
 
-@selector
-def return_data_and_counter(df):
-    return df, sample_counts
+# @selector
+# def return_data_and_counter(df):
+#     return df, sample_counts
