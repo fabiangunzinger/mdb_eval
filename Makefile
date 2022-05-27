@@ -17,4 +17,8 @@ test:
 	@python -m src.data.make_data --piece 0
 
 
+.PHONY: figures
+figures:
+	@Rscript src/figures/sample_description.R
+
 
