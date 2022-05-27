@@ -80,7 +80,7 @@ def main(argv=None):
     frames = []
     for fp in filepaths:
         frames.append(clean_piece(fp))
-        print(hd.make_selection_table(sl.selection_table))
+        print(hd.make_selection_table(sl.sample_counts))
 
     data = (
         # pd.concat(clean_piece(fp) for fp in filepaths)
