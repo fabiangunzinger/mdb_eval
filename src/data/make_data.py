@@ -45,8 +45,7 @@ def select_sample(df):
 
 @hh.timer(active=TIMER_ACTIVE)
 def clean_piece(filepath):
-    df, sample_counts = read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
-    return df, sample_counts
+    return read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
 
 
 @hh.timer(active=TIMER_ACTIVE)
