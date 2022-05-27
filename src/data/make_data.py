@@ -77,15 +77,9 @@ def main(argv=None):
 
     pieces = args.piece if args.piece else range(5)
     filepaths = [get_filepath(piece) for piece in pieces]
-    frames, total_sample_counts = [], collections.Counter()
-
-    for fp in filepaths:
-        df, sample_counts = clean_piece(fp)
-        frames.append(df)
-        total_sample_counts.update(sample_counts)
 
     data = (
-        pd.concat(frames)
+        pd.concat(clean_piece(fp) for fp in filepaths)
         .reset_index(drop=True)
         .pipe(transform_variables)
         .pipe(validate_data)
@@ -94,7 +88,7 @@ def main(argv=None):
     fp = os.path.join(config.AWS_PROJECT, fn)
     io.write_parquet(data, fp)
 
-    selection_table = hd.make_selection_table(total_sample_counts)
+    selection_table = hd.make_selection_table(sl.sample_counts)
     fp = os.path.join(config.TABDIR, "sample_selection.tex")
     hd.write_selection_table(selection_table, fp)
 
