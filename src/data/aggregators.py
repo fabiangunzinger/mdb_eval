@@ -89,6 +89,7 @@ def savings_accounts_flows(df):
             inflows_norm=lambda df: df.inflows / month_income,
             outflows_norm=lambda df: df.outflows / month_income,
             has_pos_netflows=lambda df: (df.netflows > 0).astype(int),
+            pos_netflows=lambda df: df.netflows * df.has_pos_netflows,
             pos_netflows_norm=lambda df: df.netflows_norm * df.has_pos_netflows,
         )
         .replace([np.inf, -np.inf, np.nan], 0)
@@ -261,6 +262,9 @@ def proportion_discretionary_spend(df):
         "clothes - everyday or work",
         "clothes - other",
         "designer clothes",
+        "food, groceries, household",
+        "groceries",
+        "supermarket",
         "jewellery",
         "personal electronics",
         "shoes",
@@ -277,8 +281,9 @@ def proportion_discretionary_spend(df):
         "sports event",
         "take-away",
     ]
+
     group_cols = [df.user_id, df.ym]
-    is_desc_spend = df.tag_spend.isin(tags) & df.is_debit
+    is_desc_spend = df.tag.isin(tags) & df.is_debit
     desc_spend = df.amount.where(is_desc_spend, np.nan).groupby(group_cols).sum()
     month_income = income(df)
     return (
