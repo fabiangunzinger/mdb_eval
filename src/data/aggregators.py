@@ -237,19 +237,19 @@ def new_loan(df):
 
 @aggregator
 @hh.timer(active=ACTIVE_TIMER)
-def pct_credit(df):
+def proportion_credit(df):
     """Proportion of month spend paid by credit card."""
     group_cols = [df.user_id, df.ym]
     is_spend = df.tag_group.eq("spend") & df.is_debit
     spend = df.amount.where(is_spend, np.nan).groupby(group_cols).sum()
     is_cc_spend = is_spend & df.account_type.eq("credit card")
     cc_spend = df.amount.where(is_cc_spend, np.nan).groupby(group_cols).sum()
-    return cc_spend.div(spend).mul(100).rename("pct_credit")
+    return cc_spend.div(spend).rename("prop_credit")
 
 
 @aggregator
 @hh.timer(active=ACTIVE_TIMER)
-def discretionary_spend(df):
+def proportion_discretionary_spend(df):
     """Highly discretionary spend as a proportion of monthly income."""
     tags = [
         "accessories",
