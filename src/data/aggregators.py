@@ -245,3 +245,44 @@ def pct_credit(df):
     is_cc_spend = is_spend & df.account_type.eq("credit card")
     cc_spend = df.amount.where(is_cc_spend, np.nan).groupby(group_cols).sum()
     return cc_spend.div(spend).mul(100).rename("pct_credit")
+
+
+@aggregator
+@hh.timer(active=ACTIVE_TIMER)
+def discretionary_spend(df):
+    """Highly discretionary spend as a proportion of monthly income."""
+    tags = [
+        "accessories",
+        "appearance",
+        "beauty products",
+        "beauty treatments",
+        "clothes",
+        "clothes - designer or other",
+        "clothes - everyday or work",
+        "clothes - other",
+        "designer clothes",
+        "jewellery",
+        "personal electronics",
+        "shoes",
+        "cinema",
+        "concert & theatre",
+        "dining and drinking",
+        "dining or going out",
+        "enjoyment",
+        "entertainment, tv, media",
+        "gambling",
+        "games and gaming",
+        "hotel/b&b",
+        "lunch or snacks",
+        "sports event",
+        "take-away",
+    ]
+    group_cols = [df.user_id, df.ym]
+    is_desc_spend = df.tag_spend.isin(tags) & df.is_debit
+    desc_spend = df.amount.where(is_desc_spend, np.nan).groupby(group_cols).sum()
+    month_income = income(df)
+    return (
+        desc_spend.div(month_income)
+        .replace([np.inf, -np.inf, np.nan], 0)
+        .rename("disc_spend")
+    )

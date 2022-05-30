@@ -77,14 +77,8 @@ def main(argv=None):
     pieces = args.piece if args.piece else range(5)
     filepaths = [get_filepath(piece) for piece in pieces]
 
-    frames = []
-    for fp in filepaths:
-        frames.append(clean_piece(fp))
-        print(hd.make_selection_table(sl.sample_counts))
-
     data = (
-        # pd.concat(clean_piece(fp) for fp in filepaths)
-        pd.concat(frames)
+        pd.concat(clean_piece(fp) for fp in filepaths)
         .reset_index(drop=True)
         .pipe(transform_variables)
         .pipe(validate_data)
