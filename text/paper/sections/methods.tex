@@ -34,9 +34,12 @@ percent sample, and finally ran the entire analysis.
 
 \end{itemize}
 
+\subsection{Data preprocessing}%
+\label{sub:data_preprocessing}
 
-\subsection{Sample selection and data preprocessing}%
-\label{sub:sample_selection}
+
+\paragraph{Sample selection}%
+\label{par:sample_selection}
 
 To assess the impact of app use on users' financial behaviour we need to
 observe their relevant financial history for a sufficiently long period of time
@@ -55,7 +58,7 @@ implement each condition can be found on \href{path-to-github}{path to github}.
 \begin{table}
 \centering
 \caption{Sample selection}\label{tab:selection}
-\input{\tabdir/sample_selection_XX1.tex}
+\input{\tabdir/sample_selection.tex}
 \tabnote{\textwidth}{Number of users, user-months, transactions, and
 transaction volume in millions of British Pounds left in our sample after each sample selection step. Link to sample selection
 code:
@@ -132,6 +135,30 @@ user has any savings account inflows in a given month to see whether the app
 helps users save at all. To investigate possible channels, we consider total
 spend, highly discretionary spend, banking charges, the total amount of
 borrowing, as well as payday borrowing, all as proportion of monthly income.
+
+
+
+Net savings (\textit{netflows\_norm})
+Inflows into minus outflows out of all of a user's savings accounts divided
+by monthly income. To capture only ``user-generated'' flows, we exclude
+interest and ``save the change'' transactions, as well as transactions of
+less than \pounds5 in absolute
+value. Monthly income and raw inflows and outflows are winsorised at the 1
+percent level.
+We focus on net inflows to capture effective savings.
+
+Positive net savings dummy (\textit{has\_pos\_netflows})
+Dummy equal to 1 if there were positive net savings (as defined above).
+Captures extensive margin of savings (change in number of months with positive
+net deposits)
+
+Positive net savings (\textit{pos\_netflows})
+Equal to net savings if there were positive net savings.
+Captures intensive margin of savings (change in deposit amount in months with
+positive net deposits)
+
+
+
 
 \paragraph{Adjusting for multiple hypothesis tests}%
 \label{par:adjusting_for_multiple_hypothesis_tests}
