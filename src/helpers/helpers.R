@@ -12,3 +12,14 @@ read_s3parquet <- function(filepath) {
   # Wrapper to conveniently read parquet files from S3.
   data.frame(aws.s3::s3read_using(arrow::read_parquet, object=filepath))
 }
+
+figure <- function(filepath, width=2000, height=1000, ...) {
+  png(
+    file.path(FIGDIR, filepath),
+    width = width,
+    height = height,
+    units = "px",
+    pointsize = 30,
+    ...
+  )
+}

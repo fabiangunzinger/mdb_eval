@@ -25,14 +25,14 @@ setFixest_etable(
   )
 )
 
-setFixest_coefplot(
-  pt.col = "steelblue4",
-  pt.cex = 1.5,
-  pt.pch = 15,
-  ci.col = "darkolivegreen4",
-  ci.width = 0,
-  ci.lwd = 2
-)
+# setFixest_coefplot(
+#   pt.col = "steelblue4",
+#   pt.cex = 1.5,
+#   pt.pch = 15,
+#   ci.col = "darkolivegreen4",
+#   ci.width = 0,
+#   ci.lwd = 2
+# )
 
 setFixest_dict(c(
   has_sa_inflows = "Has savings",
@@ -48,11 +48,15 @@ setFixest_dict(c(
   
   month_income = "Month income",
   month_spend = 'Month spend',
+  disc_spend = "Disc. spend",
   is_female = 'Female',
   age = 'Age',
   is_urban = 'Urban',
   generation = "Generation",
   
   user_id = 'User ID',
-  ym = 'Year-month'
+  ym = 'Year-month',
+  
+  '(Intercept)' = 'Intercept'
 ))
+
