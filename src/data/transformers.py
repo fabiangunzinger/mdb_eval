@@ -29,7 +29,7 @@ def winsorise(df):
     df["netflows_norm"] = hd.winsorise(df.netflows_norm, pct=WIN_PCT / 2, how="both")
 
     df["txns_count"] = hd.winsorise(df.txns_count, pct=WIN_PCT, how="upper")
-    df["txns_count"] = hd.winsorise(df.txns_volume, pct=WIN_PCT, how="upper")
+    df["txns_volume"] = hd.winsorise(df.txns_volume, pct=WIN_PCT, how="upper")
     df["month_spend"] = hd.winsorise(df.month_spend, pct=WIN_PCT, how="upper")
     df["disc_spend"] = hd.winsorise(df.disc_spend, pct=WIN_PCT, how="upper")
     df["month_income"] = hd.winsorise(df.month_income, pct=WIN_PCT, how="upper")
