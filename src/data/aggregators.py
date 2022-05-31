@@ -42,7 +42,8 @@ def numeric_ym(df):
 def month(df):
     """Numeric month for use as FE."""
     group_cols = [df.user_id, df.ym]
-    return df.date.dt.month.groupby(group_cols).first().rename('month')
+    return df.date.dt.month.groupby(group_cols).first().rename("month")
+
 
 @aggregator
 @hh.timer(on=TIMER_ON)
@@ -165,6 +166,7 @@ def region(df):
         df.rename(columns={"region_name": "region"})
         .groupby(group_cols)[["region", "is_urban"]]
         .first()
+        .assign(region_code=lambda df: df.region.factorize()[0])
     )
 
 
