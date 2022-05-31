@@ -293,3 +293,13 @@ def discretionary_spend(df):
     is_disc_spend = df.tag_auto.isin(tags) & df.is_debit
     disc_spend = df.amount.where(is_disc_spend, np.nan).groupby(group_cols)
     return disc_spend.sum().rename("discret_spend")
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def num_accounts(df):
+    """Number of active accounts."""
+    group_cols = [df.user_id, df.ym]
+    return df.groupby(group_cols).account_id.nunique()
+
+
