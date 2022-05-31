@@ -39,6 +39,13 @@ def numeric_ym(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
+def month(df):
+    """Numeric month for use as FE."""
+    group_cols = [df.user_id, df.ym]
+    return df.date.dt.month.groupby(group_cols).first().rename('month')
+
+@aggregator
+@hh.timer(on=TIMER_ON)
 def txns_count(df):
     group_cols = [df.user_id, df.ym]
     return df.groupby(group_cols).id.size().rename("txns_count")
