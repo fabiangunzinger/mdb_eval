@@ -300,6 +300,15 @@ def discretionary_spend(df):
 def num_accounts(df):
     """Number of active accounts."""
     group_cols = [df.user_id, df.ym]
-    return df.groupby(group_cols).account_id.nunique()
-
+    accounts = (
+        df.groupby("user_id").account_id.nunique().rename("num_accounts").reset_index()
+    )
+    return (
+        df.groupby(group_cols)
+        .id.first()
+        .reset_index()
+        .merge(accounts)
+        .drop(columns="id")
+        .set_index(["user_id", "ym"])
+    )
 
