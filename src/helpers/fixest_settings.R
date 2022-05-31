@@ -54,8 +54,8 @@ setFixest_dict(c(
   is_urban = 'Urban',
   generation = "Generation",
   
-  user_id = 'User ID',
-  ym = 'Year-month',
+  user_id = 'User FE',
+  month = "Month FE",
   
   '(Intercept)' = 'Intercept'
 ))

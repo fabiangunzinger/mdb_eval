@@ -106,15 +106,6 @@ def month_min_spend(df, min_spend=config.MIN_MONTH_SPEND):
 
 @selector
 @counter
-def working_age(df):
-    """At least 18 and no more than 65 years old (working age)"""
-    cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
 def complete_demographic_info(df):
     """Complete demographic information
 
@@ -122,6 +113,15 @@ def complete_demographic_info(df):
     """
     cols = ["age", "is_female", "is_urban"]
     cond = df[cols].isna().groupby(df.user_id).sum().sum(1).eq(0)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def working_age(df):
+    """Working age"""
+    cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 

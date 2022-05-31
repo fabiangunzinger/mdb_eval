@@ -4,6 +4,109 @@
 \label{sec:results}
 
 
+\subsection{Pre-post comparison}%
+\label{sub:pre_post}
+
+Notes:
+\begin{itemize}
+    \item Assumption: there are no confounding effects (either time-varying,
+        individual varying, or individual-time varying), so treatment
+        assignment is as good as random.
+
+    \item With controls, we assume that there are no confounding variables
+        other than the ones we control for.
+\end{itemize}
+
+\begin{figure}[htpb]
+    \centering
+    \caption{Naive pre-post results}%
+    \includegraphics[width=\linewidth]{\figdir/reg_naive_pre_post.png}
+    \label{fig:reg_naive_pre_post}
+    \fignote{\textwidth}{Notes: ...}
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \caption{Pre-post with controls}%
+    \includegraphics[width=\linewidth]{\figdir/reg_controls.png}
+    \label{fig:reg_controls}
+    \fignote{\textwidth}{Notes: ...}
+\end{figure}
+
+
+\subsection{Static and dynamic TWFE}%
+\label{sub:static_twfe}
+
+Static:
+\begin{equation}
+    y_{it} = \alpha_i + \lambda_t + \beta T_{it} + \gamma X_{it} + \epsilon_{it}
+\end{equation}
+
+Dynamic:
+\begin{equation}
+    y_{it} = \alpha_i + \lambda_t + \sum^{5}_{s=-6} \beta_s T_{its} + \gamma X_{it} + \epsilon_{it}
+\end{equation}
+
+\begin{itemize}
+
+    \item Comparison: pre vs post signup within each individual.
+
+    \item Assumption: there are no time-varying unobserved effects that affect
+        both y and T.
+
+    \item Discussion: there is something that made the individual sign up in
+        the first place, and it might well be an individual level shock that we
+        don't observe (unexpected large expense, loss of job, etc.)
+
+    \item See \citet{imai2021use} for problems with twfe
+
+    \item See \citet{sun2021estimating} for problems with that and compare to
+        their approach as implemented in fixest.
+
+\end{itemize}
+
+\begin{figure}[htpb]
+    \centering
+    \caption{TWFE}%
+    \includegraphics[width=\linewidth]{\figdir/reg_twfe.png}
+    \label{fig:reg_twfe}
+    \fignote{\textwidth}{Notes: ...}
+\end{figure}
+
+
+\subsection{Dynamic TWFE}%
+\label{sub:dynamic_twfe}
+
+\subsection{Matching}%
+\label{sub:alternative_matching_method}
+
+\subsection{Post treatment periods as control}%
+\label{sub:post_treatment_periods_as_control}
+
+\subsection{Synthetic controls}%
+\label{sub:synthetic_controls}
+
+See \citet{abadie2021penalized} for how to use synthetic controls for disaggregated data.
+
+
+\subsection{Model comparisons}%
+\label{sub:model_comparisons}
+
+\begin{figure}[htpb]
+    \centering
+    \caption{Comparison}%
+    \includegraphics[width=\linewidth]{\figdir/reg_comparison.png}
+    \label{fig:reg_comparison}
+    \fignote{\textwidth}{Notes: ...}
+\end{figure}
+
+
+\input{\tabdir/reg_compare.tex}
+
+
+\subsection{Alternative window lengths}%
+\label{sub:alternative_window_lengths}
+
 \subsection{Subgroups}%
 \label{sub:subgroups}
 
