@@ -280,13 +280,7 @@ def discretionary_spend(df):
         "sports event",
         "take-away",
     ]
-
     group_cols = [df.user_id, df.ym]
-    is_desc_spend = df.tag_auto.isin(tags) & df.is_debit
-    desc_spend = df.amount.where(is_desc_spend, np.nan).groupby(group_cols).sum()
-    month_income = income(df)
-    return (
-        desc_spend.div(month_income)
-        .replace([np.inf, -np.inf, np.nan], 0)
-        .rename("disc_spend")
-    )
+    is_disc_spend = df.tag_auto.isin(tags) & df.is_debit
+    disc_spend = df.amount.where(is_disc_spend, np.nan).groupby(group_cols)
+    return disc_spend.sum().rename("discret_spend")
