@@ -6,12 +6,12 @@ Functions to validate integrity of analysis data.
 import src.config as config
 
 
-validator_funcs = []
+validators = []
 
 
 def validator(func):
     """Add func to list of validator functions."""
-    validator_funcs.append(func)
+    validators.append(func)
     return func
 
 

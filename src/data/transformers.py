@@ -6,7 +6,7 @@ Functions to transform variables.
 import src.helpers.data as hd
 
 
-transformer_funcs = []
+transformers = []
 
 
 WIN_PCT = 5
@@ -14,7 +14,7 @@ WIN_PCT = 5
 
 def transformer(func):
     """Add func to list of transformer functions."""
-    transformer_funcs.append(func)
+    transformers.append(func)
     return func
 
 

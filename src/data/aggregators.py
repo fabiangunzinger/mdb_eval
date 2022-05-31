@@ -15,19 +15,19 @@ import src.helpers.data as hd
 import src.helpers.helpers as hh
 
 
-ACTIVE_TIMER = False
+TIMER_ON = False
 
 
-aggregator_funcs = []
+aggregators = []
 
 
 def aggregator(func):
-    aggregator_funcs.append(func)
+    aggregators.append(func)
     return func
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def numeric_ym(df):
     """Numeric ym variable for use in R."""
     group_cols = [df.user_id, df.ym]
@@ -38,21 +38,21 @@ def numeric_ym(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def txns_count(df):
     group_cols = [df.user_id, df.ym]
     return df.groupby(group_cols).id.size().rename("txns_count")
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def txns_volume(df):
     group_cols = [df.user_id, df.ym]
     return df.amount.abs().groupby(group_cols).sum().rename("txns_volume")
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def income(df):
     """Mean monthly income by calendar year."""
     is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
@@ -69,7 +69,7 @@ def income(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def savings_accounts_flows(df):
     """Saving accounts flows variables."""
     is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
@@ -96,7 +96,7 @@ def savings_accounts_flows(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def treatment(df):
     """Indicator for post signup period."""
     group_cols = [df.user_id, df.ym]
@@ -105,7 +105,7 @@ def treatment(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def time_to_treatment(df):
     """Number of leads or lags to signup month."""
     group_cols = [df.user_id, df.ym]
@@ -115,7 +115,7 @@ def time_to_treatment(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def month_spend(df):
     """Total monthly spend."""
     is_spend = df.tag_group.eq("spend") & df.is_debit
@@ -125,7 +125,7 @@ def month_spend(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def user_registration_date(df):
     """User registration date."""
     group_cols = [df.user_id, df.ym]
@@ -133,7 +133,7 @@ def user_registration_date(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def age(df):
     """Adds user age at time of signup."""
     group_cols = [df.user_id, df.ym]
@@ -142,7 +142,7 @@ def age(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def female(df):
     """Dummy for whether user is a women."""
     group_cols = [df.user_id, df.ym]
@@ -150,7 +150,7 @@ def female(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def region(df):
     """Region and urban dummy."""
     group_cols = [df.user_id, df.ym]
@@ -162,7 +162,7 @@ def region(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def sa_account(df):
     """Indicator for whether user has at least one savings account added.
 
@@ -181,7 +181,7 @@ def sa_account(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def generation(df):
     """Generation of user.
 
@@ -218,7 +218,7 @@ def generation(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def new_loan(df):
     """Dummy indicating loan takeout."""
     group_cols = [df.user_id, df.ym]
@@ -236,7 +236,7 @@ def new_loan(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def proportion_credit(df):
     """Proportion of month spend paid by credit card."""
     group_cols = [df.user_id, df.ym]
@@ -248,7 +248,7 @@ def proportion_credit(df):
 
 
 @aggregator
-@hh.timer(active=ACTIVE_TIMER)
+@hh.timer(on=TIMER_ON)
 def discretionary_spend(df):
     """Highly discretionary spend as a proportion of monthly income."""
     tags = [

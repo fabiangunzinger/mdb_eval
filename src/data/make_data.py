@@ -13,49 +13,47 @@ import sys
 import pandas as pd
 
 import src.config as config
-import src.helpers.data as hd
-import src.helpers.helpers as hh
-import src.helpers.io as io
 import src.data.aggregators as agg
 import src.data.selectors as sl
 import src.data.transformers as tf
 import src.data.validators as vl
+import src.helpers.data as hd
+import src.helpers.helpers as hh
+import src.helpers.io as io
 
 
-TIMER_ACTIVE = True
+TIMER_ON = True
 
 
-@hh.timer(active=TIMER_ACTIVE)
+@hh.timer(on=TIMER_ON)
 def read_piece(filepath, **kwargs):
-    print('Reading', filepath)
+    print("Reading", filepath)
     return io.read_parquet(filepath, **kwargs)
 
 
-@hh.timer(active=TIMER_ACTIVE)
+@hh.timer(on=TIMER_ON)
 def aggregate_data(df):
-    return pd.concat(
-        (func(df) for func in agg.aggregator_funcs), axis=1, join="inner"
-    ).reset_index()
+    return pd.concat((f(df) for f in agg.aggregators), axis=1).reset_index()
 
 
-@hh.timer(active=TIMER_ACTIVE)
+@hh.timer(on=TIMER_ON)
 def select_sample(df):
-    return functools.reduce(lambda df, f: f(df), sl.selector_funcs, df)
+    return functools.reduce(lambda df, f: f(df), sl.selectors, df)
 
 
-@hh.timer(active=TIMER_ACTIVE)
+@hh.timer(on=TIMER_ON)
 def clean_piece(filepath):
     return read_piece(filepath).pipe(aggregate_data).pipe(select_sample)
 
 
-@hh.timer(active=TIMER_ACTIVE)
+@hh.timer(on=TIMER_ON)
 def transform_variables(df):
-    return functools.reduce(lambda df, f: f(df), tf.transformer_funcs, df)
+    return functools.reduce(lambda df, f: f(df), tf.transformers, df)
 
 
-@hh.timer(active=TIMER_ACTIVE)
+@hh.timer(on=TIMER_ON)
 def validate_data(df):
-    return functools.reduce(lambda df, f: f(df), vl.validator_funcs, df)
+    return functools.reduce(lambda df, f: f(df), vl.validators, df)
 
 
 def get_filepath(piece):
@@ -68,7 +66,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-@hh.timer(active=TIMER_ACTIVE)
+@hh.timer(on=TIMER_ON)
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
