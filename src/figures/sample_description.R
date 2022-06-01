@@ -37,20 +37,23 @@ age <- df %>%
   geom_density(aes(age)) +
   labs(x = "Age", y = "Density")
 
-
-reorder_size <- function(x) {
-  factor(x, levels = names(sort(table(x))))
-}
-
 region <- df %>%
   group_by(user_id) %>% 
   summarise(region = first(region)) %>% 
-  mutate(region = tools::toTitleCase(region)) %>% 
+  count(region) %>%
+  mutate(region = tools::toTitleCase(region), prop = n / sum(n)) %>% 
   ggplot() +
-  geom_bar(aes(y = reorder_size(region), x = (..count..) / sum(..count..))) +
+  geom_bar(aes(y = reorder(region, prop), x = prop), stat = "identity") +
   scale_x_continuous(labels = scales::percent) +
   labs(x = 'Percent', y = 'Region')
 
 
 year_income + age + gender + region
-ggsave(file.path(FIGDIR, 'sample_description.png'))
+
+figname <- 'sample_description.png'
+ggsave(
+  file.path(FIGDIR, figname),
+  height = 2000,
+  width = 3000,
+  units = "px"
+)
