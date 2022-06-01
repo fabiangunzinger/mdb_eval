@@ -2,11 +2,11 @@ library(dplyr)
 library(ggplot2)
 library(PanelMatch)
 
+source('./src/config.R')
 source('./src/helpers/helpers.R')
-source('./src/figures/fig_settings.R')
 
 
-df <- read_s3parquet('s3://3di-project-eval/eval_XX1.parquet')
+df <- read_analysis_data()
 
 
 sample_size <- 200

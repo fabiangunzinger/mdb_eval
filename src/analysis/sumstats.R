@@ -1,6 +1,8 @@
 library(stargazer)
 
-source('./helpers/helpers.R')
+source('./src/config.R')
+source('./src/helpers/helpers.R')
+
 
 df = read_analysis_data()
 

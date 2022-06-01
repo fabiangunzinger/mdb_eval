@@ -3,15 +3,14 @@ library(ggplot2)
 library(ggthemr)
 library(patchwork)
 
+source('./src/config.R')
 source('./src/helpers/helpers.R')
-source('./src/figures/fig_settings.R')
 
 ggthemr('fresh')
 theme_set(theme_minimal())
 
 
 df <- read_analysis_data()
-# df <- read_s3parquet('s3://3di-project-eval/eval_0.parquet')
 
 gender <- df %>% 
   group_by(user_id) %>%
@@ -45,7 +44,7 @@ reorder_size <- function(x) {
 
 region <- df %>%
   group_by(user_id) %>% 
-  summarise(region = first(region_name)) %>% 
+  summarise(region = first(region)) %>% 
   mutate(region = tools::toTitleCase(region)) %>% 
   ggplot() +
   geom_bar(aes(y = reorder_size(region), x = (..count..) / sum(..count..))) +

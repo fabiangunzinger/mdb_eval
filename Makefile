@@ -1,9 +1,3 @@
-MDB_BUCKET := s3://3di-data-mdb
-EVAL_BUCKET := s3://3di-project-eval
-
-PIECES := XX0 XX1 XX2 XX3 XX4 XX5 XX6 XX7 XX8 XX9
-
-
 
 .PHONY: data
 data:
@@ -17,8 +11,20 @@ test:
 	@python -m src.data.make_data --piece 0
 
 
+
+.PHONY: sumstats
+sumstats:
+	@printf '\n Updating sumstats table...\n'
+	@Rscript src/analysis/sumstats.R
+
+
 .PHONY: figures
 figures:
+
+	@printf '\n Updating sample description plots...\n'
 	@Rscript src/figures/sample_description.R
+
+	@printf '\n Updating treatment histories plot...\n'
+	@Rscript src/figures/treat_histories.R
 
 
