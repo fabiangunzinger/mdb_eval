@@ -28,8 +28,10 @@ def at_least_min_year_income(df, min_income=config.MIN_YEAR_INCOME):
 
 
 @validator
-def min_number_of_months(df):
-    assert df.groupby('user_id').size().ge(6).all()
+def min_pre_and_post_signup_months(df):
+    g = df.groupby('user_id')
+    assert g.tt.min().max().le(config.MIN_PRE_MONTHS)
+    assert g.tt.max().min().gt(config.MAX_PRE_MONTHS)
     return df
 
 

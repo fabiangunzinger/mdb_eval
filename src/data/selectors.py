@@ -72,7 +72,7 @@ def savings_account(df):
 @counter
 def min_pre_signup_data(df, min_pre_months=config.MIN_PRE_MONTHS):
     """At least 6 months of pre-signup data"""
-    cond = df.groupby("user_id").tt.min().le(min_pre_months)
+    cond = df.groupby("user_id").tt.min().le(-min_pre_months)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
