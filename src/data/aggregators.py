@@ -172,7 +172,7 @@ def region(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
-def sa_account(df):
+def savings_account(df):
     """Indicator for whether user has at least one savings account added.
 
     We can only observe an account as added when we observe a transaction. So
@@ -185,8 +185,29 @@ def sa_account(df):
         .max()
         .groupby("user_id")
         .transform("max")
-        .rename("has_sa_account")
+        .rename("has_savings_account")
     )
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def current_account(df):
+    """Indicator for whether user has at least one current account added.
+
+    We can only observe an account as added when we observe a transaction. So
+    the indicator is one when we observe at least one current account txn for
+    the user.
+    """
+    group_cols = [df.user_id, df.ym]
+    return (
+        df.account_type.eq("current")
+        .groupby(group_cols)
+        .max()
+        .groupby("user_id")
+        .transform("max")
+        .rename("has_current_account")
+    )
+
 
 
 @aggregator

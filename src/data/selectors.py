@@ -8,6 +8,7 @@ import functools
 import itertools
 
 import src.config as config
+import src.helpers.helpers as hh
 
 
 selectors = []
@@ -52,20 +53,15 @@ def add_raw_count(df):
 
 @selector
 @counter
-def year_income(df, min_income=config.MIN_YEAR_INCOME):
-    """At least \pounds5,000 of annual income"""
-    cond = df.groupby("user_id").month_income.min().ge(min_income / 12)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
-def savings_account(df):
-    """At least one savings account"""
-    cond = df.has_sa_account.groupby(df.user_id).max().eq(1)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
+def drop_first_and_last_month(df):
+    """Drop first and last month
+    These will likely have incomplete data.
+    """
+    g = df.groupby("user_id")
+    ym_max = g.ym.transform('max')
+    ym_min = g.ym.transform('min')
+    cond = df.ym.between(ym_min, ym_max, inclusive="neither")
+    return df[cond]
 
 
 @selector
@@ -82,6 +78,33 @@ def min_pre_signup_data(df, min_pre_months=config.MIN_PRE_MONTHS):
 def min_post_signup_data(df, min_post_months=config.MIN_POST_MONTHS):
     """At least 12 months of post-signup data"""
     cond = df.groupby("user_id").tt.max().ge(min_post_months)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def has_current_account(df):
+    """At least one current account"""
+    cond = df.has_current_account.groupby(df.user_id).max().eq(1)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def has_savings_account(df):
+    """At least one savings account"""
+    cond = df.has_savings_account.groupby(df.user_id).max().eq(1)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def year_income(df, min_income=config.MIN_YEAR_INCOME):
+    """At least \pounds5,000 of annual income"""
+    cond = df.groupby("user_id").month_income.min().ge(min_income / 12)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
