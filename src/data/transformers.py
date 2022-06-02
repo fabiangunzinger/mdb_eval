@@ -3,14 +3,11 @@ Functions to transform variables.
 
 """
 
-import scr.config as config
+import src.config as config
 import src.helpers.data as hd
 
 
 transformers = []
-
-
-WIN_PCT = 1
 
 
 def transformer(func):

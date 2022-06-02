@@ -14,10 +14,10 @@ ROOTDIR = Path(__file__).parent.parent
 FIGDIR = os.path.join(ROOTDIR, "output", "figures")
 TABDIR = os.path.join(ROOTDIR, "output", "tables")
 
-
-# Sample selection parameters
+# Data preprocessing parameters
 MIN_YEAR_INCOME = 5000
 MIN_PRE_MONTHS = 6
 MIN_POST_MONTHS = 6
 MIN_MONTH_SPEND = 200
 MIN_MONTH_TXNS = 10
+WIN_PCT = 1
