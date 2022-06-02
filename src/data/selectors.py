@@ -76,7 +76,7 @@ def min_pre_signup_data(df, min_pre_months=config.MIN_PRE_MONTHS):
 @selector
 @counter
 def min_post_signup_data(df, min_post_months=config.MIN_POST_MONTHS):
-    """At least 12 months of post-signup data"""
+    """At least 6 months of post-signup data"""
     cond = df.groupby("user_id").tt.max().ge(min_post_months)
     users = cond[cond].index
     return df[df.user_id.isin(users)]

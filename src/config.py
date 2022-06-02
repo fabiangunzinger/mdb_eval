@@ -16,8 +16,8 @@ TABDIR = os.path.join(ROOTDIR, "output", "tables")
 
 
 # Sample selection parameters
-MIN_YEAR_INCOME = 500
+MIN_YEAR_INCOME = 5000
 MIN_PRE_MONTHS = 6
-MIN_POST_MONTHS = 12
+MIN_POST_MONTHS = 6
 MIN_MONTH_SPEND = 200
 MIN_MONTH_TXNS = 10
