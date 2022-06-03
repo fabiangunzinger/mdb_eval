@@ -58,8 +58,8 @@ def drop_first_and_last_month(df):
     These will likely have incomplete data.
     """
     g = df.groupby("user_id")
-    ym_max = g.ym.transform('max')
-    ym_min = g.ym.transform('min')
+    ym_max = g.ym.transform("max")
+    ym_min = g.ym.transform("min")
     cond = df.ym.between(ym_min, ym_max, inclusive="neither")
     return df[cond]
 
@@ -96,6 +96,15 @@ def has_current_account(df):
 def has_savings_account(df):
     """At least one savings account"""
     cond = df.has_savings_account.groupby(df.user_id).max().eq(1)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def max_active_accounts(df, max_accounts=config.MAX_ACTIVE_ACCOUNTS):
+    """No more than 10 active accounts"""
+    cond = df.groupby("user_id").accounts_active.max().le(max_accounts)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 

@@ -15,6 +15,7 @@ FIGDIR = os.path.join(ROOTDIR, "output", "figures")
 TABDIR = os.path.join(ROOTDIR, "output", "tables")
 
 # Data preprocessing parameters
+MAX_ACTIVE_ACCOUNTS = 10
 MIN_YEAR_INCOME = 5000
 MIN_PRE_MONTHS = 6
 MIN_POST_MONTHS = 6
