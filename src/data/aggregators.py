@@ -338,24 +338,19 @@ def num_accounts(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
-def txns_by_day_of_month(df):
-    """Number of txns by day of month for descriptive stats."""
+def sa_flow_amounts(df):
     is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
     sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
-    in_out = df.is_debit.map({True: "out_txns", False: "in_txns"})
+    in_out = df.is_debit.map({True: "out", False: "in"})
     group_cols = [df.user_id, df.ym, in_out, df.date.dt.day]
     return (
         sa_flows.groupby(group_cols)
-        .size()
+        .sum()
+        .abs()
         .reset_index([2, 3])
-        .assign(counts=lambda df: df.is_debit + df.date.astype('str'))
-        .drop(columns=['is_debit', 'date'])
-        .set_index('counts', append=True)
+        .assign(txns=lambda df: df.is_debit + df.date.astype("str"))
+        .drop(columns=["is_debit", "date"])
+        .set_index("txns", append=True)
         .unstack()
         .fillna(0)
     )
-
-@aggregator
-@hh.timer(on=TIMER_ON)
-def sa_flow_amounts(df):
-    pass
