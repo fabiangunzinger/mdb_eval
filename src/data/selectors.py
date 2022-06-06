@@ -165,7 +165,3 @@ def add_final_count(df):
     Add count of final dataset to selection table."""
     return df
 
-
-# @selector
-# def return_data_and_counter(df):
-#     return df, sample_counts
