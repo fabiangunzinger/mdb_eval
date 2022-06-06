@@ -345,3 +345,7 @@ def savings_account_flows_by_dom(df):
     in_out_dom = in_out + df.date.dt.day.astype("str")
     group_cols = [df.user_id, df.ym, in_out_dom]
     return sa_flows.groupby(group_cols).sum().abs().unstack().fillna(0)
+
+
+
+
