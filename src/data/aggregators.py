@@ -106,7 +106,10 @@ def savings_accounts_flows(df):
 @aggregator
 @hh.timer(on=TIMER_ON)
 def treatment(df):
-    """Indicator for post signup period."""
+    """Treatment indicator.
+
+    Treatment period starts at app signup date.
+    """
     group_cols = [df.user_id, df.ym]
     t = df.date >= df.user_registration_date
     return t.groupby(group_cols).max().astype("int").rename("t")
