@@ -32,10 +32,10 @@ def counter(func):
         description = func.__doc__.splitlines()[0]
         sample_counts.update(
             {
-                description + "@users": df.user_id.nunique(),
-                description + "@user_months": len(df),
-                description + "@txns": df.txns_count.sum(),
-                description + "@txns_volume": df.txns_volume.sum() / 1e6,
+                "  " + description + "@users": df.user_id.nunique(),
+                "  " + description + "@user_months": len(df),
+                "  " + description + "@txns": df.txns_count.sum(),
+                "  " + description + "@txns_volume": df.txns_volume.sum() / 1e6,
             }
         )
         return df
@@ -54,7 +54,7 @@ def add_raw_count(df):
 @selector
 @counter
 def drop_beta_users(df):
-    """Drop all beta users.
+    """Drop all beta users
     App was launched sometime in 2011, so drop all users registering before
     2012.
     """
