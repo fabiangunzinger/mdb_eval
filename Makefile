@@ -1,15 +1,7 @@
 
-.PHONY: data
-data:
-	@printf '\nProducing analysis data...\n'
-	@python -m src.data.make_data
 
-
-.PHONY: test
-test:
-	@printf '\nProducing test analysis data...\n'
-	@python -m src.data.make_data --piece 0
-
+.PHONY: all
+all: sumstats figures msg
 
 
 .PHONY: sumstats
@@ -18,9 +10,13 @@ sumstats:
 	@Rscript src/analysis/sumstats.R
 
 
-.PHONY: figures sampdesc treathist
+.PHONY: figures sampdesc treathist savpat
 
-figures: sampdesc treathist
+figures: sampdesc treathist savpat
+
+savpat:
+	@printf '\n Updating savings patterns plots...\n'
+	@Rscript src/figures/savings_patterns.R
 
 sampdesc:
 	@printf '\n Updating sample description plots...\n'
@@ -30,4 +26,16 @@ treathist:
 	@printf '\n Updating treatment histories plot...\n'
 	@Rscript src/figures/treat_histories.R
 
+msg:
+	@printf '\n All done.\n'
+
+
+.PHONY: data testdata
+data:
+	@printf '\nProducing analysis data...\n'
+	@python -m src.data.make_data
+
+testdata:
+	@printf '\nProducing test analysis data...\n'
+	@python -m src.data.make_data --piece 0
 
