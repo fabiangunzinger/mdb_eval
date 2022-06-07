@@ -53,6 +53,18 @@ def add_raw_count(df):
 
 @selector
 @counter
+def drop_beta_users(df):
+    """Drop all beta users.
+    App was launched sometime in 2011, so drop all users registering before
+    2012.
+    """
+    cond = df.groupby('user_id').user_registration_date.ge('2012-01-01')
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def drop_first_and_last_month(df):
     """Drop first and last month
     These will likely have incomplete data.
