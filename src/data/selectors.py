@@ -54,7 +54,7 @@ def add_raw_count(df):
 @selector
 @counter
 def drop_beta_users(df):
-    """Drop all beta users
+    """Drop beta users
     App was launched sometime in 2011, so drop all users registering before
     2012.
     """
