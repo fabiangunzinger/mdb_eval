@@ -58,7 +58,7 @@ def drop_beta_users(df):
     App was launched sometime in 2011, so drop all users registering before
     2012.
     """
-    cond = df.groupby('user_id').user_registration_date.ge('2012-01-01')
+    cond = df.groupby('user_id').user_registration_date.first().ge('2012-01-01')
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
