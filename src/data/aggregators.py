@@ -338,6 +338,28 @@ def num_accounts(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
+def all_savings_accounts_added_at_once(df):
+    """Dummy indicating whether user added all savings accounts in one day."""
+    cond = (
+        df.groupby(["user_id", "account_type"])
+        .account_created.nunique()
+        .unstack()
+        .savings.eq(1)
+        .rename("sa_added_once")
+        .reset_index()
+    )
+    return (
+        df.groupby(["user_id", "ym"])
+        .id.first()
+        .reset_index()
+        .merge(cond)
+        .drop(columns="id")
+        .set_index(["user_id", "ym"])
+    )
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
 def savings_account_flows_by_dom(df):
     is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
     sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
@@ -345,7 +367,3 @@ def savings_account_flows_by_dom(df):
     in_out_dom = in_out + df.date.dt.day.astype("str")
     group_cols = [df.user_id, df.ym, in_out_dom]
     return sa_flows.groupby(group_cols).sum().abs().unstack().fillna(0)
-
-
-
-

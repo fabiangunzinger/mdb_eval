@@ -102,6 +102,15 @@ def has_savings_account(df):
 
 @selector
 @counter
+def savings_accounts_added_at_once(df):
+    """All savings accounts observed throughout"""
+    cond = df.groupby('user_id').sa_added_once.first()
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def max_active_accounts(df, max_accounts=config.MAX_ACTIVE_ACCOUNTS):
     """No more than 10 active accounts"""
     cond = df.groupby("user_id").accounts_active.max().le(max_accounts)
