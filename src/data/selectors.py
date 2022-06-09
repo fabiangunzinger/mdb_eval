@@ -133,7 +133,7 @@ def hist_sa_data(df, min_pre=6, min_post=5):
     diff_post = num_months(reg_date) - num_months(earliest_last)
     cond = diff_pre.lt(-min_pre) & diff_post.ge(min_post)
     users = cond[cond].index
-    return len(users)
+    return df[df.user_id.isin(users)]
 
 
 # @selector
