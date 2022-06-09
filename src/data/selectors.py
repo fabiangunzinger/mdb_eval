@@ -114,6 +114,30 @@ def has_savings_account(df):
 
 @selector
 @counter
+def hist_sa_data(df, min_pre=6, min_post=5):
+    """Complete savings account data
+
+    Ensures that user has added complete set of savings accounts
+    during specified pre and post signup period.
+    """
+    
+    def num_months(date):
+        return date.dt.year * 12 + date.dt.month
+
+    g = df.groupby('user_id')
+    reg_date = g.user_registration_date.first()
+    latest_first = g.latest_first.first()
+    earliest_last = g.earliest_last.first()
+    
+    diff_pre = num_months(reg_date) - num_months(latest_first)
+    diff_post = num_months(reg_date) - num_months(earliest_last)
+    cond = diff_pre.lt(-min_pre) & diff_post.ge(min_post)
+    users = cond[cond].index
+    return len(users)
+
+
+# @selector
+# @counter
 def savings_accounts_added_at_once(df):
     """All savings accounts observed throughout"""
     cond = df.groupby("user_id").sa_added_once.first()
