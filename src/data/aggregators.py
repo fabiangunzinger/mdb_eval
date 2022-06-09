@@ -15,7 +15,7 @@ import src.helpers.data as hd
 import src.helpers.helpers as hh
 
 
-TIMER_ON = False
+TIMER_ON = True
 
 
 aggregators = []
