@@ -363,6 +363,36 @@ def all_savings_accounts_added_at_once(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
+def sa_observation_checkers(df):
+    """Creates utility variables to check savings account observability.
+
+    We want to ensure that we can observe all of a user's savings accounts
+    for the specified number of pre and post signup periods. For the complete
+    set of a user's savigns accounts, we calculate the latest among the first
+    txn dates, and the earliest among the last txn dates.
+    """
+    is_sa = df.account_type.eq("savings")
+    sa_ids = df.account_id.where(is_sa, np.nan)
+    checkers = (
+        df.groupby([df.user_id, sa_ids])
+        .date.agg([("first_txn", "min"), ("last_txn", "max")])
+        .groupby("user_id")
+        .agg({"first_txn": "max", "last_txn": "min"})
+        .rename(columns={"first_txn": "latest_first", "last_txn": "earliest_last"})
+        .reset_index()
+    )
+    return (
+        df.groupby(["user_id", "ym"])
+        .id.first()
+        .reset_index()
+        .merge(checkers)
+        .drop(columns="id")
+        .set_index(["user_id", "ym"])
+    )
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
 def savings_account_flows_by_dom(df):
     is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
     sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
