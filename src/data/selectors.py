@@ -112,8 +112,8 @@ def has_savings_account(df):
     return df[df.user_id.isin(users)]
 
 
-# @selector
-# @counter
+@selector
+@counter
 def savings_accounts_added_at_once(df):
     """All savings accounts observed throughout"""
     cond = df.groupby("user_id").sa_added_once.first()
