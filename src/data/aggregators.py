@@ -140,7 +140,7 @@ def month_spend(df):
 def user_registration_date(df):
     """User registration date."""
     group_cols = [df.user_id, df.ym]
-    return df.groupby(group_cols).user_registration_date.first()
+    return df.groupby(group_cols).user_registration_date.first().dt.to_period('m')
 
 
 @aggregator
@@ -384,6 +384,7 @@ def sa_observation_checkers(df):
                 "last_txn": "earliest_last_sa_txn",
             }
         )
+        .apply(lambda x: x.dt.to_period('m'))
         .reset_index()
     )
     return (
