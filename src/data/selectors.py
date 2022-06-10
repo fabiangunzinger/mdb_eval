@@ -78,9 +78,9 @@ def drop_first_and_last_month(df):
     return df[cond]
 
 
-@selector
-@counter
-def pre_and_post_signup_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
+# @selector
+# @counter
+def hist_data_all_txns(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
     """At least 6 months of pre and post signup data
 
     Checks for contiguous data to filter out gaps in observed months.
@@ -116,33 +116,20 @@ def has_savings_account(df):
 
 @selector
 @counter
-def hist_sa_data(df, min_pre=6, min_post=5):
+def hist_data_sa_only(df, min_pre=cf.MIN_PRE_MONTHS, min_post=cf.MIN_POST_MONTHS):
     """Complete savings account data
 
     Ensures that user has added complete set of savings accounts
     during specified pre and post signup period.
     """
-    
-    def num_months(date):
-        return date.dt.year * 12 + date.dt.month
-
     g = df.groupby('user_id')
-    reg_date = g.user_registration_date.first()
-    latest_first = g.latest_first.first()
-    earliest_last = g.earliest_last.first()
-    
-    diff_pre = num_months(reg_date) - num_months(latest_first)
-    diff_post = num_months(reg_date) - num_months(earliest_last)
-    cond = diff_pre.lt(-min_pre) & diff_post.ge(min_post)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
+    reg_date = g.user_registration_date.first().dt.to_period('m').view('int')
+    latest_first = g.latest_first_sa_txn.first().dt.to_period('m').view('int')
+    earliest_last = g.earliest_last_sa_txn.first().dt.to_period('m').view('int')
 
-
-# @selector
-# @counter
-def savings_accounts_added_at_once(df):
-    """All savings accounts observed throughout"""
-    cond = df.groupby("user_id").sa_added_once.first()
+    diff_pre = reg_date - latest_first
+    diff_post = earliest_last - reg_date
+    cond = (diff_pre >= min_pre) & (diff_post >= min_post - 1)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
