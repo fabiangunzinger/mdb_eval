@@ -55,8 +55,9 @@ def add_raw_count(df):
 @counter
 def drop_testers(df):
     """Drop alpha and beta testers
-    App was launched sometime in 2011, so drop all users registering before
-    2012.
+
+    App was launched sometime in 2011, so to ensure we only have users that 
+    were not testers, we drop all users registering before 2012.
     """
     cond = df.groupby("user_id").user_registration_date.first().ge("2012-01-01")
     users = cond[cond].index
