@@ -118,7 +118,7 @@ def treatment(df):
 @aggregator
 @hh.timer(on=TIMER_ON)
 def time_to_treatment(df):
-    """Number of leads or lags to signup month."""
+    """Leads or lags to signup month."""
     group_cols = [df.user_id, df.ym]
     ym = df.ym.view("int")
     reg_ym = df.user_registration_date.dt.to_period("m").view("int")
