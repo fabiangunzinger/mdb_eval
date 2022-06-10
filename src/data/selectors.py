@@ -59,7 +59,7 @@ def drop_testers(df):
     App was launched sometime in 2011, so to ensure we only have users that 
     were not testers, we drop all users registering before 2012.
     """
-    cond = df.groupby("user_id").user_registration_date.first().ge("2012-01-01")
+    cond = df.groupby("user_id").user_reg_ym.first().ge("2012-01")
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
@@ -76,24 +76,6 @@ def drop_first_and_last_month(df):
     ym_min = g.ym.transform("min")
     cond = df.ym.between(ym_min, ym_max, inclusive="neither")
     return df[cond]
-
-
-# @selector
-# @counter
-def hist_data_all_txns(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
-    """At least 6 months of pre and post signup data
-
-    Checks for contiguous data to filter out gaps in observed months.
-    """
-    required_periods = set(range(-lower, upper))
-
-    def cond_checker(g):
-        observed_periods = set(g.tt.unique())
-        return required_periods.issubset(observed_periods)
-
-    cond = df.groupby("user_id").apply(cond_checker)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
 
 
 @selector
@@ -123,15 +105,50 @@ def hist_data_sa_only(df, min_pre=cf.MIN_PRE_MONTHS, min_post=cf.MIN_POST_MONTHS
     during specified pre and post signup period.
     """
     g = df.groupby('user_id')
-    reg_date = g.user_registration_date.first().dt.to_period('m').view('int')
-    latest_first = g.latest_first_sa_txn.first().dt.to_period('m').view('int')
-    earliest_last = g.earliest_last_sa_txn.first().dt.to_period('m').view('int')
+    reg_date = g.user_reg_ym.first().view('int')
+    latest_first = g.latest_first_sa_txn.first().view('int')
+    earliest_last = g.earliest_last_sa_txn.first().view('int')
 
     diff_pre = reg_date - latest_first
     diff_post = earliest_last - reg_date
     cond = (diff_pre >= min_pre) & (diff_post >= min_post - 1)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def contiguous_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
+    """Contiguous historical data"""
+    required_periods = set(range(-lower, upper))
+
+    def cond_checker(g):
+        observed_periods = set(g.tt.unique())
+        return required_periods.issubset(observed_periods)
+
+    cond = df.groupby("user_id").apply(cond_checker)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+
+
+def hist_data_all_txns(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
+    """At least 6 months of pre and post signup data
+
+    Checks for contiguous data to filter out gaps in observed months.
+    """
+    required_periods = set(range(-lower, upper))
+
+    def cond_checker(g):
+        observed_periods = set(g.tt.unique())
+        return required_periods.issubset(observed_periods)
+
+    cond = df.groupby("user_id").apply(cond_checker)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
 
 
 @selector
