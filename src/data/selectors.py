@@ -68,6 +68,7 @@ def drop_testers(df):
 @counter
 def drop_first_and_last_month(df):
     """Drop first and last month
+
     These will likely have incomplete data.
     """
     g = df.groupby("user_id")
