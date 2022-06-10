@@ -378,7 +378,12 @@ def sa_observation_checkers(df):
         .date.agg([("first_txn", "min"), ("last_txn", "max")])
         .groupby("user_id")
         .agg({"first_txn": "max", "last_txn": "min"})
-        .rename(columns={"first_txn": "latest_first", "last_txn": "earliest_last"})
+        .rename(
+            columns={
+                "first_txn": "latest_first_sa_txn",
+                "last_txn": "earliest_last_sa_txn",
+            }
+        )
         .reset_index()
     )
     return (
