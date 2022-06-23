@@ -67,6 +67,19 @@ def drop_first_and_last_month(df):
 
 @selector
 @counter
+def drop_testers(df):
+    """Drop test users
+
+    App was launched sometime in 2011, so to ensure we only have users that 
+    were not testers, we drop all users registering before 2012.
+    """
+    cond = df.groupby("user_id").user_reg_ym.first().ge("2012-01")
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def pre_and_post_signup_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
     """At least 6 months of pre and post signup data
 
@@ -160,19 +173,6 @@ def complete_demographic_info(df):
     """
     cols = ["age", "is_female", "is_urban"]
     cond = df[cols].isna().groupby(df.user_id).sum().sum(1).eq(0)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
-def drop_testers(df):
-    """Not a test user
-
-    App was launched sometime in 2011, so to ensure we only have users that 
-    were not testers, we drop all users registering before 2012.
-    """
-    cond = df.groupby("user_id").user_reg_ym.first().ge("2012-01")
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
