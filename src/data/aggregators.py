@@ -119,10 +119,7 @@ def user_registration_ym(df):
 @aggregator
 @hh.timer(on=TIMER_ON)
 def treatment(df):
-    """Treatment indicator.
-
-    Month of app signup set to period 0, and counted as first treatment period.
-    """
+    """Treatment indicator."""
     group_cols = [df.user_id, df.ym]
     reg_ym = user_registration_ym(df)
     return df.groupby(group_cols).ym.ge(reg_ym).astye("int").rename("t")
@@ -131,7 +128,10 @@ def treatment(df):
 @aggregator
 @hh.timer(on=TIMER_ON)
 def time_to_treatment(df):
-    """Leads or lags to signup month."""
+    """Leads or lags to signup month.
+
+    Month of signup is 0.
+    """
     group_cols = [df.user_id, df.ym]
     ym = df.ym.view("int")
     reg_ym = df.user_registration_date.dt.to_period("m").view("int")
