@@ -67,6 +67,24 @@ def drop_first_and_last_month(df):
 
 @selector
 @counter
+def pre_and_post_signup_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
+    """At least 6 months of pre and post signup data
+
+    Also ensures that we obser users during all months during that period.
+    """
+    required_periods = set(range(-lower, upper))
+
+    def cond_checker(g):
+        observed_periods = set(g.tt.unique())
+        return required_periods.issubset(observed_periods)
+
+    cond = df.groupby("user_id").apply(cond_checker)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def signup_after_march_2017(df):
     """App signup after March 2017
 
@@ -75,21 +93,6 @@ def signup_after_march_2017(df):
     April 2017 onwards.
     """
     cond = df.user_reg_ym.ge('2017-04')
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
-def contiguous_pre_post_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
-    """Contiguous year-month observations"""
-    required_periods = set(range(-lower, upper))
-
-    def cond_checker(g):
-        observed_periods = set(g.tt.unique())
-        return required_periods.issubset(observed_periods)
-
-    cond = df.groupby("user_id").apply(cond_checker)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
@@ -163,15 +166,6 @@ def complete_demographic_info(df):
 
 @selector
 @counter
-def working_age(df):
-    """Working age"""
-    cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
 def drop_testers(df):
     """Not a test user
 
@@ -179,6 +173,15 @@ def drop_testers(df):
     were not testers, we drop all users registering before 2012.
     """
     cond = df.groupby("user_id").user_reg_ym.first().ge("2012-01")
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def working_age(df):
+    """Working age"""
+    cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
