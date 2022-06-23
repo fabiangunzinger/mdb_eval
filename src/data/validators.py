@@ -3,6 +3,8 @@ Functions to validate integrity of analysis data.
 
 """
 
+import numpy as np
+
 import src.config as config
 
 
@@ -18,6 +20,13 @@ def validator(func):
 @validator
 def no_missing_values(df):
     assert df.isna().sum().sum() == 0
+    return df
+
+
+@validator
+def correct_treatment_lags(df):
+    assert df[df.t.eq(0)].tt.between(-np.inf, -1)
+    assert df[df.t.eq(1)].tt.between(0, np.inf)
     return df
 
 
