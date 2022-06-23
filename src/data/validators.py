@@ -25,8 +25,8 @@ def no_missing_values(df):
 
 @validator
 def correct_treatment_lags(df):
-    assert df[df.t.eq(0)].tt.between(-np.inf, -1)
-    assert df[df.t.eq(1)].tt.between(0, np.inf)
+    assert df[df.t.eq(0)].tt.between(-np.inf, -1).all()
+    assert df[df.t.eq(1)].tt.between(0, np.inf).all()
     return df
 
 
