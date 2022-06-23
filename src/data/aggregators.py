@@ -122,7 +122,7 @@ def treatment(df):
     """Treatment indicator."""
     group_cols = [df.user_id, df.ym]
     reg_ym = user_registration_ym(df)
-    return df.groupby(group_cols).ym.first().ge(reg_ym).astype("int").rename("t")
+    return df.groupby(group_cols).ym.first().ge(reg_ym).astye("int").rename("t")
 
 
 @aggregator
@@ -180,7 +180,7 @@ def region(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
-def savings_account(df):
+def has_savings_account(df):
     """Indicator for whether user has at least one savings account added.
 
     We can only observe an account as added when we observe a transaction. So
@@ -199,7 +199,7 @@ def savings_account(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
-def current_account(df):
+def has_current_account(df):
     """Indicator for whether user has at least one current account added.
 
     We can only observe an account as added when we observe a transaction. So
@@ -252,24 +252,6 @@ def generation(df):
         .to_frame()
         .assign(generation_code=lambda df: df.generation.cat.codes)
     )
-
-
-@aggregator
-@hh.timer(on=TIMER_ON)
-def new_loan(df):
-    """Dummy indicating loan takeout."""
-    group_cols = [df.user_id, df.ym]
-    loan_tags = [
-        "personal loan",
-        "unsecured loan funds",
-        "payday loan",
-        "unsecured loan repayment",
-        "payday loan funds",
-        "secured loan repayment",
-    ]
-    is_loan = df.tag_auto.isin(loan_tags)
-    loans = df.id.where(is_loan & ~df.is_debit, np.nan)
-    return loans.groupby(group_cols).count().gt(0).astype(int).rename("new_loan")
 
 
 @aggregator
@@ -343,71 +325,3 @@ def num_accounts(df):
         .set_index(["user_id", "ym"])
     )
 
-
-@aggregator
-@hh.timer(on=TIMER_ON)
-def all_savings_accounts_added_at_once(df):
-    """Dummy indicating whether user added all savings accounts in one day."""
-    cond = (
-        df.groupby(["user_id", "account_type"])
-        .account_created.nunique()
-        .unstack()
-        .savings.eq(1)
-        .rename("sa_added_once")
-        .reset_index()
-    )
-    return (
-        df.groupby(["user_id", "ym"])
-        .id.first()
-        .reset_index()
-        .merge(cond)
-        .drop(columns="id")
-        .set_index(["user_id", "ym"])
-    )
-
-
-@aggregator
-@hh.timer(on=TIMER_ON)
-def sa_observation_checkers(df):
-    """Creates utility variables to check savings account observability.
-
-    We want to ensure that we can observe all of a user's savings accounts
-    for the specified number of pre and post signup periods. For the complete
-    set of a user's savigns accounts, we calculate the latest among the first
-    txn dates, and the earliest among the last txn dates.
-    """
-    is_sa = df.account_type.eq("savings")
-    sa_ids = df.account_id.where(is_sa, np.nan)
-    checkers = (
-        df.groupby([df.user_id, sa_ids])
-        .date.agg([("first_txn", "min"), ("last_txn", "max")])
-        .groupby("user_id")
-        .agg({"first_txn": "max", "last_txn": "min"})
-        .rename(
-            columns={
-                "first_txn": "latest_first_sa_txn",
-                "last_txn": "earliest_last_sa_txn",
-            }
-        )
-        .apply(lambda x: x.dt.to_period("m"))
-        .reset_index()
-    )
-    return (
-        df.groupby(["user_id", "ym"])
-        .id.first()
-        .reset_index()
-        .merge(checkers)
-        .drop(columns="id")
-        .set_index(["user_id", "ym"])
-    )
-
-
-# @aggregator
-# @hh.timer(on=TIMER_ON)
-def savings_account_flows_by_dom(df):
-    is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
-    sa_flows = df.amount.where(df.is_sa_flow == 1, 0)
-    in_out = df.is_debit.map({True: "out_", False: "in_"})
-    in_out_dom = in_out + df.date.dt.day.astype("str")
-    group_cols = [df.user_id, df.ym, in_out_dom]
-    return sa_flows.groupby(group_cols).sum().abs().unstack().fillna(0)
