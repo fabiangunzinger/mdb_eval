@@ -105,14 +105,27 @@ def savings_accounts_flows(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
+def user_registration_ym(df):
+    """Year-month of user registration."""
+    group_cols = [df.user_id, df.ym]
+    return (
+        df.groupby(group_cols)
+        .user_registration_date.first()
+        .dt.to_period("m")
+        .rename("user_reg_ym")
+    )
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
 def treatment(df):
     """Treatment indicator.
 
-    Treatment period starts at app signup date.
+    Month of app signup set to period 0, and counted as first treatment period.
     """
     group_cols = [df.user_id, df.ym]
-    t = df.date >= df.user_registration_date
-    return t.groupby(group_cols).max().astype("int").rename("t")
+    reg_ym = user_registration_ym(df)
+    return df.groupby(group_cols).ym.ge(reg_ym).astye("int").rename("t")
 
 
 @aggregator
@@ -133,19 +146,6 @@ def month_spend(df):
     spend = df.amount.where(is_spend, np.nan)
     group_cols = [df.user_id, df.ym]
     return spend.groupby(group_cols).sum().rename("month_spend")
-
-
-@aggregator
-@hh.timer(on=TIMER_ON)
-def user_registration_ym(df):
-    """Year-month of user registration."""
-    group_cols = [df.user_id, df.ym]
-    return (
-        df.groupby(group_cols)
-        .user_registration_date.first()
-        .dt.to_period("m")
-        .rename("user_reg_ym")
-    )
 
 
 @aggregator
@@ -411,4 +411,3 @@ def savings_account_flows_by_dom(df):
     in_out_dom = in_out + df.date.dt.day.astype("str")
     group_cols = [df.user_id, df.ym, in_out_dom]
     return sa_flows.groupby(group_cols).sum().abs().unstack().fillna(0)
-
