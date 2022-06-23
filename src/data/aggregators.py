@@ -122,7 +122,7 @@ def treatment(df):
     """Treatment indicator."""
     group_cols = [df.user_id, df.ym]
     reg_ym = user_registration_ym(df)
-    return df.groupby(group_cols).ym.first().ge(reg_ym).astye("int").rename("t")
+    return df.groupby(group_cols).ym.first().ge(reg_ym).astype("int").rename("t")
 
 
 @aggregator
