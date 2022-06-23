@@ -7,6 +7,8 @@ import collections
 import functools
 import itertools
 
+import numpy as np
+
 import src.config as cf
 import src.helpers.helpers as hh
 
@@ -131,10 +133,26 @@ def has_current_account(df):
 @selector
 @counter
 def year_income(df, min_income=cf.MIN_YEAR_INCOME):
-    """At least \pounds5,000 of annual income"""
+    """At least \pounds5,000 of annual income
+
+    Month income is calculated as sum of all income flows in a
+    calendar year divided by 12.
+    """
     cond = df.groupby("user_id").month_income.min().ge(min_income / 12)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
+
+
+def year_income(df, min_income=cf.MIN_YEAR_INCOME):
+
+
+    num_months = df.groupby('user_id').size()
+    req_months = np.floor(num_months * 5 / 6)
+    return df.groupby('user_id').month_income
+    return req_months
+
+
+
 
 
 @selector
