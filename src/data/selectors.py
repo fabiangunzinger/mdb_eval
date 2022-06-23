@@ -53,19 +53,6 @@ def add_raw_count(df):
 
 @selector
 @counter
-def drop_testers(df):
-    """Drop alpha and beta testers
-
-    App was launched sometime in 2011, so to ensure we only have users that 
-    were not testers, we drop all users registering before 2012.
-    """
-    cond = df.groupby("user_id").user_reg_ym.first().ge("2012-01")
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
 def drop_first_and_last_month(df):
     """Drop first and last month
 
@@ -80,9 +67,29 @@ def drop_first_and_last_month(df):
 
 @selector
 @counter
-def has_current_account(df):
-    """At least one current account"""
-    cond = df.has_current_account.groupby(df.user_id).max().eq(1)
+def signup_after_march_2017(df):
+    """App signup after March 2017
+
+    To ensure that we have at least 12 months of account history
+    available, which became available for all major banks from
+    April 2017 onwards.
+    """
+    cond = df.user_reg_ym.ge('2017-04')
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def contiguous_pre_post_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
+    """Contiguous year-month observations"""
+    required_periods = set(range(-lower, upper))
+
+    def cond_checker(g):
+        observed_periods = set(g.tt.unique())
+        return required_periods.issubset(observed_periods)
+
+    cond = df.groupby("user_id").apply(cond_checker)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
@@ -98,64 +105,9 @@ def has_savings_account(df):
 
 @selector
 @counter
-def hist_data_sa_only(df, min_pre=cf.MIN_PRE_MONTHS, min_post=cf.MIN_POST_MONTHS):
-    """Complete savings account data
-
-    Ensures that user has added complete set of savings accounts
-    during specified pre and post signup period.
-    """
-    g = df.groupby('user_id')
-    reg_date = g.user_reg_ym.first().view('int')
-    latest_first = g.latest_first_sa_txn.first().view('int')
-    earliest_last = g.earliest_last_sa_txn.first().view('int')
-
-    diff_pre = reg_date - latest_first
-    diff_post = earliest_last - reg_date
-    cond = (diff_pre >= min_pre) & (diff_post >= min_post - 1)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
-def contiguous_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
-    """Contiguous historical data"""
-    required_periods = set(range(-lower, upper))
-
-    def cond_checker(g):
-        observed_periods = set(g.tt.unique())
-        return required_periods.issubset(observed_periods)
-
-    cond = df.groupby("user_id").apply(cond_checker)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-
-
-def hist_data_all_txns(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
-    """At least 6 months of pre and post signup data
-
-    Checks for contiguous data to filter out gaps in observed months.
-    """
-    required_periods = set(range(-lower, upper))
-
-    def cond_checker(g):
-        observed_periods = set(g.tt.unique())
-        return required_periods.issubset(observed_periods)
-
-    cond = df.groupby("user_id").apply(cond_checker)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-
-
-@selector
-@counter
-def max_active_accounts(df, max_accounts=cf.MAX_ACTIVE_ACCOUNTS):
-    """No more than 10 active accounts"""
-    cond = df.groupby("user_id").accounts_active.max().le(max_accounts)
+def has_current_account(df):
+    """At least one current account"""
+    cond = df.has_current_account.groupby(df.user_id).max().eq(1)
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
@@ -189,6 +141,15 @@ def month_min_spend(df, min_spend=cf.MIN_MONTH_SPEND):
 
 @selector
 @counter
+def max_active_accounts(df, max_accounts=cf.MAX_ACTIVE_ACCOUNTS):
+    """No more than 10 active accounts"""
+    cond = df.groupby("user_id").accounts_active.max().le(max_accounts)
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def complete_demographic_info(df):
     """Complete demographic information
 
@@ -205,6 +166,19 @@ def complete_demographic_info(df):
 def working_age(df):
     """Working age"""
     cond = df.groupby("user_id").age.first().between(18, 65, inclusive="both")
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def drop_testers(df):
+    """Not a test user
+
+    App was launched sometime in 2011, so to ensure we only have users that 
+    were not testers, we drop all users registering before 2012.
+    """
+    cond = df.groupby("user_id").user_reg_ym.first().ge("2012-01")
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
