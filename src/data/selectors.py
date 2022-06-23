@@ -143,18 +143,6 @@ def year_income(df, min_income=cf.MIN_YEAR_INCOME):
     return df[df.user_id.isin(users)]
 
 
-def year_income(df, min_income=cf.MIN_YEAR_INCOME):
-
-
-    num_months = df.groupby('user_id').size()
-    req_months = np.floor(num_months * 5 / 6)
-    return df.groupby('user_id').month_income
-    return req_months
-
-
-
-
-
 @selector
 @counter
 def month_min_txns(df, min_txns=cf.MIN_MONTH_TXNS):
