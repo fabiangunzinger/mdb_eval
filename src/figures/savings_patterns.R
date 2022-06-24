@@ -1,106 +1,88 @@
+library(cowplot)
 library(tidyverse)
-library(ggthemr)
-library(patchwork)
+library(lubridate)
 
 source('./src/config.R')
 source('./src/helpers/helpers.R')
 
-ggthemr('fresh')
 theme_set(theme_minimal())
 
 
 df <- read_analysis_data()
-names(df)
 
 
-flowpat <- "^(in|out|net)flows$"
+flows <- "^(in|out|net)flows$"
 
-
-flows_by_tt <- df %>% 
-  select(tt, matches(flowpat)) %>% 
-  filter(between(tt, -12, 24)) %>% 
-  pivot_longer(matches(flowpat)) %>% 
-  ggplot(aes(tt, value, color = str_to_title(name))) +
-  stat_summary(fun.data = "mean_cl_boot") +
-  labs(
-    x = "Months to/since beginning of app use",
-    y = "Amount (£)",
-    color = ""
+flows_month <- df %>%
+  select(month, matches(flows)) %>% 
+  pivot_longer(matches(flows)) %>% 
+  ggplot(aes(factor(month), value, colour = name, shape = name)) +
+  geom_point(stat = "summary", fun = "mean") +
+  scale_colour_brewer(palette = palette) +
+  labs(x = "Month", y = "Amount (£)", colour = NULL, shape = NULL) +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 12)
   )
 
-flows_by_month <- df %>% 
-  select(month, matches(flowpat)) %>% 
-  pivot_longer(matches(flowpat)) %>% 
-  ggplot(aes(month(month, label = T), value, color = str_to_title(name))) +
-  stat_summary(fun.data = "mean_cl_boot") +
-  labs(
-    x = "Month",
-    y = "Amount (£)",
-    color = ""
-  )
+flows_tt <- df %>% 
+  select(tt, matches(flows)) %>% 
+  filter(between(tt, -6, 5)) %>%
+  pivot_longer(matches(flows)) %>%
+  ggplot(aes(tt, value, colour = name, shape = name)) +
+  geom_point(stat = "summary", fun = "mean") +
+  scale_colour_brewer(palette = palette) +
+  labs(x = "Time to/since beginning of app use", y = "Amount (£)")
 
 
-flows_by_tt + flows_by_month
+# flows_day <- df %>%
+#   select(matches("^(in|out)_..?$")) %>% 
+#   pivot_longer(everything()) %>% 
+#   separate(name, c("flow", "dow"), "_", convert = T) %>% 
+#   ggplot() +
+#   geom_point(
+#     aes(dow, value, colour = flow, shape = flow),
+#     stat = "summary", fun = "mean"
+#   ) +
+#   coord_cartesian(ylim = c(0, 70)) +
+#   scale_colour_brewer(palette = palette) +
+#   labs(x = "Day of month", y = "Amount (£)")
 
 
-
-# dev
-
-day_order <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
-
-
-
-
-
-
-
-# old entropy stuff
-moy <- ggplot(dt) +
-  geom_bar(aes(month(date, label = T))) +
-  labs(
-    x = 'Month of year',
-    y = txns_label
-  )
-moy
-
-dom <- ggplot(dt) +
-  geom_bar(aes(day(date))) +
-  labs(
-    x = 'Day of month',
-    y = txns_label
-  )
-dom
-
-d <- dt[, .N, -amount][order(-N)][1:10]
-amounts <- ggplot(d) +
-  geom_bar(aes(N, reorder(factor(amount), N)), stat = 'identity') +
-  labs(
-    x = txns_label,
-    y = 'Amount'
-  )
-amounts
+# inflow_amounts <- df %>% 
+#   select(matches(flows)) %>% 
+#   pivot_longer(everything()) %>% 
+#   filter(name == "inflows", between(value, 1, 10000)) %>%
+#   group_by(name, value) %>% 
+#   ggplot() +
+#   geom_bar(aes(value, color = name), group = "dodge") +
+#   scale_colour_brewer(palette = palette) +
+#   scale_x_continuous(breaks = seq(0, 1000, 100)) +
+#   labs(x = "Amount (£)", y = "Number of transactions") +
+#   coord_cartesian(xlim = c(0, 1000))
 
 
-cap <- 'Notes: number of days since last transfer into savings account. Number of transactions with delay of more than 35 days are fewer than 5 percent and are not shown.'
-dt <- dt[, ddate := difftime(date, shift(date), units = 'days'), user_id]
-ddate <- ggplot(dt[ddate <= 35]) +
-  geom_bar(aes(factor(ddate))) +
-  labs(
-    x = 'Days since last savings account transfer',
-    y = txns_label,
-    caption = cap
-  )
-ddate
+# Combine plots and add legend
+
+p <- plot_grid(
+  flows_month + theme(legend.position = "none"),
+  # flows_day + theme(legend.position = "none"),
+  flows_tt + theme(legend.position = "none"),
+  # inflow_amounts + theme(legend.position = "none"),
+  labels = "AUTO",
+  label_x = 0,
+  label_y = 0,
+  hjust = -0.5, vjust = -1
+)
+
+legend <- get_legend(flows_month)
+plot_grid(p, legend, ncol = 1, rel_heights = c(1, .1))
 
 
-pw <- moy + dom + amounts + ddate 
-pw + plot_layout(ncol = 2)
-ggsave(file.path(FIGDIR, 'savings.png'))
-
-
-
-
-
-
-
-
+figname <- 'savings_patterns.png'
+ggsave(
+  file.path(FIGDIR, figname),
+  height = 1000,
+  width = 2000,
+  units = "px"
+)

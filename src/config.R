@@ -1,3 +1,4 @@
+library(RColorBrewer)
 
 # Environment variable
 Sys.setenv(AWS_PROFILE='3di', AWS_DEFAULT_REGION='eu-west-2')
@@ -11,9 +12,11 @@ setwd(ROOT)
 
 
 # Figure settings
+palette <- "Set1"
+single_col <- brewer.pal(3, name=palette)[2]
+
 # colours from wesanderson palette Zissou1
 # https://github.com/karthik/wesanderson/blob/master/R/colors.R
-treat_col <- '#78B7C5'
-untreat_col <- '#E1AF00'
-
+# treat_col <- '#78B7C5'
+# untreat_col <- '#E1AF00'
 

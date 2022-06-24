@@ -15,6 +15,7 @@ stargazer(
   title = 'Summary statistics',
   label = 'tab:sumstats',
   font.size = 'footnotesize',
+  table.placement = "H",
 out = file.path(TABDIR, tabname)
 )
 

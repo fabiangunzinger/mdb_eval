@@ -1,46 +1,13 @@
 % !TEX root = ../eval.tex
 
-\section{Variable construction}%
-\label{sec:variable_construction}
+\section{Data}%
+\label{app:data}
 
-The table below describes the construction and rationale for including of all
-variables used. The code used to construct the variables is available on
-\href{https://github.com/fabiangunzinger/mdb_eval/blob/d094f8cd364f64bbe3d4e644abbff726af86de2f/src/data/aggregators.py}{GitHub}.
 
-\begin{table}[htpb]
-    \centering\scriptsize
-    \caption{Variable construction}
-    \label{tab:vars}
-    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X
-        >{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
-    \hline\hline
-    Variable (name in dataset) & Definition  & Rationale \\
-    \hline\\
-    \multicolumn{3}{c}{\textbf{Primary outcome}}\\\\
+\subsection{Historical data availability}%
+\label{sub:historical_data_availability}
 
-    \multicolumn{3}{c}{\textbf{Covariates}}\\\\
+Translate jupyter notebook fig to R.
 
-    New loan dummy (\textit{new\_loan})&
-    Dummy variable equal to 1 if user takes out a new loan. Calculated positive inflows
-    of funds tagged as ``loan''.&
-    Might increase (additional funds) or decrease (need to repay) propensity to
-    save in month of takeout and lower propensity to save in the future due to
-    need to repay.\\
 
-    Unemployment benefits dummy (\textit{unemp\_benefits})&
-    Dummy variable equal to 1 if user has inflow of funds tagged as ``job
-    seeker benefits''.&
-    Might lower a user's ability to save but increase their need for a money
-    management app.\\
-
-    Monthly income (\textit{month\_income})&
-    Average monthly income in a calendar year, calculated as the sum of all
-    credits tagged income payments in said year divided by 12.&
-    Income may alter the need and ability to save and correlate with cognitive
-    characteristics that alter a person's propensity to use a money management
-    app.\\
-
-    \hline\hline
-    \end{tabularx}
-\end{table}
 

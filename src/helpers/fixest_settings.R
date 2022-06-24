@@ -16,7 +16,7 @@ set_font = function(x, fontsize){
 setFixest_etable(
   postprocess.tex = set_font,
   se.below = T,
-  digits = 'r3',
+  digits = 'r2',
   coefstat = 'confint',
   style.tex = style.tex(
     main = "base",
@@ -48,14 +48,16 @@ setFixest_dict(c(
   
   month_income = "Month income",
   month_spend = 'Month spend',
-  disc_spend = "Disc. spend",
+  discret_spend = "Discretionary spend",
   is_female = 'Female',
   age = 'Age',
   is_urban = 'Urban',
   generation = "Generation",
+  region_code = "Region",
+  accounts_active = "Active accounts",
   
-  user_id = 'User FE',
-  month = "Month FE",
+  user_id = "User ID",
+  ym = "Year-month",
   
   '(Intercept)' = 'Intercept'
 ))

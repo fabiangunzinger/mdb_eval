@@ -9,6 +9,8 @@ source('./src/helpers/helpers.R')
 df <- read_analysis_data()
 
 
+df
+
 sample_size <- 200
 dfs <- filter(df, user_id %in% sample(unique(user_id), sample_size))
 xticks <- c(201206, 201306, 201406, 201506, 201606, 201706, 201806, 201906, 202006)

@@ -3,23 +3,24 @@ library(ggplot2)
 library(gridExtra)
 library(PanelMatch)
 
+source('./src/config.R')
 source('./src/helpers/helpers.R')
-source('./src/figures/fig_settings.R')
 
 
-df <- read_s3parquet('s3://3di-project-eval/eval_0.parquet')
+df <- read_analysis_data()
 
+# Specify covariates as vector and fml
+covs <- c("month_income", "month_spend", "discret_spend", "is_female",
+          "generation_code", "is_urban", "accounts_active")
+fml <- reformulate(covs)
 
 # Perform matching
-
-fml <-  ~ month_income + month_spend + is_female + is_urban + generation_code
-
 pm_ps_nn <- PanelMatch(
   data = df,
   time.id = "ym",
   unit.id = "user_id",
   treatment = "t",
-  outcome.var = "netflows_norm",
+  outcome.var = "netflows",
   lag = 5,
   lead = 0:5,  
   qoi = "att",
@@ -29,13 +30,9 @@ pm_ps_nn <- PanelMatch(
   size.match = 1
   )
 
-print(pm_ps_nn$att[167], verbose = T)
-
-pm_ps_nn$att[1]
 
 # Frequency distribution of matched sets
-
-set_sizes <- summary(pm$att)$overview$matched.set.size
+set_sizes <- summary(pm_ps_nn$att)$overview$matched.set.size
 png(
   file.path(FIGDIR, "hist_matchset_size.png"),
   width     = 10,
@@ -44,14 +41,12 @@ png(
   res       = 1200,
   pointsize = 6
 )
-plot(pm$att, main = NULL)
+plot(pm_ps_nn$att, main = NULL)
 dev.off()
 
 
 # Inspect covariate balance 1
-
-covs <- c("generation", "month_income", "is_female", "is_urban")
-
+ylim <- c(-1, 1)
 png(
   file.path(FIGDIR, "covar_balance.png"),
   width     = 12,
@@ -60,38 +55,32 @@ png(
   res       = 1200,
   pointsize = 6
 )
-
 par(mfrow=c(1,2))
-
 get_covariate_balance(
-  pm$att,
+  pm_ps_nn$att,
   data = df,
   use.equal.weights = T,
   covariates = covs,
   plot = T,
-  ylim = c(-0.5, 0.5)
-  )
-
+  ylim = ylim
+)
 get_covariate_balance(
-  pm$att,
+  pm_ps_nn$att,
   data = df,
   use.equal.weights = F,
   covariates = covs,
   plot = T,
-  ylim = c(-0.5, 0.5)
-  )
-
+  ylim = ylim
+)
 dev.off()
 
 
 # Check for parallel pre-treatment trend assumption
-
 # tbd
 
 
 # Estimates
-
-pe <- PanelEstimate(sets = pm, data = df)
+pe <- PanelEstimate(sets = pm_ps_nn, data = df)
 summary(pe)
 png(
   file.path(FIGDIR, "match_estimates.png"),
@@ -107,39 +96,22 @@ dev.off()
 
 # Visualise matchset examples
 
-
-
-
-mset <- pm$att[100]
-a <- DisplayTreatment(
-  data = df,
-  unit.id = "user_id",
-  time.id = "ym",
-  treatment = "t",
-  legend.position = "right",
-  xlab = "Year-months",
-  ylab = "User",
-  hide.x.axis.label = T,
-  hide.y.axis.label = T,
-  matched.set = mset,
-  show.set.only = T,
-) + labs(title = "") + theme(legend.position = "none")  
-
-mset <- pm$att[200]
-b <- DisplayTreatment(
-  data = df,
-  unit.id = "user_id",
-  time.id = "ym",
-  treatment = "t",
-  legend.position = "right",
-  xlab = "Year-months",
-  ylab = "User",
-  hide.x.axis.label = T,
-  hide.y.axis.label = T,
-  matched.set = mset,
-  show.set.only = T,
-) + labs(title = "") + theme(legend.position = "none")
-
-
+disptreat <- function(matched_set) {
+  DisplayTreatment(
+    data = df,
+    unit.id = "user_id",
+    time.id = "ym",
+    treatment = "t",
+    legend.position = "right",
+    xlab = "Year-months",
+    ylab = "User",
+    hide.x.axis.label = T,
+    hide.y.axis.label = T,
+    matched.set = mset,
+    show.set.only = T,
+  ) + labs(title = "") + theme(legend.position = "none") 
+}
+a <- disptreat(pm_ps_nn$att[100])
+b <- disptreat(pm_ps_nn$att[200])
 g <- arrangeGrob(a, b, ncol = 2)
-ggsave(file = file.path(FIGDIR, 'matchset_examples.png'), g)
+ggsave(file = file.path(FIGDIR, 'matchset_examples_new.png'), g)

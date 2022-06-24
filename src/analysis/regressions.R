@@ -1,82 +1,113 @@
 library(dplyr)
 library(fixest)
+library(glue)
 library(gridExtra)
 library(lubridate)
 
-source('./helpers/helpers.R')
-source('./helpers/fixest_settings.R')
+source('./src/config.R')
+source('./src/helpers/fixest_settings.R')
+source('./src/helpers/helpers.R')
 
-df <- read_analysis_data() %>%
-  filter(between(tt, -6, 12))
 
+df <- read_analysis_data()
 
 setFixest_fml(
-  ..controls = ~month_income + month_spend + discret_spend + is_female + i(generation, "Boomers") + region_code + num_accounts,
-  ..fe = ~user_id + month,
-  ..mvfe = ~mvsw(user_id, month)
+  ..ds = ~ i(tt, -1, bin=list("<-6" = -35:-6, ">5" = 6:25)),
+  ..controls = ~month_income + month_spend + accounts_active,
+  ..fe = ~user_id + ym,
+  ..mvfe = ~mvsw(ym, user_id)
 )
 
-# Simple pre-post comparison
-figname <- 'reg_pre_post.png'
-m_stat_pp <- feols(netflows ~ t, df)
-m_dynam_pp <- feols(netflows ~ i(tt, 0), df)
-etable(m_stat_pp, m_dynam_pp)
-figure(figname)
-par(mfrow=c(1, 2))
-fiplot(m_dynam_pp)
-fcoefplot(m_stat_pp)
-dev.off()
+# Static models -------------------------------------------------------------------
 
-# Adding FEs
-figname <- 'reg_twfe.png'
-m_stat_twfe <- feols(netflows ~ t + ..controls | ..mvfe, df)
-m_dynam_twfe <- feols(netflows ~ i(tt, 0) + ..controls | ..mvfe, df)
-etable(m_stat_twfe)
-etable(m_dynam_twfe)
-figure(figname)
-par(mfrow=c(1, 2))
-fiplot(m_dynam_twfe)
-fcoefplot(m_stat_twfe)
-dev.off()
-
-# Comparison plots
-figname <- "reg_comparison.png"
-figure(figname, height=2000, width=2000)
-par(mfrow=c(2, 1))
-fiplot(list(m_dynam_pp, m_dynam_twfe))
-# legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17), 
-       # legend = c("Pre-post", "TWFE"))
-fcoefplot(list(m_stat_pp, m_stat_twfe), keep="App use")
-# legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17), 
-       # legend = c("Pre-post", "TWFE"))
-dev.off()
-
-# Decompose net-inflows
-m_dynam_twfe_net <- feols(netflows ~ i(tt, 0) + ..controls | ..fe, df)
-m_dynam_twfe_in <- feols(inflows ~ i(tt, 0) + ..controls | ..fe, df)
-m_dynam_twfe_out <- feols(outflows ~ i(tt, 0) + ..controls | ..fe, df)
-fiplot(list(m_dynam_twfe_net, m_dynam_twfe_in, m_dynam_twfe_out))
-
-# Decompose internal vs external margin
-m_dynam_twfe_int <- feols(pos_netflows ~ i(tt, 0) + ..controls | ..fe, df)
-m_dynam_twfe_ext <- feols(has_pos_netflows ~ i(tt, 0) + ..controls | ..fe, df)
-fiplot(m_dynam_twfe_int)
-fiplot(m_dynam_twfe_ext)
-
-
-# Tables
-tabname <- "reg_compare.tex"
-etable(m_stat_pp, m_stat_twfe,
-  title = 'Regression results',
-  order = c("App use", "!Intercept"),
-  tex = T,
-  fontsize = 'tiny',
-  file=file.path(TABDIR, tabname),
-  label = glue('tab:reg_compare'),
-  replace = T
+title <- 'Static results'
+label <- "reg_static"
+m_static <- feols(netflows ~ t + ..controls | ..mvfe, df)
+etable(m_static,
+       title = title,
+       order = c("App use", "!Intercept"),
+       tex = T,
+       fontsize = 'tiny',
+       file=file.path(TABDIR, glue('{label}.tex')),
+       label = glue('tab:{label}'),
+       replace = T
 )
 
-etable(m_stat_pp, m_stat_twfe,
-       title = 'Regression results',
-       order = c("App use", "!Intercept")
+
+# Dynamic models ------------------------------------------------------------------
+
+title <- 'Dynamic results'
+label <- "reg_dynamic"
+m_dynamic <- feols(netflows ~ ..ds + ..controls | ..mvfe, df)
+etable(m_dynamic,
+       title = title,
+       order = c("App use", "!Intercept"),
+       tex = T,
+       fontsize = 'tiny',
+       file=file.path(TABDIR, glue('{label}.tex')),
+       label = glue('tab:{label}'),
+       replace = T
 )
+figure(glue('{label}.png'))
+fiplot(m_dynamic)
+legend(
+  "topleft",
+  col = c(1, 2, 4, 3),
+  pch = c(20, 15, 17, 21),
+  legend = c(
+    "Controls",
+    "Controls and year-month FEs",
+    "Controls and user FE",
+    "Controls and year-month and user FEs"
+  )
+)
+dev.off()
+
+
+# Decomposing inflows and outflows ------------------------------------------------
+
+title <- 'Decomposing inflows and outflows'
+label <- "reg_decomp_inout"
+reg_decomp_inout <- feols(c(netflows, inflows, outflows) ~ ..ds + ..controls | ..fe, df)
+etable(reg_decomp_inout,
+       title = title,
+       order = c("App use", "!Intercept"),
+       tex = T,
+       fontsize = 'tiny',
+       file=file.path(TABDIR, glue('{label}.tex')),
+       label = glue('tab:{label}'),
+       replace = T
+)
+figure(glue('{label}.png'), width = 2000, height = 3000, pointsize=70)
+par(mfrow=c(3,1))
+fiplot(reg_decomp_inout[1])
+fiplot(reg_decomp_inout[2])
+fiplot(reg_decomp_inout[3])
+dev.off()
+
+
+# Decomposing intensive and extensive margin --------------------------------------
+
+title <- 'Decomposing intensive and extensive margin'
+label <- "reg_decomp_intext"
+reg_decomp_intext <- feols(c(pos_netflows, has_pos_netflows) ~ ..ds + ..controls | ..fe, df)
+etable(reg_decomp_intext,
+       title = title,
+       order = c("App use", "!Intercept"),
+       tex = T,
+       fontsize = 'tiny',
+       file=file.path(TABDIR, glue('{label}.tex')),
+       label = glue('tab:{label}'),
+       replace = T
+)
+
+figure(glue('{label}.png'), width = 2000, height = 2000, pointsize=50)
+par(mfrow=c(2,1))
+fiplot(reg_decomp_intext[1])
+fiplot(reg_decomp_intext[2])
+dev.off()
+
+
+# Sun & Abraham estimator ---------------------------------------------------------
+
+#tbd

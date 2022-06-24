@@ -1,0 +1,59 @@
+
+\begin{table}[htbp]
+   \centering
+   \tiny
+   \begin{threeparttable}[b]
+      \caption{\label{tab:reg_decomp_inout} Decomposing inflows and outflows}
+      \begin{tabular}{lccc}
+         \tabularnewline \midrule \midrule
+         Dependent Variables:            & Net-inflows       & Inflows          & Outflows\\  
+         Model:                          & (1)               & (2)              & (3)\\  
+         \midrule
+         \emph{Variables}\\
+         Months to/since app use $=$ <-6 & -89.62            & 211.30$^{***}$   & 273.42$^{***}$\\   
+                                         & [-199.15; 19.91]  & [123.17; 299.44] & [189.51; 357.32]\\   
+         Months to/since app use $=$ -5  & -29.27            & 144.18$^{***}$   & 157.83$^{***}$\\   
+                                         & [-155.74; 97.21]  & [48.04; 240.32]  & [72.05; 243.61]\\   
+         Months to/since app use $=$ -4  & -70.73            & 70.83            & 111.08$^{***}$\\   
+                                         & [-198.51; 57.05]  & [-19.61; 161.27] & [30.32; 191.83]\\   
+         Months to/since app use $=$ -3  & -60.24            & -38.95           & 4.40\\   
+                                         & [-190.93; 70.45]  & [-127.54; 49.65] & [-73.25; 82.06]\\   
+         Months to/since app use $=$ -2  & -118.23$^{*}$     & -21.84           & 68.21$^{*}$\\   
+                                         & [-239.68; 3.23]   & [-109.66; 65.97] & [-6.27; 142.70]\\   
+         Months to/since app use $=$ 0   & -15.70            & 84.25$^{*}$      & 53.83\\   
+                                         & [-143.61; 112.21] & [-8.19; 176.69]  & [-23.61; 131.27]\\   
+         Months to/since app use $=$ 1   & -63.71            & 60.41            & 56.22\\   
+                                         & [-191.73; 64.30]  & [-32.98; 153.80] & [-25.11; 137.55]\\   
+         Months to/since app use $=$ 2   & -128.78$^{**}$    & -15.64           & 57.12\\   
+                                         & [-250.69; -6.86]  & [-104.05; 72.77] & [-23.34; 137.59]\\   
+         Months to/since app use $=$ 3   & -66.80            & 5.37             & 35.16\\   
+                                         & [-188.29; 54.70]  & [-88.20; 98.94]  & [-44.86; 115.19]\\   
+         Months to/since app use $=$ 4   & -96.92            & 51.76            & 96.72$^{**}$\\   
+                                         & [-220.45; 26.62]  & [-45.48; 149.00] & [10.88; 182.56]\\   
+         Months to/since app use $=$ 5   & 34.50             & 124.68$^{**}$    & 114.76$^{**}$\\   
+                                         & [-90.18; 159.17]  & [20.69; 228.67]  & [24.30; 205.22]\\   
+         Months to/since app use $=$ >5  & -62.71            & 109.43$^{**}$    & 137.02$^{***}$\\   
+                                         & [-175.07; 49.65]  & [7.93; 210.92]   & [40.08; 233.96]\\   
+         Month income                    & 0.08$^{***}$      & 0.06$^{***}$     & -0.01\\   
+                                         & [0.05; 0.11]      & [0.03; 0.09]     & [-0.04; 0.02]\\   
+         Month spend                     & -0.16$^{***}$     & 0.11$^{***}$     & 0.25$^{***}$\\   
+                                         & [-0.18; -0.14]    & [0.09; 0.12]     & [0.23; 0.27]\\   
+         Active accounts                 & 67.15$^{***}$     & 311.43$^{***}$   & 252.24$^{***}$\\   
+                                         & [48.99; 85.31]    & [288.32; 334.53] & [230.27; 274.22]\\   
+         \midrule
+         \emph{Fixed-effects}\\
+         User ID                         & Yes               & Yes              & Yes\\  
+         Year-month                      & Yes               & Yes              & Yes\\  
+         \midrule
+         \emph{Fit statistics}\\
+         Observations                    & 148,932           & 148,932          & 148,932\\  
+         R$^2$                           & 0.04044           & 0.24349          & 0.31041\\  
+         Within R$^2$                    & 0.00933           & 0.03705          & 0.07270\\  
+         \midrule \midrule
+         \multicolumn{4}{l}{\emph{Clustered (User ID) co-variance matrix, 95\% confidence intervals in brackets}}\\
+         \multicolumn{4}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+      \end{tabular}
+   \end{threeparttable}
+\end{table}
+
+
