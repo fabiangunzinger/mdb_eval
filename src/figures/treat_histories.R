@@ -8,13 +8,10 @@ source('./src/helpers/helpers.R')
 
 df <- read_analysis_data()
 
-
-df
-
 sample_size <- 200
 dfs <- filter(df, user_id %in% sample(unique(user_id), sample_size))
-xticks <- c(201206, 201306, 201406, 201506, 201606, 201706, 201806, 201906, 202006)
-xlabs <- c("2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020")
+xticks <- c(201706, 201806, 201906, 202006)
+xlabs <- c("2017", "2018", "2019", "2020")
 
 DisplayTreatment(
   data = dfs,
@@ -22,10 +19,12 @@ DisplayTreatment(
   time.id = "ymn",
   treatment = "t",
   legend.position = "bottom",
-  xlab = "Year-months",
+  xlab = "Month",
   ylab = "User",
   legend.labels = c("Not using app (control)", "Using app (treatment)"),
-  title = ""
+  title = "",
+  color.of.treated = palette[1],
+  color.of.untreated = palette[2]
   ) +
   theme(
     axis.text.y = element_blank(),

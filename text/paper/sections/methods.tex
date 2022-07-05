@@ -3,14 +3,6 @@
 \section{Methods}%
 \label{sec:data}
 
-While we were unable to pre-register the analysis because we have had access to
-and been working with the Money Dashoard data for months, we proceeded in the
-same spirit: we first wrote a draft of the paper in the form of a pre-analysis
-plan, following \citet{olken2015promises}, then tested the entire code base --
-data pre-processing, balance checks, main analysis, and extensions -- with a 1
-percent sample, and finally ran the entire analysis.
-
-
 \subsection{Dataset}%
 \label{sub:dataset}
 
@@ -123,19 +115,12 @@ covariates in our analysis, and users who are not between the ages of 18 and
 65, as their financial objectives are plausibly different.
 
 
-\paragraph{Data transformations}%
+\paragraph{Data transformations:}%
 \label{par:data_transformations}
 
 To minimise the influence of outliers, we winsorise spend, income, and savings
-accounts flow variables at the 5 percent level or -- if we winsorise on both
-ends of the distribution -- at the 2.5 percent level.
-
-\edit{Question: how to determine winsor level? Currently using 5 percent
-because 1 percent still leaves very large values in the data: 20k spend, 15k
-income, 20k sa inflows/outflows, all per user-month}
-
-
-
+accounts flow variables at the 1 percent level or -- if we winsorise on both
+ends of the distribution -- at the 0.5 percent level.
 
 
 \subsection{Summary statistics}%
@@ -145,11 +130,14 @@ Figure~\ref{fig:sample_description} describes the sample.
 
 \begin{figure}[H]
     \centering
-    \caption{Sample description}%
+    \caption{Sample characteristics}
     \includegraphics[width=\linewidth]{\figdir/sample_description.png}
     \label{fig:sample_description}
-    \fignote{\textwidth}{Labal and describe panels... LCFS is data from the
-        2018/19 wave of ONS's Living Costs and Food Survey.}
+    \fignote{\textwidth}{Panels A and B show the distribution of disposable
+        income and total spending in 2019, respectively, benchmarked against
+        the 2018/19 wave of the ONS Living Cost and Food Survey (LCFS). The
+        remaining panels show the data distributions of age, gender, region,
+    and the number of active accounts.}%
 \end{figure}
 
 Table~\ref{tab:sumstats} provides summary statistics.
@@ -176,13 +164,14 @@ the app. Figure~\ref{fig:treatplot_sample_raw} shows the treatment history for
     \caption{Treatment assignment plot}%
     \includegraphics[width=0.8\linewidth]{\figdir/treatplot_sample_raw.png}
     \label{fig:treatplot_sample_raw}
-    \fignote{\textwidth}{Each horizontal line shows for one of 200 randomly
-        selected users the observed pre and post signup periods in blue and
-        red, respectively. The faint vertical white lines indicate month
-        borders, whitespace indicates periods in which we do not observe the
-    user. To the left of the observed period, this is because the app cannot
-access data before that point when the user signs up; to the right, because
-they have stopped using the app.}
+
+    \fignote{\textwidth}{Each horizontal line shows the observed pre and post
+        signup periods in blue and red, respectively, for one of 200 randomly
+        selected users. The faint vertical white lines indicate month borders,
+        whitespace indicates periods in which we do not observe the user. To
+    the left of the observed period, this is because the app cannot access data
+before that point when the user signs up; to the right, because they have
+stopped using the app.}
 
 \end{figure}
 
@@ -224,9 +213,16 @@ positive net deposits)
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{\figdir/savings_patterns.png}
     \caption{Savings patterns}%
+    \includegraphics[width=\linewidth]{\figdir/savings_patterns.png}
     \label{fig:\figdir/savings_patterns}
+    \fignote{\textwidth}{Panel A shows distribution of savings account inflow
+        amounts, making clear that most transactions are the kinds of round
+        amounts we would expect savings transactions to be. The data is
+        truncated at \pounds1000. Panel B hows inflows, outflows, and netflows
+        into savings accounts for six months before and five months after app
+    use.}
+
 \end{figure}
 
 

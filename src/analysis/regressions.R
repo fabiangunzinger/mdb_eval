@@ -14,15 +14,16 @@ df <- read_analysis_data()
 setFixest_fml(
   ..ds = ~ i(tt, -1, bin=list("<-6" = -35:-6, ">5" = 6:25)),
   ..controls = ~month_income + month_spend + accounts_active,
-  ..fe = ~user_id + ym,
+  ..fe = ~ym + user_id,
   ..mvfe = ~mvsw(ym, user_id)
 )
 
+names(df)
 # Static models -------------------------------------------------------------------
 
 title <- 'Static results'
 label <- "reg_static"
-m_static <- feols(netflows ~ t + ..controls | ..mvfe, df)
+m_static <- feols(c(netflows, discret_spend) ~ t + ..controls | ..mvfe, df)
 etable(m_static,
        title = title,
        order = c("App use", "!Intercept"),
@@ -34,11 +35,14 @@ etable(m_static,
 )
 
 
+
+
+
 # Dynamic models ------------------------------------------------------------------
 
 title <- 'Dynamic results'
 label <- "reg_dynamic"
-m_dynamic <- feols(netflows ~ ..ds + ..controls | ..mvfe, df)
+m_dynamic <- feols(c(netflows, discret_spend) ~ ..ds + ..controls | ..mvfe, df)
 etable(m_dynamic,
        title = title,
        order = c("App use", "!Intercept"),
@@ -48,10 +52,23 @@ etable(m_dynamic,
        label = glue('tab:{label}'),
        replace = T
 )
-figure(glue('{label}.png'))
-fiplot(m_dynamic)
+figure(glue('{label}.png'), width = 2000, height = 2000, pointsize=30)
+par(mfrow=c(2,1))
+fiplot(m_dynamic[1:4])
 legend(
   "topleft",
+  col = c(1, 2, 4, 3),
+  pch = c(20, 15, 17, 21),
+  legend = c(
+    "Controls",
+    "Controls and year-month FEs",
+    "Controls and user FE",
+    "Controls and year-month and user FEs"
+  )
+)
+fiplot(m_dynamic[5:8])
+legend(
+  "bottomright",
   col = c(1, 2, 4, 3),
   pch = c(20, 15, 17, 21),
   legend = c(

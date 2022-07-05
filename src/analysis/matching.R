@@ -10,7 +10,7 @@ source('./src/helpers/helpers.R')
 df <- read_analysis_data()
 
 # Specify covariates as vector and fml
-covs <- c("month_income", "month_spend", "discret_spend", "is_female",
+covs <- c("month_income", "month_spend", "is_female",
           "generation_code", "is_urban", "accounts_active")
 fml <- reformulate(covs)
 
@@ -107,7 +107,7 @@ disptreat <- function(matched_set) {
     ylab = "User",
     hide.x.axis.label = T,
     hide.y.axis.label = T,
-    matched.set = mset,
+    matched.set = matched_set,
     show.set.only = T,
   ) + labs(title = "") + theme(legend.position = "none") 
 }
