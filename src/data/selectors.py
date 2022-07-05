@@ -82,6 +82,20 @@ def drop_testers(df):
 
 @selector
 @counter
+def signup_after_march_2017(df):
+    """App signup after March 2017
+
+    To ensure that we have at least 12 months of account history
+    available, which became available for all major banks from
+    April 2017 onwards.
+    """
+    cond = df.user_reg_ym.ge('2017-04')
+    users = cond[cond].index
+    return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
 def pre_and_post_signup_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
     """At least 6 months of pre and post signup data
 
@@ -94,20 +108,6 @@ def pre_and_post_signup_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONT
         return required_periods.issubset(observed_periods)
 
     cond = df.groupby("user_id").apply(cond_checker)
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
-def signup_after_march_2017(df):
-    """App signup after March 2017
-
-    To ensure that we have at least 12 months of account history
-    available, which became available for all major banks from
-    April 2017 onwards.
-    """
-    cond = df.user_reg_ym.ge('2017-04')
     users = cond[cond].index
     return df[df.user_id.isin(users)]
 
