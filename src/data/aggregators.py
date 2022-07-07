@@ -130,7 +130,7 @@ def treatment(df):
 def time_to_treatment(df):
     """Leads or lags to signup month.
 
-    Month of signup is 0.
+    Month of signup is set to tt = 0.
     """
     group_cols = [df.user_id, df.ym]
     ym = df.ym.view("int")
