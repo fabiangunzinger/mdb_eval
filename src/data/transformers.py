@@ -35,8 +35,8 @@ def winsorise(df):
     df["txns_count"] = hd.winsorise(df.txns_count, pct=config.WIN_PCT, how="upper")
     df["txns_volume"] = hd.winsorise(df.txns_volume, pct=config.WIN_PCT, how="upper")
     df["month_spend"] = hd.winsorise(df.month_spend, pct=config.WIN_PCT, how="upper")
-    df["discret_spend"] = hd.winsorise(
-        df.discret_spend, pct=config.WIN_PCT, how="upper"
+    df["dspend"] = hd.winsorise(
+        df.dspend, pct=config.WIN_PCT, how="upper"
     )
     df["month_income"] = hd.winsorise(df.month_income, pct=config.WIN_PCT, how="upper")
 
