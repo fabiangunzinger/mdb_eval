@@ -269,7 +269,7 @@ def proportion_credit(df):
 @aggregator
 @hh.timer(on=TIMER_ON)
 def discretionary_spend(df):
-    """Highly discretionary spend as a proportion of monthly income."""
+    """Highly discretionary spend."""
     tags = [
         "accessories",
         "appearance",
@@ -301,8 +301,11 @@ def discretionary_spend(df):
     ]
     group_cols = [df.user_id, df.ym]
     is_disc_spend = df.tag_auto.isin(tags) & df.is_debit
-    disc_spend = df.amount.where(is_disc_spend, np.nan).groupby(group_cols)
-    return disc_spend.sum().rename("discret_spend")
+    return (
+        df.amount.where(is_disc_spend, np.nan)
+        .groupby(group_cols)
+        .agg([("dspend", "sum"), ("dspend_count", "count"), ("dspend_mean", "mean")])
+    )
 
 
 @aggregator
@@ -324,4 +327,3 @@ def num_accounts(df):
         .merge(total)
         .set_index(["user_id", "ym"])
     )
-
