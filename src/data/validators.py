@@ -19,7 +19,8 @@ def validator(func):
 
 @validator
 def no_missing_values(df):
-    assert df.isna().sum().sum() == 0
+    exceptions = ['dspend_mean']
+    assert df.drop(exceptions, axis='columns').notna().all().all()
     return df
 
 
