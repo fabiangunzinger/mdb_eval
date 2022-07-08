@@ -25,14 +25,11 @@ setFixest_etable(
   )
 )
 
-# setFixest_coefplot(
-#   pt.col = "steelblue4",
-#   pt.cex = 1.5,
-#   pt.pch = 15,
-#   ci.col = "darkolivegreen4",
-#   ci.width = 0,
-#   ci.lwd = 2
-# )
+setFixest_coefplot(
+  # pt.col = "steelblue4",
+  # ci.col = "steelblue4",
+  pt.join = TRUE
+)
 
 setFixest_dict(c(
   has_sa_inflows = "Has savings",
@@ -43,12 +40,15 @@ setFixest_dict(c(
   outflows_norm = "Outflows / Income",
   netflows_norm = "Net-inflows / Income",
   has_pos_netflows = "Has positive net-inflows",
+  pos_netflows = "Positive net-inflows",
   t = "App use",
-  tt = "Months to/since app use",
+  tt = "Months relative to app use",
   
   month_income = "Month income",
   month_spend = 'Month spend',
-  discret_spend = "Discretionary spend",
+  dspend = "Discretionary spend",
+  dspend_count = "Discretionary spend txns",
+  dspend_mean = "Mean discretionary spend txn",
   is_female = 'Female',
   age = 'Age',
   is_urban = 'Urban',
@@ -62,3 +62,29 @@ setFixest_dict(c(
   '(Intercept)' = 'Intercept'
 ))
 
+
+fcoefplot <- function(model, ...) {
+  # wrapper around coefplot with custom settings
+  coefplot(
+    model,
+    lab.fit = "tilted",
+    ylab = 'Change in __depvar__',
+    main = "",
+    col = c(1, 2, 4, 3, 5, 6, 7, 8),
+    pt.pch = c(20, 15, 17, 21, 24, 22),
+    ...
+  )
+}
+
+
+fiplot <- function(model, ...) {
+  # wrapper around iplot with custom settings
+  iplot(
+    model,
+    ylab = '__depvar__',
+    main = "",
+    col = c(1, 2, 4, 3, 5, 6, 7, 8),
+    pt.pch = c(20, 15, 17, 21, 24, 22),
+    ...
+  )
+}

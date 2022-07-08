@@ -12,22 +12,6 @@ df <- read_analysis_data()
 
 
 flows <- "^(in|out|net)flows$"
-# 
-# flows_month <- df %>%
-#   select(month, matches(flows)) %>% 
-#   pivot_longer(matches(flows)) %>% 
-#   mutate(name = factor(
-#     name, 
-#     levels = c("inflows", "outflows", "netflows"), 
-#     labels = c("Inflows", "Outflows", "Netflows")
-#     )) %>% 
-#   ggplot(aes(factor(month), value, colour = name, shape = name)) +
-#   geom_point(stat = "summary", fun = "mean") +
-#   labs(x = "Month", y = "Amount (£)", colour = NULL, shape = NULL) +
-#   theme(
-#     legend.position = "bottom",
-#     legend.text = element_text(size = 12)
-#   )
 
 inflow_amounts <- df %>%
   select(matches(flows)) %>%

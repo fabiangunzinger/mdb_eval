@@ -3,151 +3,139 @@
 \section{Results}%
 \label{sec:results}
 
-\subsection{Static TWFE}%
-\label{sub:static_results}
-
-\begin{equation}
-    y_{it} = \alpha_i + \lambda_t + \beta D_{it} + \gamma X_{it} + \epsilon_{it}
-\end{equation}
-
-Notes:
-\begin{itemize}
-    \item Assumption: there are no confounding effects (either time-varying,
-        individual varying, or individual-time varying), so treatment
-        assignment is as good as random.
-
-    \item With controls, we assume that there are no confounding variables
-        other than the ones we control for.
-\end{itemize}
-\input{\tabdir/reg_static.tex}
-
 
 \subsection{Dynamic TWFE}%
 \label{sub:dynamic_results}
 
 \begin{equation}
-    y_{it} = \alpha_i + \lambda_t + \sum^{5}_{\substack{s=-6 \\
-    s\neq-1}} \beta_s D_{its} + \gamma X_{it} + \epsilon_{it},
+\label{eq:dynamic_twfe}
+    y_{it} = \sum^{5}_{s=-6} \beta_s D_{it}^s + \alpha_i + \lambda_t + \gamma X_{it} + \epsilon_{it},
 \end{equation}
 
 where $y_{it}$ is the outcome for individual $i$ at time $t$, $\alpha_i$ and
 $\lambda_t$ are individual and year-month fixed effects, respectively, and
-$X_{it}$ is a vector of individual and time varying controls. $D_{its}$ equals
+$X_{it}$ is a vector of individual and time varying controls. $D_{it}^s$ equals
 1 if, in period $t$, individual $i$ is $s$ months away from signing up to the
 app. The set of $\beta_s$ coefficients measure the effect of treatment $s$
 periods away from treatment, which is what we are interested in.
 
-We omit the relative period indicator for period $s = -1$ because we need to
-omit one relative period indicator to avoid perfect collinearity among the
-period indicators, and we choose the last pre-treatment period because it
-serves as a natural benchmark against which to compare the outcomes in other
-periods.\footnote{As \citet{sun2021estimating} point out, there are two sources
-of perfect multicollinearity when estimating a fully dynamic model (i.e. one
-including all possible lags). The first results from all relative period
-indicators summing to 1 in each period, so that the entire set of relative period
-dummies across all time periods is perfectly multicollinear. We deal with this
-by excluding the indicator for $s = -1$. The second issue arises from the fact
-that for initial treatment period $E_i$, $t = s + E_i$. We deal with this issue
-by "trimming" our sample to be balanced in relative periods by only using
-data from relative periodl $\{-6, 5\}$. Both of these approaches are standard
-in the empirical literature.}
+To avoid multicollinearity issues and uniquely identify the lead and lag
+effects, we omit relative period indicator $s = -1$, and bin the endpoints of our
+observation window so that $D_{it}^{-6} = 1$ for all periods six or more
+periods prior to signup and $D_{it}^{5} = 1$ for all months five or more months
+after the month of signup. This expresses all estimates relative to the omitted
+period, which -- given that it is the last month before signup -- serves as a
+natural benchmark. Binning endpoints assumes that coefficients remain constant
+outside the observation window. Both of these approaches are standard in the
+literature, as discussed in \citet{sun2021estimating, schmidheiny2019event}.
 
-
-\citet{sun2021estimating} define an event study design as a staggered adoption
-design where units are treated at different times and where there may or may
-not be never treated units. In our case, we have no never treated units, and
-treatment is absorbing in that once a unit is treated they will also be treated
-in all subsequent units.\footnote{We cannot rule out that some users who
-stopped using the app and closed their account rejoined later on, in which case
-they would appear in our dataset as a new user. However, we can plausibly
-assume that such cases are rare.} 
-
-Setup:
-\begin{itemize}
-    \item We observe $N+1$ unites for $T+1$ periods and, for each
-        $i\in\{0,\ldots, N\}$ and $t\in\{0,\ldots,T\}$ observe outcome $y_{it}$
-        and treatment status $D_{it}\in\{0, 1\}$, where $D_{it}$ equals 1 if unit
-        $i$ is treated in period $t$ and 0 otherwise.
-
-    \item We can uniquely characterise treatment paths by the time period of
-        initial treatment, denoted as $E_i = min\{t: D_{it} = 1\}$.
-
-    \item We can group units into cohorts $e \in \{0,\ldots, T\}$, where units
-        in cohort $e$ were all first treated at time $e$, so that $\{i: E_i =
-        e\}$.
-
-    \item We define $y^e_{it}$ as the potential outcome in period $t$ if unit
-        $i$ was first treated in period $e$.
-
-\end{itemize}
-
-
-Assumptions:
-\begin{itemize}
-    \item Observations $\{y_{it}, D_{it}\}_{t=0}^T$ are independent.
-
-    \item A1: parallel trends: difference in baseline outcomes over time do
-        not differ between treatment cohorts. Not obviously violated in our
-        context. Early adopters might differ from late adopters, but difference
-        might plausibly be constant over time. - We don't have never treated
-        units, so Ashenfelter dip scenario is not a problem, even though we
-        seem to observe something like this in discretionary spending graph
-        (increase in disc spend before signup)
-
-    \item A2: no anticipatory behaviour. Plausibly violated if people are
-        motivated to save more and start doing so even before app use. Can test
-        for whether there is a peak prior to signup. Because our units have
-        private knowledge about future of treatment path (their intention to
-        reduce spending and save more and sign up to an app), this might be
-        violated. The trajectories of discret spend and net inflows are
-        conflicting on this, though, suggesting that they increases discret
-        spend in runup to app use (which might provide motivation to eventually
-        sign up) but also might have increased net savings slightly.
-
-    \item A3: treatment effect homogeneity across all cohorts and all relative
-        periods. (Note: treatment effects can be dynamic, but need to be the
-        same across cohorts). We could test for this.
-
-\end{itemize}
-
-
-Notes:
-\begin{itemize}
-
-    \item Comparison: pre vs post signup within each individual.
-
-    \item Assumption: there are no time-varying unobserved effects that affect
-        both y and D (formally: $E[Du] = 0$, since u is by definition
-        correlated with y.
-
-    \item Discussion: there is something that made the individual sign up in
-        the first place, and it might well be an individual level shock that we
-        don't observe (unexpected large expense, loss of job, exposure to
-        something that motivates saving or change in financial behaviour).
-
-    \item See \citet{imai2021use} for problems with twfe
-
-\end{itemize}
-
-\input{\tabdir/reg_dynamic.tex}
+% We omit the relative period indicator for period $s = -1$ because we need to
+% omit one relative period indicator to avoid perfect collinearity among the
+% period indicators, and we choose the last pre-treatment period because it
+% serves as a natural benchmark against which to compare the outcomes in other
+% periods.\footnote{As \citet{sun2021estimating} point out, there are two sources
+% of perfect multicollinearity when estimating a fully dynamic model (i.e. one
+% including all possible lags). The first results from all relative period
+% indicators summing to 1 in each period, so that the entire set of relative period
+% dummies across all time periods is perfectly multicollinear. We deal with this
+% by excluding the indicator for $s = -1$. The second issue arises from the fact
+% that for initial treatment period $E_i$, $t = s + E_i$. We deal with this issue
+% by "trimming" our sample to be balanced in relative periods by only using
+% data from relative periodl $\{-6, 5\}$. Both of these approaches are standard
+% in the empirical literature.}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{\figdir/reg_dynamic.png}
-    \caption{Dynamic results}%
-    \label{fig:reg_dynamic}
+    \caption{Main results}%
+    \label{fig:dspend_main}
+    \includegraphics[width=.49\textwidth]{\figdir/dspend_main.png}
+    \includegraphics[width=.49\textwidth]{\figdir/netflows_main.png}
+    \fignote{\textwidth}{Figures show estimates of leads and lags frome
+        estimating model~(\ref{eq:dynamic_twfe}) with distretionary spend (left) and
+netflows into savings accounts (right) as the dependent variable. Standard
+errors are clustered by user.}
 \end{figure}
 
 
-\subsection{Decomposing inflows and outflows}%
-\label{sub:decomposing_inflows_and_outflows}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=.7\textwidth]{\figdir/reg_decomp_inout}
-    \caption{Decomposing inflows and outflows}%
-    \label{fig:reg_decomp_inout}
-\end{figure}
+
+
+% \citet{sun2021estimating} define an event study design as a staggered adoption
+% design where units are treated at different times and where there may or may
+% not be never treated units. In our case, we have no never treated units, and
+% treatment is absorbing in that once a unit is treated they will also be treated
+% in all subsequent units.\footnote{We cannot rule out that some users who
+% stopped using the app and closed their account rejoined later on, in which case
+% they would appear in our dataset as a new user. However, we can plausibly
+% assume that such cases are rare.} 
+
+% Setup:
+% \begin{itemize}
+%     \item We observe $N+1$ unites for $T+1$ periods and, for each
+%         $i\in\{0,\ldots, N\}$ and $t\in\{0,\ldots,T\}$ observe outcome $y_{it}$
+%         and treatment status $D_{it}\in\{0, 1\}$, where $D_{it}$ equals 1 if unit
+%         $i$ is treated in period $t$ and 0 otherwise.
+
+%     \item We can uniquely characterise treatment paths by the time period of
+%         initial treatment, denoted as $E_i = min\{t: D_{it} = 1\}$.
+
+%     \item We can group units into cohorts $e \in \{0,\ldots, T\}$, where units
+%         in cohort $e$ were all first treated at time $e$, so that $\{i: E_i =
+%         e\}$.
+
+%     \item We define $y^e_{it}$ as the potential outcome in period $t$ if unit
+%         $i$ was first treated in period $e$.
+
+% \end{itemize}
+
+
+% Assumptions:
+% \begin{itemize}
+%     \item Observations $\{y_{it}, D_{it}\}_{t=0}^T$ are independent.
+
+%     \item A1: parallel trends: difference in baseline outcomes over time do
+%         not differ between treatment cohorts. Not obviously violated in our
+%         context. Early adopters might differ from late adopters, but difference
+%         might plausibly be constant over time. - We don't have never treated
+%         units, so Ashenfelter dip scenario is not a problem, even though we
+%         seem to observe something like this in discretionary spending graph
+%         (increase in disc spend before signup)
+
+%     \item A2: no anticipatory behaviour. Plausibly violated if people are
+%         motivated to save more and start doing so even before app use. Can test
+%         for whether there is a peak prior to signup. Because our units have
+%         private knowledge about future of treatment path (their intention to
+%         reduce spending and save more and sign up to an app), this might be
+%         violated. The trajectories of discret spend and net inflows are
+%         conflicting on this, though, suggesting that they increases discret
+%         spend in runup to app use (which might provide motivation to eventually
+%         sign up) but also might have increased net savings slightly.
+
+%     \item A3: treatment effect homogeneity across all cohorts and all relative
+%         periods. (Note: treatment effects can be dynamic, but need to be the
+%         same across cohorts). We could test for this.
+
+% \end{itemize}
+
+
+% Notes:
+% \begin{itemize}
+
+%     \item Comparison: pre vs post signup within each individual.
+
+%     \item Assumption: there are no time-varying unobserved effects that affect
+%         both y and D (formally: $E[Du] = 0$, since u is by definition
+%         correlated with y.
+
+%     \item Discussion: there is something that made the individual sign up in
+%         the first place, and it might well be an individual level shock that we
+%         don't observe (unexpected large expense, loss of job, exposure to
+%         something that motivates saving or change in financial behaviour).
+
+%     \item See \citet{imai2021use} for problems with twfe
+
+% \end{itemize}
+
 
 
 \subsection{Decomposing intensive and extensive margins}%
@@ -155,190 +143,64 @@ Notes:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=.7\textwidth]{\figdir/reg_decomp_intext}
-    \caption{Decomposing intensive and extensive margin}%
-    \label{fig:reg_decomp_intext}
+    \caption{Decomposition of intensive and extensive margins}%
+    \label{fig:intext}
+    \includegraphics[width=.49\textwidth]{\figdir/has_pos_netflows.png}
+    \includegraphics[width=.49\textwidth]{\figdir/pos_netflows.png}
+    \includegraphics[width=.49\textwidth]{\figdir/dspend_count.png}
+    \includegraphics[width=.49\textwidth]{\figdir/dspend_mean.png}
+    \fignote{\textwidth}{...}
 \end{figure}
 
 
-\subsection{Matching}%
-\label{sub:alternative_matching_method}
+% \input{\tabdir/intext.tex}
 
-Control group design:
-\begin{itemize}
 
-    \item We only have data for a self-selected group of people who choose to
-        use the app. This has a couple consequences:
+\subsection{Decomposing inflows and outflows}%
+\label{sub:decomposing_inflows_and_outflows}
 
-    \item By virtue of signing up to an app that helps them manage
-        their money, these users are different from those who don't
-        sign up. As a result, we are unable to answer the question of
-        whether app use helps the average person in the
-        population as a whole save more.\footnote{One way to get closer
-            to that answer is to re-weight our sample on observable
-            demographic variables so as to match the UK population as a
-            whole. But our sample differs from the population as a
-            whole both is ways that are observable (demographic
-            variables) and unobservable (self-awareness that they need
-            help managing their money, cognitive resources to engage
-            with the app, motivation to do so). Re-weighting would only
-            help us deal with the first of these.}
+\begin{figure}[H]
+    \centering
+    \caption{Decomposing inflows and outflows}%
+    \label{fig:inout}
+    \includegraphics[width=.6\textwidth]{\figdir/netflows.png}
+    \includegraphics[width=.6\textwidth]{\figdir/inflows.png}
+    \includegraphics[width=.6\textwidth]{\figdir/outflows.png}
+    \fignote{\textwidth}{...}
+\end{figure}
 
-    \item Even among people who do eventually sign up to the app,
-        hte decision when to do so is unlikely to be random --
-        \textit{something} makes them sign up at the particular
-        point in time they do and not before or after. If we think
-        of this factor as ``motivation to save more'', then said
-        motivation is inextricably linked with the decision to sign
-        up so that we cannot differentiate between the two.
+\input{\tabdir/inout.tex}
 
-    \item Hence: due to the first point above, we cannot estimate
-        an ATE (effect of app use on the average citizen), and due
-        to the second point we also cannot estimate a pure ATT
-        (effect of app use on users). Instead, our estimated effect
-        of app use captures the effect of being motivated to save
-        more and using the app to do so.\footnote{One way to get a
-            step closer to ATT would be to find a variable that
-        correlates with ``motivation to save'' and control for it /
-    match on it.}
 
-    \item This is true for both our matched DiD and our TWFE
-        design. While these two approaches use a different
-        counterfactual to estimate the effect of app use
-        (behaviour of a matched control in the case of DiD and
-        extrapolating within-user pre-signup behaviour in the case
-        of TWFE), neither can help us with the fact that the
-        decision to sign up is likely correlated with the
-        time-varying unobserved effect ``motivation to save more''.
 
-\end{itemize}
+\subsection{Static results}%
+\label{sub:static_results}
 
-DiD:
-\begin{itemize}
+\input{\tabdir/static.tex}
 
-    \item We use a difference-in-differences design to estimate the effect of
-        app use. Because we do not have a separate control group, we use the
-        per-signup data of Money Dashboard users as control periods and use
-        matching to find comparable control user for each tretment user.
 
-    \item To do this, we use the matching estimator for panel data proposed by
-        \citet{imai2021matching}. Following paper, we conduct the following
-        steps:
 
-    \item For each treated observation, we find a set of control observations
-        with that share the same treatment history for a period of $L$ periods
-        before the treatment and $F$ periods after the treatment. In our
-        baseline specification, we rely on a year's worth of data around the
-        treatment period and set $L=6$ and $F = 0, 1, 2, 3, 4, 5$.
+\subsection{Additional TWFE specifications}%
+\label{sub:additional_twfe_specifications}
 
-    \item Identification assumption is that potential outcomes only depend on
-        treatment status of the past L periods. In general, this means that if
-        treatment has a cumulative effect over time, the full effect is reached
-        after L periods. In our context, this means that any effect on savings
-        behaviour from usign the app is fully realised after L periods. (I
-        think this means that if we look at the treatment effect for F periods
-        forward, the effect should not become stronger after F = L).
+\begin{figure}[H]
+    \centering
+    \caption{Alternative model specifications}%
+    \includegraphics[width=.7\textwidth]{\figdir/dspend_alt.png}
+\end{figure}
 
-\end{itemize}
-
-DiD identification assumptions:
-\begin{itemize}
-    \item No spillover effects: the potential outcome of unit $i$ at time $t$
-        is independent of the treatment status of other units. This is violated
-        if a user's partner or friends also use the app and, through sharing
-        their experiences or motivations, influence the user's savings
-        behaviour.
-
-    \item Carryover effects no longer than $L$ periods: a user's potential
-        outcome in period $t$ is independent of treatment status in periods
-        more than $L$ periods ago. Given that we are dealing with an absorbing
-        treatment, this is not a very strong assumption in our context, and we
-        choose $L$ based on what we think is an informative number of periods
-        to observe pre-app use behaviour.\footnote{An absorbing treatment is
-            one that cannot be reversed, and hence we only change from
-            untreated to treated once.}.
-
-    \item Parallel trends: the spending trajectory between treated and control
-        units would have continued to be parallel if the treated unit hadn't
-        started using the app. This is violated whenever an intended change in
-        savings behaviour also provided the impetus for the user to start using
-        the app, which is likely to occurr frequently. To the extent this is
-        the case, we have an ommitted variable ``motivation to save more'',
-        which both changes the user's savings behaviour and their treatment
-        status. Because of this, what we are measuring is not a pure ATT of app
-        use -- the effect of app use on savings over and above the change
-        precipitated by a change motivation -- but the effect of app use for
-        users motivated to save more.
-
-\end{itemize}
+\input{\tabdir/dspend_alt.tex}
 
 
 \begin{figure}[H]
     \centering
-    \caption{Match set examples}%
-    \includegraphics[width=\linewidth]{\figdir/matchset_examples.png}
-    \includegraphics[width=\linewidth]{\figdir/matchset_examples_new.png}
-    \label{fig:matchset_examples}
-
-    \fignote{\textwidth}{}
-
+    \caption{Alternative model specifications}%
+    \includegraphics[width=.7\textwidth]{\figdir/netflows_alt.png}
 \end{figure}
 
-
-\begin{figure}[H]
-    \centering
-    \caption{Distribution of size of matched control units}%
-    \includegraphics[width=0.8\linewidth]{\figdir/hist_matchset_size.png}
-    \label{fig:hist_matchset_size}
-
-    \fignote{\textwidth}{In the first step of the matching proceedure, each
-        user gets assigned a set of potential control users that share the same
-        treatment history for a specified number of periods before the user
-        signs up to teh app (6 months, in our baseline specification), but that
-        do not sign up themselves for a specified number of periods after the
-        treatment user has signed up (another 6 months, in our baseline
-        specification). The figure shows the distribution of the sizes of these
-        sets of potential control users. The pink vertical bar on the left
-    shows to count of users for whom no control users cound be found.}
-
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \caption{Covariance balance}%
-    \includegraphics[width=0.8\linewidth]{\figdir/covar_balance.png}
-    \label{fig:covar_balance}
-
-    \fignote{\textwidth}{Average covariate standard deviation between treatment and
-        control units for each pre-treatment period using the entire set of
-        potential controls on the left and, on the right, the refined set of
-        controls, which, in our baseline specification, consists of the nearest
-        neighbour match based on the propensity score.}
-
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \caption{Matching estimates}%
-    \includegraphics[width=0.8\linewidth]{\figdir/match_estimates.png}
-    \label{fig:match_estimates}
-
-    \fignote{\textwidth}{}
-
-\end{figure}
-
-Is estimate causal?
-\begin{itemize}
-    \item \citet{king2006dangers} show that there are four sources of bias
-        (ommitted variable, posttreatment, interpolation, extrapolation).
-    
-    \item Discuss each in turn to argue that effect is causal (for our population
-        of interest, which are people signing up to MDB). 
-\end{itemize}
+\input{\tabdir/netflows_alt.tex}
 
 
-\subsection{Alternative window lengths}%
-\label{sub:alternative_window_lengths}
 
 \subsection{Subgroups}%
 \label{sub:subgroups}
@@ -359,11 +221,5 @@ per-adoption average savings tercile (inspired by \citet{carlin2017fintech},
 see Fig 5 and Table 4).
 
 See also section 6 in \citet{gargano2021goal}
-
-
-\subsection{Alternative outcome variables}%
-\label{sub:alternative_outcome_variables}
-
-Look at netflows scaled by income
 
 

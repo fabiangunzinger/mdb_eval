@@ -81,7 +81,7 @@ active_accounts <- df %>%
   count(accounts_active) %>% 
   mutate(prop = n / sum(n)) %>% 
   ggplot() +
-  geom_bar(aes(accounts_active, prop), stat = "identity", fill = palette[1]) +
+  geom_bar(aes(factor(accounts_active), prop), stat = "identity", fill = palette[1]) +
   labs(x = "Number of active accounts (by user-month)", y = "Count")
 
 

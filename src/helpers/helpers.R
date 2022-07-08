@@ -48,30 +48,3 @@ figure <- function(filepath, width=2000, height=1000, pointsize=30, ...) {
     ...
   )
 }
-
-
-fcoefplot <- function(model, ...) {
-  # wrapper around coefplot with custom settings
-  coefplot(
-    model,
-    lab.fit = "tilted",
-    ylab = 'Change in __depvar__',
-    main = "",
-    col = c(1, 2, 4, 3, 5, 6, 7, 8),
-    pt.pch = c(20, 15, 17, 21, 24, 22),
-    ...
-  )
-}
-
-
-fiplot <- function(model, ...) {
-  # wrapper around iplot with custom settings
-  iplot(
-    model,
-    ylab = 'Change in __depvar__',
-    main = "",
-    col = c(1, 2, 4, 3, 5, 6, 7, 8),
-    pt.pch = c(20, 15, 17, 21, 24, 22),
-    ...
-  )
-}
