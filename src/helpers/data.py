@@ -49,8 +49,8 @@ def read_raw_data(sample="XX7", **kwargs):
 
 
 @hh.timer
-def read_txn_data(sample="XX7", **kwargs):
-    fp = f"s3://3di-data-mdb/clean/mdb_{sample}.parquet"
+def read_txn_data(sample="XX1", **kwargs):
+    fp = f"s3://3di-data-mdb/clean/samples/mdb_{sample}.parquet"
     return io.read_parquet(fp, **kwargs)
 
 
