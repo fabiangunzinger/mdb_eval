@@ -55,9 +55,8 @@ def read_txn_data(sample="XX7", **kwargs):
 
 
 @hh.timer
-def read_analysis_data(sample=None, **kwargs):
-    fn = f"eval_{sample}.parquet" if sample else "eval.parquet"
-    fp = os.path.join("s3://3di-project-eval", fn)
+def read_analysis_data(**kwargs):
+    fp = "s3://3di-project-eval/eval.parquet"
     return io.read_parquet(fp, **kwargs)
 
 
