@@ -53,8 +53,8 @@ def add_raw_count(df):
     return df
 
 
-@selector
-@counter
+# @selector
+# @counter
 def drop_first_and_last_month(df):
     """Drop first and last month
 
@@ -94,8 +94,8 @@ def signup_after_march_2017(df):
     return df[df.user_id.isin(users)]
 
 
-@selector
-@counter
+# @selector
+# @counter
 def pre_and_post_signup_data(df, lower=cf.MIN_PRE_MONTHS, upper=cf.MIN_POST_MONTHS):
     """At least 6 months of pre and post signup data
 
@@ -170,8 +170,8 @@ def max_active_accounts(df, max_accounts=cf.MAX_ACTIVE_ACCOUNTS):
     return df[df.user_id.isin(users)]
 
 
-@selector
-@counter
+# @selector
+# @counter
 def complete_demographic_info(df):
     """Complete demographic information
 
