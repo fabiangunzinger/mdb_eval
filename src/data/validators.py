@@ -17,7 +17,7 @@ def validator(func):
     return func
 
 
-@validator
+# @validator
 def no_missing_values(df):
     exceptions = ['dspend_mean']
     assert df.drop(exceptions, axis='columns').notna().all().all()
@@ -37,7 +37,7 @@ def at_least_min_year_income(df, min_income=config.MIN_YEAR_INCOME):
     return df
 
 
-@validator
+# @validator
 def min_pre_and_post_signup_months(df):
     g = df.groupby("user_id")
     assert g.tt.min().max() <= -config.MIN_PRE_MONTHS
@@ -57,7 +57,7 @@ def min_month_txns(df, min_txns=config.MIN_MONTH_TXNS):
     return df
 
 
-@validator
+# @validator
 def complete_demographic_info(df):
     assert df.filter(regex="is_female|age|region").isna().sum().sum() == 0
     return df
