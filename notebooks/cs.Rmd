@@ -1,0 +1,161 @@
+---
+title: "Callaway and Sant'Anna"
+author: "Fabian Gunzinger"
+date: '2022-08-10'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+library(did)
+library(tidyverse)
+library(fixest)
+library(glue)
+library(gridExtra)
+library(lubridate)
+
+source('/Users/fgu/dev/projects/mdb_eval/src/config.R')
+source('/Users/fgu/dev/projects/mdb_eval/src/helpers/fixest_settings.R')
+source('/Users/fgu/dev/projects/mdb_eval/src/helpers/helpers.R')
+```
+
+
+## Data
+
+```{r}
+df <- read_analysis_data()
+names(df)
+```
+
+
+<!-- Building balanced panel. -->
+
+<!-- ```{r} -->
+<!-- controls <- c("is_female") -->
+<!-- d <- df %>%  -->
+<!--   filter(between(ymn, 201801, 201912)) %>% -->
+<!--   group_by(user_id) %>% -->
+<!--   select(dspend, user_reg_ym, user_id, ym, month_income, month_spend, accounts_active, tt) -->
+
+<!-- ``` -->
+
+
+### Baseline results
+
+- Results for periods -6 to 5
+
+
+Assumptions:
+
+- A1: Absorbing treatment. This is unproblematic.
+
+- A2: Random sampling (each unit is independently drawn from a larger population of interest). This is not self-evidently true. In a narrow sense, MDB users are different by virtue of having signed up. One way to think of a super population is to think about knowing of MDB's existence to some extent as random, in which case the super population consists of all people who would have signed up if they had heard of MDB. Another is for signup to be partially driven by need, and need to be partially random. The super population is than everyone with a potential need in the future.
+
+- A3: Limited (known) treatment anticipation. In baseline, we assume that there is no anticipation. We provide robustness checks with different anticipation periods.
+
+- A5: Unconditional parallel trends based on not-yet treated groups.
+
+- A6: Overlap condition: positive fraction of population starts treatment in each period, and propensity scores are bounded away from 1 for all groups and times.
+
+
+Allows for:
+
+- Heterogeneous treatment across time and units
+
+```{r}
+bl_gt <- att_gt(
+  yname = "dspend",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+bl_es <- aggte(
+  bl_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+ggdid(bl_es)
+fn <- glue("{FIGDIR}/bl_es.png")
+ggsave(fn)
+```
+
+
+### Conditional parallel trends
+
+- Above, we assume that all users have parallel trends.
+
+- Here, we assume that users with the same characteristics have parallel trends.
+
+
+```{r}
+xformla <- ~ month_income + month_spend + accounts_active
+cond_gt <- att_gt(
+  yname = "dspend",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+cond_es <- aggte(
+  cond_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+ggdid(cond_es)
+fn <- glue("{FIGDIR}/cond_es.png")
+ggsave(fn)
+
+summary(cond_es)
+summary(bl_es)
+
+```
+
+
+
+### Relax no-anticipation assumption
+
+- see callaway2021difference-appendix
+
+
+### Honest DID
+
+- See https://github.com/pedrohcgs/CS_RR
+
+
+### Further results
+
+```{r}
+
+# Group-specific effects - testing for group-effect heterogeneity
+gs <- aggte(bl_gt, type = "group", na.rm = TRUE)
+ggdid(gs)
+
+# Calendar-time effects
+ct <- aggte(bl_gt, type = "calendar", na.rm = TRUE)
+ggdid(ct)
+
+
+
+```
+
+
+
+### Drop first and last periods

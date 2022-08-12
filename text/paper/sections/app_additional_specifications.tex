@@ -1,0 +1,54 @@
+% !TEX root = ../eval.tex
+
+\section{Additional specifications}%
+\label{sec:additional_specifications}
+
+
+\subsection{Static TWFE}%
+\label{sub:static_results}
+\begin{equation}
+    y_{it} = \alpha_i + \lambda_t + \beta D_{it} + \gamma X_{it} + \epsilon_{it}
+\end{equation}
+\input{\tabdir/static.tex}
+
+
+\subsection{Additional TWFE specifications}%
+\label{sub:additional_twfe_specifications}
+\begin{figure}[H]
+    \centering
+    \caption{Alternative model specifications}%
+    \includegraphics[width=.7\textwidth]{\figdir/dspend_alt.png}
+\end{figure}
+\input{\tabdir/dspend_alt.tex}
+\begin{figure}[H]
+    \centering
+    \caption{Alternative model specifications}%
+    \includegraphics[width=.7\textwidth]{\figdir/netflows_alt.png}
+\end{figure}
+\input{\tabdir/netflows_alt.tex}
+
+
+\subsection{Decomposing inflows and outflows}%
+\label{sub:decomposing_inflows_and_outflows}
+\begin{figure}[H]
+    \centering
+    \caption{Decomposing inflows and outflows}%
+    \label{fig:inout}
+    \includegraphics[width=.6\textwidth]{\figdir/netflows.png}
+    \includegraphics[width=.6\textwidth]{\figdir/inflows.png}
+    \includegraphics[width=.6\textwidth]{\figdir/outflows.png}
+    \fignote{\textwidth}{...}
+\end{figure}
+\input{\tabdir/inout.tex}
+
+
+\subsection{Twoway clustering}%
+\label{sub:twoway_clustering}
+Figures compares main results, which are clustered at the user id-level, with
+specification that clusters at the user and year-month level.
+
+\subsection{Longer event windows}%
+\label{sub:longer_event_windows}
+Figures show main results for longer effect windows (additional periods have
+fewer observations and thus larger confidence intervals)
+

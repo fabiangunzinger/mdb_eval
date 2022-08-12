@@ -57,7 +57,7 @@ def min_month_txns(df, min_txns=config.MIN_MONTH_TXNS):
     return df
 
 
-# @validator
+@validator
 def complete_demographic_info(df):
     assert df.filter(regex="is_female|age|region").isna().sum().sum() == 0
     return df

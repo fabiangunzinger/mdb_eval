@@ -1,5 +1,5 @@
-library(dplyr)
-library(fixest)
+library(did)
+library(tidyverse)
 library(glue)
 library(gridExtra)
 library(lubridate)
@@ -8,167 +8,282 @@ source('./src/config.R')
 source('./src/helpers/fixest_settings.R')
 source('./src/helpers/helpers.R')
 
+
 df <- read_analysis_data()
 names(df)
 
-# Duplicate time to treatment variable as x for fixest indicator binning
-df$x <- df$tt
 
 
 
-setFixest_fml(
-  ..ds = ~i(tt, ref = -1, bin = .("-6" = ~x <= -6, "5" = ~x >= 5)),
-  ..controls = ~month_income + month_spend + accounts_active,
-  ..fe = ~user_id + ym,
-  ..mvfe = ~mvsw(user_id, ym)
+# Baseline results ----------------------------------------------------------------
+
+bl_gt <- att_gt(
+  yname = "dspend",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
 )
 
+bl_es <- aggte(
+  bl_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+ggdid(bl_es)
+fn <- glue("{FIGDIR}/bl_es.png")
+ggsave(fn)
 
-# Main results --------------------------------------------------------------------
 
-m <- feols(dspend ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'dspend_main.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(m)
-dev.off()
+# Conditional parallel paths ------------------------------------------------------
 
-m <- feols(netflows ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'netflows_main.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(m)
-dev.off()
+xformla <- ~ month_income + month_spend + accounts_active
 
-
-# Decomposing intensive and extensive margin --------------------------------------
-
-has_pos_netflows <- feols(has_pos_netflows ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'has_pos_netflows.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(has_pos_netflows)
-dev.off()
-
-pos_netflows <- feols(pos_netflows ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'pos_netflows.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(pos_netflows)
-dev.off()
-
-dspend_count <- feols(dspend_count ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'dspend_count.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(dspend_count)
-dev.off()
-
-dspend_mean <- feols(dspend_mean ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'dspend_mean.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(dspend_mean)
-dev.off()
-
-label <- 'intext'
-etable(has_pos_netflows, pos_netflows, dspend_count, dspend_mean,
-       title = "Intensive and extensive margins",
-       order = c("App use", "!Intercept"),
-       tex = T,
-       fontsize = 'tiny',
-       file=file.path(TABDIR, glue('{label}.tex')),
-       label = glue('tab:{label}'),
-       replace = T
+cond_gt <- att_gt(
+  yname = "dspend",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
 )
 
-
-# Decomposing inflows and outflows ------------------------------------------------
-
-netflows <- feols(netflows ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'netflows.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(netflows)
-dev.off()
-
-inflows <- feols(inflows ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'inflows.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(inflows)
-dev.off()
-
-outflows <- feols(outflows ~ ..ds + ..controls | ..fe, df)
-png(file.path(FIGDIR, 'outflows.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(outflows)
-dev.off()
-
-title <- 'Decomposing inflows and outflows'
-label <- "inout"
-etable(netflows, inflows, outflows,
-       title = title,
-       order = c("App use", "!Intercept"),
-       tex = T,
-       fontsize = 'tiny',
-       file=file.path(TABDIR, glue('{label}.tex')),
-       label = glue('tab:{label}'),
-       replace = T
+cond_es <- aggte(
+  cond_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
 )
 
+ggdid(cond_es)
 
-# Alternative FE specifications ----------------------------------------------------
+fn <- glue("{FIGDIR}/cond_es.png")
+ggsave(fn)
 
-m <- feols(dspend ~ ..ds + ..controls | ..mvfe, df)
-etable(m,
-       title = "Alternative model specifications",
-       order = c("App use", "!Intercept"),
-       tex = T,
-       fontsize = 'tiny',
-       file=file.path(TABDIR, 'dspend_alt.tex'),
-       label = glue('tab:dspend_alt'),
-       replace = T
-)
-png(file.path(FIGDIR, 'dspend_alt.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(m)
-legend(
-  "bottomright",
-  col = c(1, 2, 4, 3),
-  pch = c(20, 15, 17, 21),
-  legend = c(
-    "Controls",
-    "Controls and year-month FEs",
-    "Controls and user FE",
-    "Controls and year-month and user FEs"
+
+
+# Anticipation effects ------------------------------------------------------------
+
+xformla <- ~ month_income + month_spend + accounts_active
+
+for (i in 1:3) {
+  antic_gt <- att_gt(
+    yname = "dspend",
+    gname = "user_reg_ym",
+    idname = "user_id",
+    tname = "ym",
+    xformla = xformla,
+    anticipation = i,
+    data = df,
+    est_method = "reg",
+    control_group = "notyettreated",
+    allow_unbalanced_panel = T,
+    cores = 4
   )
-)
-dev.off()
-
-
-m <- feols(netflows ~ ..ds + ..controls | ..mvfe, df)
-etable(m,
-       title = "Alternative model specifications",
-       order = c("App use", "!Intercept"),
-       tex = T,
-       fontsize = 'tiny',
-       file=file.path(TABDIR, 'netflows_alt.tex'),
-       label = glue('tab:netflows_alt'),
-       replace = T
-)
-png(file.path(FIGDIR, 'netflows_alt.png'), width = 2000, height = 1500, pointsize=60)
-fiplot(m)
-legend(
-  "bottomright",
-  col = c(1, 2, 4, 3),
-  pch = c(20, 15, 17, 21),
-  legend = c(
-    "Controls",
-    "Controls and year-month FEs",
-    "Controls and user FE",
-    "Controls and year-month and user FEs"
+  
+  antic_es <- aggte(
+    antic_gt,
+    type = "dynamic",
+    na.rm = T,
+    min_e = -6,
+    max_e = 5,
+    balance_e = 5
   )
-)
-dev.off()
+  
+  ggdid(antic_es, ylim = c(-200, 100))
+  
+  fn <- glue("{FIGDIR}/antic{i}_es.png")
+  ggsave(fn)
+}
+
+
+
+# Rambachan and Roth (2021) sensitivity analysis ----------------------------------
+
+# Based on https://github.com/pedrohcgs/CS_RR
+
+
+# Install some packages
+library(devtools)
+install_github("bcallaway11/BMisc", dependencies = TRUE)
+install_github("bcallaway11/did", dependencies = TRUE)
+install_github("asheshrambachan/HonestDiD", dependencies = TRUE)
+#--------------------------------------------------------------------------
+# Load packages
+#--------------------------------------------------------------------------
+# Libraries
+# Load libraries
+library(ggplot2)
+library(here)
+library(foreign)
+library(tidyverse)
+library(dplyr)
+library(did)
+library(HonestDiD)
+
+#' @title honest_did
+#'
+#' @description a function to compute a sensitivity analysis
+#'  using the approach of Rambachan and Roth (2021)
+#' @param es an event study
+honest_did <- function(es, ...) {
+  UseMethod("honest_did", es)
+}
+
+
+#' @title honest_did.AGGTEobj
+#'
+#' @description a function to compute a sensitivity analysis
+#'  using the approach of Rambachan and Roth (2021) when
+#'  the event study is estimating using the `did` package
+#'
+#' @param e event time to compute the sensitivity analysis for.
+#'  The default value is `e=0` corresponding to the "on impact"
+#'  effect of participating in the treatment.
+#' @param type Options are "smoothness" (which conducts a
+#'  sensitivity analysis allowing for violations of linear trends
+#'  in pre-treatment periods) or "relative_magnitude" (which
+#'  conducts a sensitivity analysis based on the relative magnitudes
+#'  of deviations from parallel trends in pre-treatment periods).
+#' @inheritParams HonestDiD::createSensitivityResults
+#' @inheritParams HonestDid::createSensitivityResults_relativeMagnitudes
+honest_did.AGGTEobj <- function(es,
+                                e=0,
+                                type=c("smoothness", "relative_magnitude"),
+                                method=NULL,
+                                bound="deviation from parallel trends",
+                                Mvec=NULL,
+                                Mbarvec=NULL,
+                                monotonicityDirection=NULL,
+                                biasDirection=NULL,
+                                alpha=0.05,
+                                parallel=FALSE,
+                                gridPoints=10^3,
+                                grid.ub=NA,
+                                grid.lb=NA,
+                                ...) {
+  
+  
+  type <- type[1]
+  
+  # make sure that user is passing in an event study
+  if (es$type != "dynamic") {
+    stop("need to pass in an event study")
+  }
+  
+  # check if used universal base period and warn otherwise
+  if (es$DIDparams$base_period != "universal") {
+    warning("it is recommended to use a universal base period for honest_did")
+  }
+  
+  # recover influence function for event study estimates
+  es_inf_func <- es$inf.function$dynamic.inf.func.e
+  
+  # recover variance-covariance matrix
+  n <- nrow(es_inf_func)
+  V <- t(es_inf_func) %*% es_inf_func / (n*n) 
+  
+  
+  nperiods <- nrow(V)
+  npre <- sum(1*(es$egt < 0))
+  npost <- nperiods - npre
+  
+  baseVec1 <- basisVector(index=(e+1),size=npost)
+  
+  orig_ci <- constructOriginalCS(betahat = es$att.egt,
+                                 sigma = V, numPrePeriods = npre,
+                                 numPostPeriods = npost,
+                                 l_vec = baseVec1)
+  
+  if (type=="relative_magnitude") {
+    if (is.null(method)) method <- "C-LF"
+    robust_ci <- createSensitivityResults_relativeMagnitudes(betahat = es$att.egt, sigma = V, 
+                                                             numPrePeriods = npre, 
+                                                             numPostPeriods = npost,
+                                                             bound=bound,
+                                                             method=method,
+                                                             l_vec = baseVec1,
+                                                             Mbarvec = Mbarvec,
+                                                             monotonicityDirection=monotonicityDirection,
+                                                             biasDirection=biasDirection,
+                                                             alpha=alpha,
+                                                             gridPoints=100,
+                                                             grid.lb=-1,
+                                                             grid.ub=1,
+                                                             parallel=parallel)
+    
+  } else if (type=="smoothness") {
+    robust_ci <- createSensitivityResults(betahat = es$att.egt,
+                                          sigma = V, 
+                                          numPrePeriods = npre, 
+                                          numPostPeriods = npost,
+                                          method=method,
+                                          l_vec = baseVec1,
+                                          monotonicityDirection=monotonicityDirection,
+                                          biasDirection=biasDirection,
+                                          alpha=alpha,
+                                          parallel=parallel)
+  }
+  
+  list(robust_ci=robust_ci, orig_ci=orig_ci, type=type)
+}
 
 
 
 
-# Static models -------------------------------------------------------------------
+# code for running honest_did
+hd_cs_smooth_never <- honest_did(cond_es, type="smoothness")
+hd_cs_rm_never <- honest_did(cond_es, type="relative_magnitude")
+# Drop 0 as that is not really allowed.
+hd_cs_rm_never$robust_ci <- hd_cs_rm_never$robust_ci[-1,]
 
-title <- 'Static results'
-label <- "static"
-m_static <- feols(c(netflows, discret_spend) ~ t + ..controls | ..mvfe, df)
-etable(m_static,
-       title = title,
-       order = c("App use", "!Intercept"),
-       tex = T,
-       fontsize = 'tiny',
-       file=file.path(TABDIR, glue('{label}.tex')),
-       label = glue('tab:{label}'),
-       replace = T
-)
+# make sensitivity analysis plots
+cs_HDiD_smooth <- createSensitivityPlot(hd_cs_smooth_never$robust_ci,
+                                        hd_cs_smooth_never$orig_ci)
+cs_HDiD_smooth
+fn <- glue("{FIGDIR}/cs_hdid_smooth.png")
+ggsave(fn)
+
+
+cs_HDiD_relmag <- createSensitivityPlot_relativeMagnitudes(hd_cs_rm_never$robust_ci,
+                                                           hd_cs_rm_never$orig_ci)
+cs_HDiD_relmag
+fn <- glue("{FIGDIR}/cs_hdid_relmag.png")
+ggsave(fn)
+
+
+
+# Further results -----------------------------------------------------------------
+
+# Drop first and last periods
+
+# Use only data with leads/lags -12/11, since early data unreliable and people drop out after a year
+
+# Longer lags horizon (up to 12 periods)
+
+
+
+
+
+# Group-specific effects - testing for group-effect heterogeneity
+gs <- aggte(bl_gt, type = "group", na.rm = TRUE)
+ggdid(gs)
+
+# Calendar-time effects
+ct <- aggte(bl_gt, type = "calendar", na.rm = TRUE)
+ggdid(ct)
+
 

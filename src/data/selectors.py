@@ -170,8 +170,8 @@ def max_active_accounts(df, max_accounts=cf.MAX_ACTIVE_ACCOUNTS):
     return df[df.user_id.isin(users)]
 
 
-# @selector
-# @counter
+@selector
+@counter
 def complete_demographic_info(df):
     """Complete demographic information
 
