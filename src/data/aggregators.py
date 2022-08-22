@@ -74,8 +74,7 @@ def income(df):
 
     return (
         pd.merge(month_income, year_income, left_index=True, right_index=True)
-        .reset_index()
-        .drop(columns="year")
+        .droplevel("year")
     )
 
 
@@ -86,7 +85,7 @@ def savings_accounts_flows(df):
     is_sa_flow = df.account_type.eq("savings") & df.amount.abs().gt(5)
     sa_flows = df.amount.where(df.is_sa_flow, 0)
     in_out = df.is_debit.map({True: "outflows", False: "inflows"})
-    month_income = income(df)
+    month_income = income(df).month_income
     group_vars = [df.user_id, df.ym, in_out]
     return (
         sa_flows.groupby(group_vars)
