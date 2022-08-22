@@ -71,11 +71,19 @@ def income(df):
         inc_pmts.groupby([df.user_id, df.ym, year]).sum().rename("month_income")
     )
     year_income = inc_pmts.groupby([df.user_id, year]).sum().rename("year_income")
-
-    return (
-        pd.merge(month_income, year_income, left_index=True, right_index=True)
-        .droplevel("year")
+    month_income_mean = (
+        inc_pmts.groupby([df.user_id, df.ym, year])
+        .sum()
+        .groupby(["user_id", "year"])
+        .transform("mean")
+        .rename("month_income_mean")
     )
+
+    data = pd.merge(month_income, year_income, left_index=True, right_index=True)
+
+    return pd.merge(
+        data, month_income_mean, left_index=True, right_index=True
+    ).droplevel("year")
 
 
 @aggregator
