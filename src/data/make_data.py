@@ -72,6 +72,7 @@ def main(argv=None):
         argv = sys.argv[1:]
     args = parse_args(argv)
 
+    # Use supplied test piece or all pieces
     pieces = args.piece if args.piece else range(10)
     filepaths = [get_filepath(piece) for piece in pieces]
 
