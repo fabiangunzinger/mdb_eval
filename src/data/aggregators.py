@@ -62,17 +62,20 @@ def txns_volume(df):
 @aggregator
 @hh.timer(on=TIMER_ON)
 def income(df):
-    """Mean monthly income by calendar year."""
+    """Month and year income."""
     is_income_pmt = df.tag_group.eq("income") & ~df.is_debit
-    inc_pmts = df.amount.where(is_income_pmt, 0).mul(-1).rename("month_income")
+    inc_pmts = df.amount.where(is_income_pmt, 0).mul(-1)
     year = df.date.dt.year.rename("year")
-    group_cols = [df.user_id, df.ym, year]
+
+    month_income = (
+        inc_pmts.groupby([df.user_id, df.ym, year]).sum().rename("month_income")
+    )
+    year_income = inc_pmts.groupby([df.user_id, year]).sum().rename("year_income")
+
     return (
-        inc_pmts.groupby(group_cols)
-        .sum()
-        .groupby(["user_id", "year"])
-        .transform("mean")
-        .droplevel("year")
+        pd.merge(month_income, year_income, left_index=True, right_index=True)
+        .reset_index()
+        .drop(columns="year")
     )
 
 
