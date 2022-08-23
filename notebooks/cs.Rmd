@@ -29,18 +29,6 @@ names(df)
 ```
 
 
-<!-- Building balanced panel. -->
-
-<!-- ```{r} -->
-<!-- controls <- c("is_female") -->
-<!-- d <- df %>%  -->
-<!--   filter(between(ymn, 201801, 201912)) %>% -->
-<!--   group_by(user_id) %>% -->
-<!--   select(dspend, user_reg_ym, user_id, ym, month_income, month_spend, accounts_active, tt) -->
-
-<!-- ``` -->
-
-
 ### Baseline results
 
 - Results for periods -6 to 5

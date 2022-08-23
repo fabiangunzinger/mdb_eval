@@ -12,6 +12,8 @@ theme_set(theme_minimal())
 df <- read_analysis_data()
 names(df)
 
+summary(df$year_income)
+
 app_lcfs_data <- df %>% 
   filter(ymn == 201904) %>% 
   transmute(

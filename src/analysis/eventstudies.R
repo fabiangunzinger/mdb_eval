@@ -12,12 +12,24 @@ source('./src/helpers/helpers.R')
 df <- read_analysis_data()
 names(df)
 
+cstheme <- theme(
+  plot.title = element_text(size = 22, color = "black", hjust = 0.5),
+  plot.title.position = "plot",
+  panel.grid.major.y = element_line(colour = "snow2"),
+  panel.grid.minor.y = element_line(colour = "snow2"),
+  axis.title=element_text(size = 20, colour = "black", face = "plain"),
+  axis.text = element_text(size = 20),
+  legend.text = element_text(size = 20)
+)
 
 
 
-# Baseline results ----------------------------------------------------------------
+# Unconditional parallel trends ---------------------------------------------------
 
-bl_gt <- att_gt(
+## Discretionary spend ##
+
+# Estimate group-time average treatment effects
+dspend_uncond_gt <- att_gt(
   yname = "dspend",
   gname = "user_reg_ym",
   idname = "user_id",
@@ -29,24 +41,60 @@ bl_gt <- att_gt(
   cores = 4
 )
 
-bl_es <- aggte(
-  bl_gt,
+dspend_uncond_gt
+
+# Aggregate to event-study parameters
+dspend_uncond_es <- aggte(
+  dspend_uncond_gt,
   type = "dynamic",
   na.rm = T,
   min_e = -6,
   max_e = 5,
   balance_e = 5
 )
-ggdid(bl_es)
-fn <- glue("{FIGDIR}/bl_es.png")
-ggsave(fn)
+
+# Export plot
+ggdid(dspend_uncond_es, ylab = 'Discretionary spend', xlab = "Time since treatment", legend = FALSE, title = "Unconditional parallel trends", ylim = c(-210, 100)) + cstheme
+ggsave(glue("{FIGDIR}/dspend_uncond_es.png"))
+
+
+## Netflows ##
+
+# Estimate group-time average treatment effects
+netflows_uncond_gt <- att_gt(
+  yname = "netflows",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+# Aggregate to event-study parameters
+netflows_uncond_es <- aggte(
+  netflows_uncond_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+# Export plot
+ggdid(netflows_uncond_es, ylab = 'Net-inflows into savings accounts', xlab = "Time since treatment", legend = FALSE, title = " ", ylim = c(-450, 300)) + cstheme
+ggsave(glue("{FIGDIR}/netflows_uncond_es.png"))
 
 
 # Conditional parallel paths ------------------------------------------------------
 
-xformla <- ~ month_income + month_spend + accounts_active
+xformla <- ~ month_income + month_spend + accounts_active + age
 
-cond_gt <- att_gt(
+## Discretionary spend ##
+
+dspend_cond_gt <- att_gt(
   yname = "dspend",
   gname = "user_reg_ym",
   idname = "user_id",
@@ -59,8 +107,8 @@ cond_gt <- att_gt(
   cores = 4
 )
 
-cond_es <- aggte(
-  cond_gt,
+dspend_cond_es <- aggte(
+  dspend_cond_gt,
   type = "dynamic",
   na.rm = T,
   min_e = -6,
@@ -68,18 +116,213 @@ cond_es <- aggte(
   balance_e = 5
 )
 
-ggdid(cond_es)
+ggdid(dspend_cond_es, ylab = 'Discretionary spend', xlab = "Time since treatment", legend = FALSE, title = "Conditional parallel trends", ylim = c(-210, 100)) + cstheme
+ggsave(glue("{FIGDIR}/dspend_cond_es.png"))
 
-fn <- glue("{FIGDIR}/cond_es.png")
-ggsave(fn)
+
+## Netflows ##
+
+netflows_cond_gt <- att_gt(
+  yname = "netflows",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+netflows_cond_es <- aggte(
+  netflows_cond_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+ggdid(netflows_cond_es, ylab = 'Net-inflows into savings accounts', xlab = "Time since treatment", legend = FALSE, title = " ", ylim = c(-450, 300)) + cstheme
+ggsave(glue("{FIGDIR}/netflows_cond_es.png"))
+
+
+# Extensive and intensive margins -------------------------------------------------
+
+## Discretionary spend ##
+
+dspend_extens_gt <- att_gt(
+  yname = "dspend_count",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+dspend_extens_es <- aggte(
+  dspend_extens_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+ggdid(dspend_extens_es, ylab = 'Discretionary spend (# of txns)', xlab = "Time since treatment")
+ggsave(glue("{FIGDIR}/dspend_extens_es.png"))
+
+
+dspend_intens_gt <- att_gt(
+  yname = "dspend_mean",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+dspend_intens_es <- aggte(
+  dspend_intens_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+ggdid(dspend_intens_es, ylab = 'Discretionary spend (mean spend)', xlab = "Time since treatment")
+ggsave(glue("{FIGDIR}/dspend_intens_es.png"))
+
+## Netflows ##
+
+netflows_extens_gt <- att_gt(
+  yname = "has_pos_netflows",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+netflows_extens_es <- aggte(
+  netflows_extens_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+ggdid(netflows_extens_es, ylab = 'P(net-inflows > 0)', xlab = "Time since treatment")
+ggsave(glue("{FIGDIR}/netflows_extens_es.png"))
+
+
+netflows_intens_gt <- att_gt(
+  yname = "pos_netflows",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+netflows_intens_es <- aggte(
+  netflows_intens_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+ggdid(netflows_intens_es, ylab = 'Net-inflows if net-inflows > 0', xlab = "Time since treatment")
+ggsave(glue("{FIGDIR}/netflows_intens_es.png"))
+
+
+# Inflows and outflows ------------------------------------------------------------
+
+inflows_cond_gt <- att_gt(
+  yname = "inflows",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+inflows_cond_es <- aggte(
+  inflows_cond_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+ggdid(inflows_cond_es, ylab = 'Inflows', xlab = "Time since treatment")
+ggsave(glue("{FIGDIR}/inflows_cond_es.png"))
+
+
+outflows_cond_gt <- att_gt(
+  yname = "outflows",
+  gname = "user_reg_ym",
+  idname = "user_id",
+  tname = "ym",
+  xformla = xformla,
+  data = df,
+  est_method = "reg",
+  control_group = "notyettreated",
+  allow_unbalanced_panel = T,
+  cores = 4
+)
+
+outflows_cond_es <- aggte(
+  outflows_cond_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+  balance_e = 5
+)
+
+ggdid(outflows_cond_es, ylab = 'Outflows', xlab = "Time since treatment")
+ggsave(glue("{FIGDIR}/outflows_cond_es.png"))
+
 
 
 
 # Anticipation effects ------------------------------------------------------------
 
-xformla <- ~ month_income + month_spend + accounts_active
+## Discretionary spend ##
+antic_periods <- 6
 
-for (i in 1:3) {
+antic_dspend <- vector("list", antic_periods)
+
+for (i in 1:antic_periods) {
+  
+  # Calculate group-time treatment effects
   antic_gt <- att_gt(
     yname = "dspend",
     gname = "user_reg_ym",
@@ -94,6 +337,7 @@ for (i in 1:3) {
     cores = 4
   )
   
+  # Aggregate to event-study parameters
   antic_es <- aggte(
     antic_gt,
     type = "dynamic",
@@ -103,16 +347,108 @@ for (i in 1:3) {
     balance_e = 5
   )
   
-  ggdid(antic_es, ylim = c(-200, 100))
+  # Save results for reuse
+  antic_dspend[[i]] <- list(gt = antic_gt, es = antic_es)
   
-  fn <- glue("{FIGDIR}/antic{i}_es.png")
+  # Export plot
+  ggdid(antic_es, ylim = c(-200, 100))
+  fn <- glue("{FIGDIR}/dspend_antic{i}_es.png")
+  ggsave(fn)
+}
+
+
+## Netflows ##
+
+antic_netflows <- vector("list", antic_periods)
+
+for (i in 1:antic_periods) {
+  
+  # Calculate group-time treatment effects
+  antic_gt <- att_gt(
+    yname = "netflows",
+    gname = "user_reg_ym",
+    idname = "user_id",
+    tname = "ym",
+    xformla = xformla,
+    anticipation = i,
+    data = df,
+    est_method = "reg",
+    control_group = "notyettreated",
+    allow_unbalanced_panel = T,
+    cores = 4
+  )
+  
+  # Aggregate to event-study parameters
+  antic_es <- aggte(
+    antic_gt,
+    type = "dynamic",
+    na.rm = T,
+    min_e = -6,
+    max_e = 5,
+    balance_e = 5
+  )
+  
+  # Save results for reuse
+  antic_netflows[[i]] <- list(gt = antic_gt, es = antic_es)
+  
+  # Export plot
+  ggdid(antic_es, ylim = c(-200, 100))
+  fn <- glue("{FIGDIR}/netflows_antic{i}_es.png")
   ggsave(fn)
 }
 
 
 
+
+# Unbalanced aggregation ----------------------------------------------------------
+
+## Discretionary spend ##
+## Netflows ##
+
+# Similar to baseline aggregation, but without balance_e parameter.
+ub_es <- aggte(
+  bl_gt,
+  type = "dynamic",
+  na.rm = T,
+  min_e = -6,
+  max_e = 5,
+)
+
+
+ggdid(bl_es, ylim = c(-220, 50))
+fn <- glue("{FIGDIR}/bl_es_comp.png")
+ggsave(fn)
+
+ggdid(ub_es, ylim = c(-220, 50))
+fn <- glue("{FIGDIR}/ub_es.png")
+ggsave(fn)
+
+
+
+
+# Group specific effects ----------------------------------------------------------
+
+## Discretionary spend ##
+## Netflows ##
+gs <- aggte(bl_gt, type = "group", na.rm = TRUE)
+ggdid(gs)
+
+
+
+# Calendar-time effects -----------------------------------------------------------
+
+## Discretionary spend ##
+## Netflows ##
+ct <- aggte(bl_gt, type = "calendar", na.rm = TRUE)
+ggdid(ct)
+
+
+
+
 # Rambachan and Roth (2021) sensitivity analysis ----------------------------------
 
+## Discretionary spend ##
+## Netflows ##
 # Based on https://github.com/pedrohcgs/CS_RR
 
 
@@ -268,9 +604,10 @@ ggsave(fn)
 
 # Further results -----------------------------------------------------------------
 
-# Drop first and last periods
+## Discretionary spend ##
+## Netflows ##
 
-# Use only data with leads/lags -12/11, since early data unreliable and people drop out after a year
+# Drop first and last periods
 
 # Longer lags horizon (up to 12 periods)
 
@@ -278,12 +615,5 @@ ggsave(fn)
 
 
 
-# Group-specific effects - testing for group-effect heterogeneity
-gs <- aggte(bl_gt, type = "group", na.rm = TRUE)
-ggdid(gs)
-
-# Calendar-time effects
-ct <- aggte(bl_gt, type = "calendar", na.rm = TRUE)
-ggdid(ct)
 
 

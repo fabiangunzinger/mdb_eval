@@ -3,50 +3,63 @@
 \section{Methods}%
 \label{sec:data}
 
-\subsection{Dataset}%
-\label{sub:dataset}
+\subsection{Data}%
+\label{sub:data}
 
-\begin{itemize}
+\paragraph{Dataset description:}%
+\label{par:dataset_description}
 
-    \item Money Dashboard can access up to three years of historic data for
-        each account a user links to their account.
+I use data from a UK-based financial management app that allows users to link
+accounts from different banks to obtain an integrated view of their finances.
+The complete dataset contains more than 500 million transactions made between
+2012 and June 2020 by about 250,000 users, and provides information such as
+date, amount, and description about the transaction as well as account and
+user-level information. Crucially for this paper, the app can access up to
+three years of historic data for each linked account.
 
-    \item Each user for whom we have sufficient data thus serves as both a
-        treatment unit and a potential control unit.
+The main advantage of the data for the study of consumer financial behaviour is
+that we can observe user behaviour at the transaction level across all their
+accounts, and that the data is automatically collected rather than collected
+through a survey.
 
-    \item Limitations: We have more data for users that signed up later. So average user in
-        the study is not the average MDB user. If time of signup is mainly
-        driven by financial savyness, then study sample is closer to overall
-        population than MDB sample (if we rank groups as early joiners > late
-        joiners > never joiners in terms of financial sophistication). If,
-        however, signup reflects something like openness to newness, then it's
-        not necessarily correlated with financial savyness. Either way, we
-        might ignore it for now. We could test whether behaviour differs
-        between early or late adopters, but that doesn't seem important enough.
+The main limitation is the non-representativeness of the sample relative to the
+population as a whole. Financial management apps are known to be used
+disproportionally by men, younger people, and people of higher socioeconomic
+status \citep{carlin2019generational}. Also, as pointed out in
+\citet{gelman2014harnessing}, a willingness to share financial information with
+a third party might not only select on demographic characteristics, but also
+for an increased need for financial management or a higher degree of financial
+sophistication. Because our analysis does not rely on representativeness, we do
+not address this.\footnote{For an example of how re-weighing can be used to
+mitigate the non-representative issue, see \citet{bourquin2020effects}.}
 
-\end{itemize}
 
-\subsection{Data preprocessing}%
-\label{sub:data_preprocessing}
-
-\paragraph{Cleaning}%
+\paragraph{Cleaning:}%
 \label{par:cleaning}
 
-MDB cleaning (mdb/mdb/clean.py)
-\begin{itemize}
-    \item About 75 percent of transactions are not automatically categorised,
-        and we drop transactions that have no automatic tag. Dropping untagged
-        transactions means that we might underestimate spending and savings,
-        but entures that we do not miscategorise transactions.
+I use the dataset described above for a number of projects, and perform a
+number of steps to create a minimally cleaned version of the dataset that is
+the basis for all such projects. These steps are performed in a dedicated
+data repository and not run as part of this project, but the module with
+all cleaning functions is available in the project directory.\footnote{Link to
+    cleaning functions:
+\href{https:/egithub.com/fabiangunzinger/mdb_eval/blob/f51e49c95c5884d2dc417be23921a8acd85aec9d/src/data/clean.py}{\faGithub}}
 
-    \item Custom tag classifications.
-
-    \item Drop transactions for which user ID, account ID, date, amount, and
-        transaction description are identical. This will drop some genuine
-        transactions, such as someone buying two identical cups of coffees at
-        the same coffee shop on the same day. However, data inspection suggests
-        that in most cases, we remove genuine duplicates.
-\end{itemize}
+Here, I briefly describe the main cleaning steps and their rationale. I drop
+all transactions with a missing description string because these cannot be
+categoriesed, and all transactions that are not automatically categoriesed by
+the app. Dropping these transactions makes is likely that we will underestimate
+amounts spent and saved, but minimises the risk of incorrectly classified
+transactions. I group transactions into transaction, spend, and income
+subgroups. Spend subgroups are defined following \citet{muggleton2020evidence};
+income subgroups, following \citet{hacioglu2020distributional}.\footnote{Link
+to classification file:
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/92af366d4c4052cc7a7f78a6178086de8ecdfb75/src/data/txn_classifications.py}{\faGithub}}
+Finally, I classify as duplicates and drop transactions with identical user ID,
+account ID, date, amount, and transaction description. This will drop some
+genuine transactions, such as a user buying two identical cups of coffees at
+the same coffee shop on the same day. However, data inspection suggests that in
+most cases, we remove genuine duplicates.
 
 
 \paragraph{Sample selection}%
@@ -123,8 +136,8 @@ accounts flow variables at the 1 percent level or -- if we winsorise on both
 ends of the distribution -- at the 0.5 percent level.
 
 
-\subsection{Summary statistics}%
-\label{sub:summary_statistics}
+\paragraph{Summary statistics}%
+\label{par:summary_statistics}
 
 Figure~\ref{fig:sample_description} describes the sample.
 
@@ -151,9 +164,106 @@ following url:
 Data covers the period between April 2018 and March 2019.
 
 
+\subsection{Estimation}%
+\label{sub:estimation}
 
-\subsection{Treatment}%
-\label{sub:treatment}
+
+\citet{callaway2021difference}.
+
+
+SA setup:
+\begin{itemize}
+    \item Units that are treated in period 1 are dropped from the sample, since
+        (i) there exists no possible control group based on which to identify
+        their treatment effects and (ii) they are not useful as a control group
+        themselves. (wp footnote 3)
+
+    \item If there exists no never-treated units (as in our setup), then last
+        treated group is dropped since there exists no valid "not-yet-treated"
+        comparison group for them.
+
+    \item This means that if we restrict our data to a balanced panel (e.g. all
+        data from 2018 and 2019), the groups first treated in Jan 2018 and Dec
+        2019 will be dropped from the sample.
+
+    \item Assumption 3 allows for known treatment anticipation. In our case,
+        with units self-selecting into treatment, it will be useful to do
+        robustness checks for sensible anticipation levels. (In our case, the
+        relevant anticipation period is time since deciding to save more/spend
+        less and time when signing up to app. This could realistically be up to
+        6 months). As CS point out in remark 1, increading delta makes
+        the parallel trends assumption more restrictive, since it now needs to
+        hold also for delta pre-treatment periods.
+        Our results here are weird, though: if we think that during
+        anticipation period peope already spend less, then this would bias
+        baseline results downwards. Instead, we see the opposite. In the case
+        with delta > 0, this also means we can identify GT effects only up to
+        time where last cohort effectively starts its treatment (max g -
+        delta), and, as discussed before, we cannot estimate GT for that last
+        group, either.
+
+    \item Conditional parallel trends are important in contexts when (i) there
+        are covariate specific trends in outcome paths and (ii) the
+        distribution of covariates differs between groups. (E.g. people who
+        sign up to job training differ from those who don't and job outcomes
+        depend on these covariates). In my context, do covariates differ
+        between those who sign up and those who don't? (can investigate - month
+        income, num accounts, total spend, etc. pre and post signup), and does
+        savings path depend on these variables (we'd certainly think so).
+
+        Actually, for my here, cov distr between treatment and control differs
+        only if early users are different from later ones.
+
+    \item Assumption 5 restricts pre-treatment trends (see discussion there and
+        discuss in footnote).
+
+\end{itemize}
+
+
+Assumptions:
+\begin{itemize}
+    \item A1: Absorbing treatment. This is unproblematic.
+
+    \item A2: Random sampling (each unit is independently drawn from a larger
+        population of interest). This is not self-evidently true. In a narrow
+        sense, MDB users are different by virtue of having signed up. One way
+        to think of a super population is to think about knowing of MDB's
+        existence to some extent as random, in which case the super population
+        consists of all people who would have signed up if they had heard of
+        MDB. Another is for signup to be partially driven by need, and need to
+        be partially random. The super population is than everyone with a
+        potential need in the future.
+
+    \item A3: Limited (known) treatment anticipation. In baseline, we assume
+        that there is no anticipation. We provide robustness checks with
+        different anticipation periods.
+
+    \item A5: Unconditional parallel trends based on not-yet treated groups.
+
+    \item A6: Overlap condition: positive fraction of population starts
+        treatment in each period, and propensity scores are bounded away from 1
+        for all groups and times.
+
+    \item We aggregate GT effects using a panel balanced in event times, with
+        all units being greated for at least 5 periods. This avoids that the
+        event study parameters are influenced by compositional issues (SA show
+        in section 3.1.1 that without this restriction, aggregated treatment
+        effects also are affected by different composition of groups and
+        different group weights). This comes at the cost of fewer groups used
+        for calculations. And in appendix we compare the results without this
+        restriction.
+\end{itemize} 
+
+Allows for: Heterogeneous treatment across time and units
+
+
+\subsection{Variables}%
+\label{sub:variables}
+
+
+
+\paragraph{Treatment}%
+\label{par:treatment}
 
 A user changes treatment status from untreated to treated when they start using
 the app. Figure~\ref{fig:treatplot_sample_raw} shows the treatment history for
@@ -176,8 +286,8 @@ stopped using the app.}
 \end{figure}
 
 
-\subsection{Outcomes}%
-\label{sub:outcomes}
+\paragraph{Outcomes}%
+\label{par:outcomes}
 
 Savings... see Table~\ref{tab:vars} for details.
 
@@ -226,30 +336,30 @@ positive net deposits)
 \end{figure}
 
 
-\paragraph{Adjusting for multiple hypothesis tests}%
-\label{par:adjusting_for_multiple_hypothesis_tests}
-We think of our secondary outcomes as exploratory and do not make any
-adjustments for multiple hypothesis testing.\footnote{For a recent
-game-theoretically motivated discussion of when and how to correct for multiple
-hypothesis testing, see \citet{viviano2021should}.} An alternative approach,
-based on \citet{anderson2008multiple}, would be to group outcomes into
-``savings'', ``spending'', ``borrowing'', and ``fees'', and consider them as
-different dimensions of a latent variable of interest which we might call
-``financial management skills''. We do not do that for two reasons: first and
-foremost, because we think it is natural to think of the amount saved as the
-ultimate outcome and of other outcomes as providing a more nuanced
-understanding of savings behaviour or as suggesting possible channels through
-which app use affects savings. Thinking of savings as the main goal is also
-reflected in Money Dashboard's main promise, which is to help users spend less
-and save more, as shown in Figure~\ref{fig:mdb_website}. Second, as pointed out
-in \citet{carlin2017fintech}, incurring overdraft fees is not an unambiguous
-sign of a financial mistake, as the opportunity to go into overdraft confers a
-benefit to the consumer.\footnote{For further discussions on fees, see
-\citet{jorring2020financial, stango2009consumers}.}
+% \paragraph{Adjusting for multiple hypothesis tests}%
+% \label{par:adjusting_for_multiple_hypothesis_tests}
+% We think of our secondary outcomes as exploratory and do not make any
+% adjustments for multiple hypothesis testing.\footnote{For a recent
+% game-theoretically motivated discussion of when and how to correct for multiple
+% hypothesis testing, see \citet{viviano2021should}.} An alternative approach,
+% based on \citet{anderson2008multiple}, would be to group outcomes into
+% ``savings'', ``spending'', ``borrowing'', and ``fees'', and consider them as
+% different dimensions of a latent variable of interest which we might call
+% ``financial management skills''. We do not do that for two reasons: first and
+% foremost, because we think it is natural to think of the amount saved as the
+% ultimate outcome and of other outcomes as providing a more nuanced
+% understanding of savings behaviour or as suggesting possible channels through
+% which app use affects savings. Thinking of savings as the main goal is also
+% reflected in Money Dashboard's main promise, which is to help users spend less
+% and save more, as shown in Figure~\ref{fig:mdb_website}. Second, as pointed out
+% in \citet{carlin2017fintech}, incurring overdraft fees is not an unambiguous
+% sign of a financial mistake, as the opportunity to go into overdraft confers a
+% benefit to the consumer.\footnote{For further discussions on fees, see
+% \citet{jorring2020financial, stango2009consumers}.}
 
 
-\subsection{Covariates}%
-\label{sub:covariates}
+\paragraph{Covariates}%
+\label{par:covariates}
 
 We control for baseline behaviour, events, and personal characteristics that,
 to various degrees, capture a person's need, capacity, motivation, and
