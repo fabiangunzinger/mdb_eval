@@ -18,7 +18,6 @@ vars <- c(
   "^is_female$", 
   "^is_urban$",
   "^dspend$",
-  
   "accounts_active"
   )
 

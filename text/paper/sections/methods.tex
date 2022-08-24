@@ -62,7 +62,7 @@ the same coffee shop on the same day. However, data inspection suggests that in
 most cases, we remove genuine duplicates.
 
 
-\paragraph{Sample selection}%
+\paragraph{Sample selection:}%
 \label{par:sample_selection}
 
 We select our sample so as to include users for whom we can be reasonably
@@ -136,7 +136,7 @@ accounts flow variables at the 1 percent level or -- if we winsorise on both
 ends of the distribution -- at the 0.5 percent level.
 
 
-\paragraph{Summary statistics}%
+\paragraph{Summary statistics:}%
 \label{par:summary_statistics}
 
 Figure~\ref{fig:sample_description} describes the sample.
@@ -167,94 +167,136 @@ Data covers the period between April 2018 and March 2019.
 \subsection{Estimation}%
 \label{sub:estimation}
 
+We want to estimate the effect of app use over time.  Given our data, a natural
+way to do this would be to use a dynamic two-way fixed effects model that
+includes user and year-month fixed effects and dummies indicating time since
+app signup. The estimated coefficients on these dummies are then conventionally
+interpreted as dynamic treatment effects. However, a series of recent papers
+have documented that while such an approach is frequently used in applied
+research, the parameter estimates from dynamic two-way fixed effects models are
+not valid estimators of dynamic treatment effect in most settings. In
+particular, in settings with staggered treatment assignment, where units are
+first exposed to treatment at different points in time (as is the case in our
+setting), dynamic two-way fixed effects are valid only if there is homogeneity
+in treatment effects across treatment adoption cohorts. In most settings,
+including our own, this is a very strong assumption.\footnote{Two excellent
+reviews of this new literature are \citet{roth2022trending, baker2022much}.}
 
-\citet{callaway2021difference}.
+Because of this, I use a new estimator proposed by
+\citet{callaway2021difference}, which allows for arbitrary treatment effect
+heterogeneity across treatment adoption cohorts and time, and allows for the
+incorporation of a parallel trends assumption conditional on covariates. In
+describing the estimator, I follow the approach of
+\citet{callaway2021difference} of first defining the causal parameter of
+interest, and then discussing identification, estimation, and inference.
 
+The basic building block of the framework, and the causal effect of interest,
+is the group-time average treatment effect: the average treatment effect at
+time $t$ for the group of individuals first treated at time $g$, defined as:
 
-SA setup:
-\begin{itemize}
-    \item Units that are treated in period 1 are dropped from the sample, since
-        (i) there exists no possible control group based on which to identify
-        their treatment effects and (ii) they are not useful as a control group
-        themselves. (wp footnote 3)
+\begin{equation}
+    ATT(g,t) = \mathop{\mathbb{E}}[Y_{i,t}(g) - Y_{i,t}(0)|G_i =
+    g],
+\end{equation}
 
-    \item If there exists no never-treated units (as in our setup), then last
-        treated group is dropped since there exists no valid "not-yet-treated"
-        comparison group for them.
+where $Y_{i,t}(g)$ is the potential outcome in time period $t$ of an individual
+$i$ in group $g$, and $Y_{i,t}(0)$ is the (counterfactual) potential outcome of that same
+individual if they had remained untreated.
 
-    \item This means that if we restrict our data to a balanced panel (e.g. all
-        data from 2018 and 2019), the groups first treated in Jan 2018 and Dec
-        2019 will be dropped from the sample.
+These effects are identified if two main assumptions hold: if there is limited
+and known anticipation of treatment, and if the assumption of parallel trends
+between treatment and comparison groups holds either unconditionally or
+conditionally on a set of covariates.\footnote{Additional assumptions are (i)
+    that the treatment is absorbing in the sense that once an individual is
+    treated they will remain treated forever, (ii) that individuals in the data
+    are randomly and independently drawn from a larger population, and (iii) an
+    overlap condition that ensures that there is a positive number of users
+    that is first exposed to the treatment at any period and that -- under the
+    conditional parallel trends assumption -- propensity scores for initial
+    treatment times based on covariates are bounded away from zero. The first
+    assumption could be violated only if a user closes their account on the app
+    and then signed up again later on, all within the roughly within the
+    two-year data periods I use. This cannot be more than a tiny minority of
+    users.  The second assumption holds less trivially. One way to think of a
+    super population from which the users in the dataset are drawn is to think
+    of knowledge about the app as partially random, and about the super
+    population of all individuals who would have signed up had they learned
+    about the apps existence.} Because the purpose of this section is to convey
+    the core idea of the estimation approach, I keep things as simple as
+    possible and discuss only the case with no anticipation effects and where
+    the parallel trend assumption holds unconditionally.
+    \citet{callaway2021difference} show that the same overall approach also
+    works when allowing for known anticipation and conditional parallel
+    trends.\footnote{Intuitively, known anticipation merely shifts the
+        reference period from the period immediately before treatment to the
+        period before anticipation of treatment begins. When relying on the
+        conditional parallel trends assumption, the overall the group-time
+        average treatment effect $ATT(g, t)$ is the average of unconditional
+        group-time average treatment effects for each value of the covariate
+        vector $X_i$.  As discussed in \citet{roth2022trending}, estimation is
+        challenging when $X_i$ is continuous or can take on a large number of
+        values, since then we will typically lack data to estimate
+        unconditional group-time treatment effects for each value of $X_i$.
+        There are different semi- and non-parametric approaches that can be
+        used in such cases. Below, I use the doubly-robust estimator, which is
+    the default in the `did` package. See \citet{callaway2021difference,
+roth2022trending} for more details.}
 
-    \item Assumption 3 allows for known treatment anticipation. In our case,
-        with units self-selecting into treatment, it will be useful to do
-        robustness checks for sensible anticipation levels. (In our case, the
-        relevant anticipation period is time since deciding to save more/spend
-        less and time when signing up to app. This could realistically be up to
-        6 months). As CS point out in remark 1, increading delta makes
-        the parallel trends assumption more restrictive, since it now needs to
-        hold also for delta pre-treatment periods.
-        Our results here are weird, though: if we think that during
-        anticipation period peope already spend less, then this would bias
-        baseline results downwards. Instead, we see the opposite. In the case
-        with delta > 0, this also means we can identify GT effects only up to
-        time where last cohort effectively starts its treatment (max g -
-        delta), and, as discussed before, we cannot estimate GT for that last
-        group, either.
+Given these two assumptions, \citet{callaway2021difference} show that
+$ATT(g,t)$ is identified by comparing the expected change of group $g$ between
+periods $t$ and $g-1$ with that of a comparison group that is not yet treated
+at time $t$:
 
-    \item Conditional parallel trends are important in contexts when (i) there
-        are covariate specific trends in outcome paths and (ii) the
-        distribution of covariates differs between groups. (E.g. people who
-        sign up to job training differ from those who don't and job outcomes
-        depend on these covariates). In my context, do covariates differ
-        between those who sign up and those who don't? (can investigate - month
-        income, num accounts, total spend, etc. pre and post signup), and does
-        savings path depend on these variables (we'd certainly think so).
+\begin{equation}
+    ATT(g,t) = \mathop{\mathbb{E}}[Y_{i,t} - Y_{i,g-1}|G_i = g] -
+    \mathop{\mathbb{E}}[Y_{i,t} - Y_{i,g-1}|G_i = g'], \text{ for any $g'$ > t} 
+\end{equation}
 
-        Actually, for my here, cov distr between treatment and control differs
-        only if early users are different from later ones.
+As this holds for all $g'$ that are not yet treated at time $t$, it also holds
+for an average over all groups in the set $\mathcal{G}$ containing all groups
+$g'$ for which $g' > t$,
 
-    \item Assumption 5 restricts pre-treatment trends (see discussion there and
-        discuss in footnote).
+\begin{equation}
+    ATT(g,t) = \mathop{\mathbb{E}}[Y_{i,t} - Y_{i,g-1}|G_i = g] -
+    \mathop{\mathbb{E}}[Y_{i,t} - Y_{i,g-1}|G_i \in \mathcal{G}].
+\end{equation}
 
-\end{itemize}
+This equation encapsulates two main results: that the period just before
+treatment, $g-1$, is a valid reference period, and that the group of all
+individuals that have not yet been treated at time $t$ are a valid comparison
+group for estimating treatment effects in time $t$.\footnote{If a group of
+never-treated individuals is available, then these could also serve as a
+comparison group. But because my dataset does not contain such individuals, I
+do not discuss this case.} As a result of this, units who are treated in the
+very first period in the dataset are dropped from the sample, since there
+exists no possible control group based on which to identify their treatment
+effect, and since they are not useful as a control group themselves. Similarly,
+unit treated in the very last period in the data are also dropped, since there
+exists no ``not-yet-treated`` group that could serve as a comparison group for
+them.
 
+$ATT(g,t)$ can then be estimated by replacing expectations with their sample
+analogues,
 
-Assumptions:
-\begin{itemize}
-    \item A1: Absorbing treatment. This is unproblematic.
+\begin{equation}
+    \widehat{ATT(g,t)} = \frac{1}{N_g}\sum_{i:G_i=g}[Y_{i,t} - Y_{i, g-1}] -
+    \frac{1}{N_\mathcal{G}}\sum_{i:G_i \in \mathcal{G}}[Y_{i,t} - Y_{i, g-1}]
+\end{equation}
 
-    \item A2: Random sampling (each unit is independently drawn from a larger
-        population of interest). This is not self-evidently true. In a narrow
-        sense, MDB users are different by virtue of having signed up. One way
-        to think of a super population is to think about knowing of MDB's
-        existence to some extent as random, in which case the super population
-        consists of all people who would have signed up if they had heard of
-        MDB. Another is for signup to be partially driven by need, and need to
-        be partially random. The super population is than everyone with a
-        potential need in the future.
+Once these building blocks are estimated, aggregating them to event-study type treatment effects that provide the (weighted)
+average treatment effect $l$ periods away from treatment adoption across
+different adoption groups can be achieved by simply calculating
 
-    \item A3: Limited (known) treatment anticipation. In baseline, we assume
-        that there is no anticipation. We provide robustness checks with
-        different anticipation periods.
+\begin{equation}
+    ATT_l = \sum_g w_g ATT(g,g+l),
+\end{equation}
 
-    \item A5: Unconditional parallel trends based on not-yet treated groups.
-
-    \item A6: Overlap condition: positive fraction of population starts
-        treatment in each period, and propensity scores are bounded away from 1
-        for all groups and times.
-
-    \item We aggregate GT effects using a panel balanced in event times, with
-        all units being greated for at least 5 periods. This avoids that the
-        event study parameters are influenced by compositional issues (SA show
-        in section 3.1.1 that without this restriction, aggregated treatment
-        effects also are affected by different composition of groups and
-        different group weights). This comes at the cost of fewer groups used
-        for calculations. And in appendix we compare the results without this
-        restriction.
-\end{itemize} 
-
-Allows for: Heterogeneous treatment across time and units
+where the group weights $w_g$ are the groups relative frequencies in the
+treated population. When calculating these event study parameters, I use a
+panel balanced in event times, with all units being observed for at least 5
+treatment periods. This avoids the $ATT_l$ being influenced by different
+group compositions at different periods $l$.\footnote{See Section 3.1.1 in
+\citet{callaway2021difference} for a more detailed discussion.}
 
 
 \subsection{Variables}%

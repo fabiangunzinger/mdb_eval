@@ -37,12 +37,16 @@
         Table~\ref{tab:sumstats}), this corresponds to a drop in discretionary
         spend of about 11-17 percent, which is substantial.
 
-    \item As discussed in Section~\ref{sub:estimation}, the conditional
-        parallel trend assumption leads to different results from the
-        unconditional version if (1) the paths of the outcome variables are
-        parallel only for groups with similar covariate values and (2) the
-        distribution of covariate values differs between treated and comparison
-        group. Given that our comparison group is the set of
+    \item Conditional parallel trends are important in contexts when (i) there
+        are covariate specific trends in outcome paths and (ii) the
+        distribution of covariates differs between groups. (E.g. people who
+        sign up to job training differ from those who don't and job outcomes
+        depend on these covariates)
+
+        Actually, for my here, cov distr between treatment and control differs
+        only if early users are different from later ones.
+
+    \item  Given that our comparison group is the set of
         ``not-yet-treated`` users rather than a set of ``never-treated`` users,
         the relatively small difference in results is as expected.
 
