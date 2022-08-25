@@ -337,3 +337,94 @@ def num_accounts(df):
         .merge(total)
         .set_index(["user_id", "ym"])
     )
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def investments(df):
+    """Flows into investment and pension funds."""
+    group_cols = [df.user_id, df.ym]
+    is_invest = df.tag_auto.eq("pension or investments") & df.is_debit
+    invest = df.amount.where(is_invest, 0)
+    return invest.groupby(group_cols).sum().rename('investments')
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def user_precedence_tag_based_savings(df):
+    """
+    Transfers from current accounts to (linked and unlinked)
+    savings accounts based on manual user tags.
+    """
+    group_vars = [df.user_id, df.ym]
+    is_tfr = (
+        df.tag_up.str.contains("saving") & df.account_type.eq("current") & df.is_debit
+    )
+    tfr = df.amount.where(is_tfr, 0)
+    return tfr.groupby(group_vars).sum().rename('up_savings')
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def current_account_transfers(df):
+    """
+    Transfers from current accounts.
+    """
+    group_vars = [df.user_id, df.ym]
+    is_tfr = (
+        df.tag_group.eq("transfers") & df.account_type.eq("current") & df.is_debit
+    )
+    tfr = df.amount.where(is_tfr, 0)
+    return tfr.groupby(group_vars).sum().rename('ca_transfers')
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def credit_card_payments(df):
+    """
+    Payments into credit card accounts.
+    """
+    group_vars = [df.user_id, df.ym]
+    is_cc_inflow = (
+        df.account_type.eq("credit card")
+        & ~df.is_debit
+        & df.tag_auto.eq("credit card") # discards refunds
+    )
+    cc_inflow = df.amount.where(is_cc_inflow, 0)
+    return cc_inflow(group_vars).sum().rename('cc_payments')
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def loan_funds(df):
+    """Loan funds inflow."""
+    LOAN_FUND_TAGS = [
+        "personal loan",
+        "unsecured loan funds",
+        "payday loan",
+        "payday loan funds",
+        "student loan funds",
+    ]
+    group_vars = [df.user_id, df.ym]
+    is_loan_fund = df.tag_auto.isin(LOAN_FUND_TAGS) & ~df.is_debit
+    loan_fund = df.amount.where(is_loan_fund, 0)
+    return loan_fund.groupby(group_vars).sum().rename("loan_funds")
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def loan_repayment(df):
+    """Loan repayments."""
+    LOAN_RPMT_TAGS = [
+        "secured loan repayment",
+        "unsecured loan repayment",
+        "student loan repayment",
+        "payday loan",
+        "personal loan",
+    ]
+    group_vars = [df.user_id, df.ym]
+    is_loan_rpmt = df.tag_auto.isin(LOAN_RPMT_TAGS) & df.is_debit
+    loan_rpmt = df.amount.where(is_loan_rpmt, 0)
+    return loan_rpmt.groupby(group_vars).sum().rename("loan_rpmt")
+
+
