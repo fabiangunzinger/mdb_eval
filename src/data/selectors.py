@@ -55,20 +55,6 @@ def add_raw_count(df):
 
 @selector
 @counter
-def drop_first_and_last_month(df):
-    """Drop first and last month
-
-    These will likely have incomplete data.
-    """
-    g = df.groupby("user_id")
-    ym_max = g.ym.transform("max")
-    ym_min = g.ym.transform("min")
-    cond = df.ym.between(ym_min, ym_max, inclusive="neither")
-    return df[cond]
-
-
-@selector
-@counter
 def signup_after_march_2017(df):
     """App signup after March 2017
 
@@ -79,6 +65,20 @@ def signup_after_march_2017(df):
     cond = df.user_reg_ym.ge('2017-04')
     users = cond[cond].index
     return df[df.user_id.isin(users)]
+
+
+@selector
+@counter
+def drop_first_and_last_month(df):
+    """Drop first and last month
+
+    These will likely have incomplete data.
+    """
+    g = df.groupby("user_id")
+    ym_max = g.ym.transform("max")
+    ym_min = g.ym.transform("min")
+    cond = df.ym.between(ym_min, ym_max, inclusive="neither")
+    return df[cond]
 
 
 # @selector
