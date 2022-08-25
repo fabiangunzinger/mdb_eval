@@ -53,8 +53,8 @@ def add_raw_count(df):
     return df
 
 
-# @selector
-# @counter
+@selector
+@counter
 def drop_first_and_last_month(df):
     """Drop first and last month
 
