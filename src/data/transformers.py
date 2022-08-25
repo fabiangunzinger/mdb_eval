@@ -29,6 +29,8 @@ def winsorise_upper(df):
         "month_spend",
         "month_income",
         "dspend",
+        "dspend_mean",
+        "dspend_count",
         "investments",
         "up_savings",
         "ca_transfers",
