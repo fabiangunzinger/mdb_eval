@@ -413,7 +413,7 @@ def loan_funds(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
-def loan_repayment(df):
+def loan_repayments(df):
     """Loan repayments."""
     LOAN_RPMT_TAGS = [
         "secured loan repayment",
@@ -424,7 +424,7 @@ def loan_repayment(df):
     ]
     group_vars = [df.user_id, df.ym]
     is_loan_rpmt = df.tag_auto.isin(LOAN_RPMT_TAGS) & df.is_debit
-    loan_rpmt = df.amount.where(is_loan_rpmt, 0)
-    return loan_rpmt.groupby(group_vars).sum().rename("loan_rpmt")
+    loan_rpmts = df.amount.where(is_loan_rpmt, 0)
+    return loan_rpmts.groupby(group_vars).sum().rename("loan_rpmts")
 
 
