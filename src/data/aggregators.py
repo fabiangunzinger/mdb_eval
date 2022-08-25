@@ -391,7 +391,7 @@ def credit_card_payments(df):
         & df.tag_auto.eq("credit card") # discards refunds
     )
     cc_inflow = df.amount.where(is_cc_inflow, 0)
-    return cc_inflow(group_vars).sum().rename('cc_payments')
+    return cc_inflow.groupby(group_vars).sum().rename('cc_payments')
 
 
 @aggregator
