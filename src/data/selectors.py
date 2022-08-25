@@ -69,19 +69,6 @@ def drop_first_and_last_month(df):
 
 @selector
 @counter
-def drop_testers(df):
-    """Drop test users
-
-    App was launched sometime in 2011, so to ensure we only have users that 
-    were not testers, we drop all users registering before 2012.
-    """
-    cond = df.groupby("user_id").user_reg_ym.first().ge("2012-01")
-    users = cond[cond].index
-    return df[df.user_id.isin(users)]
-
-
-@selector
-@counter
 def signup_after_march_2017(df):
     """App signup after March 2017
 
