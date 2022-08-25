@@ -17,27 +17,34 @@ def transformer(func):
 
 
 @transformer
-def winsorise(df):
-    df["inflows"] = hd.winsorise(df.inflows, pct=config.WIN_PCT, how="upper")
-    df["outflows"] = hd.winsorise(df.outflows, pct=config.WIN_PCT, how="upper")
-    df["netflows"] = hd.winsorise(df.netflows, pct=config.WIN_PCT / 2, how="both")
-    df["pos_netflows"] = hd.winsorise(
-        df.pos_netflows, pct=config.WIN_PCT / 2, how="upper"
-    )
-    df["inflows_norm"] = hd.winsorise(df.inflows_norm, pct=config.WIN_PCT, how="upper")
-    df["outflows_norm"] = hd.winsorise(
-        df.outflows_norm, pct=config.WIN_PCT, how="upper"
-    )
-    df["netflows_norm"] = hd.winsorise(
-        df.netflows_norm, pct=config.WIN_PCT / 2, how="both"
-    )
+def winsorise_upper(df):
+    cols = [
+        "inflows",
+        "outflows",
+        "pos_netflows",
+        "inflows_norm",
+        "outflows_norm",
+        "txns_count",
+        "txns_volume",
+        "month_spend",
+        "month_income",
+        "dspend",
+        "investments",
+        "up_savings",
+        "ca_transfers",
+        "cc_payments",
+        "loan_funds",
+        "loan_rpmts",
+    ]
+    df[cols] = df[cols].apply(hd.winsorise, pct=config.WIN_PCT, how="upper")
+    return df
 
-    df["txns_count"] = hd.winsorise(df.txns_count, pct=config.WIN_PCT, how="upper")
-    df["txns_volume"] = hd.winsorise(df.txns_volume, pct=config.WIN_PCT, how="upper")
-    df["month_spend"] = hd.winsorise(df.month_spend, pct=config.WIN_PCT, how="upper")
-    df["dspend"] = hd.winsorise(
-        df.dspend, pct=config.WIN_PCT, how="upper"
-    )
-    df["month_income"] = hd.winsorise(df.month_income, pct=config.WIN_PCT, how="upper")
 
+@transformer
+def winsorise_both(df):
+    cols = [
+        "netflows",
+        "netflows_norm",
+    ]
+    df[cols] = df[cols].apply(hd.winsorise, pct=config.WIN_PCT / 2, how="both")
     return df
