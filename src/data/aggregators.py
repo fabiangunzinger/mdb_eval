@@ -390,7 +390,7 @@ def credit_card_payments(df):
         & ~df.is_debit
         & df.tag_auto.eq("credit card") # discards refunds
     )
-    cc_inflow = df.amount.where(is_cc_inflow, 0)
+    cc_inflow = df.amount.where(is_cc_inflow, 0).mul(-1)
     return cc_inflow.groupby(group_vars).sum().rename('cc_payments')
 
 
@@ -407,7 +407,7 @@ def loan_funds(df):
     ]
     group_vars = [df.user_id, df.ym]
     is_loan_fund = df.tag_auto.isin(LOAN_FUND_TAGS) & ~df.is_debit
-    loan_fund = df.amount.where(is_loan_fund, 0)
+    loan_fund = df.amount.where(is_loan_fund, 0).mul(-1)
     return loan_fund.groupby(group_vars).sum().rename("loan_funds")
 
 
