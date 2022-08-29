@@ -3,7 +3,6 @@ library(tidyverse)
 library(lubridate)
 library(glue)
 
-
 source('./src/config.R')
 source('./src/helpers/helpers.R')
 
@@ -20,13 +19,13 @@ names(df)
 df %>% 
   group_by(tt) %>% 
   summarise_all(mean) %>% 
-  filter(between(tt, -6, 5)) %>% 
+  filter(between(tt, -12, 12)) %>% 
   ggplot(aes(tt, dspend)) +
   geom_line() +
   geom_point() +
-  ylim(0, 1100) %>% 
+  ylim(500, 1000) +
   labs(
-    xlab = "Time since app signup",
-    ylab = "Discretionary spend"
+    x = "Time since app signup",
   )
+
 

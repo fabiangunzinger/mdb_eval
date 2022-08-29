@@ -18,20 +18,32 @@ user-level information. Crucially for this paper, the app can access up to
 three years of historic data for each linked account.
 
 The main advantage of the data for the study of consumer financial behaviour is
-that we can observe user behaviour at the transaction level across all their
-accounts, and that the data is automatically collected rather than collected
-through a survey.
+that we can potentially observe user behaviour at the transaction level across
+all their accounts, and that the data is collected automatically and in
+real-time rather than through surveys that collect data with some time-lag and
+often rely on consumer's ability and willingness to provide accurate
+information.
 
-The main limitation is the non-representativeness of the sample relative to the
-population as a whole. Financial management apps are known to be used
-disproportionally by men, younger people, and people of higher socioeconomic
-status \citep{carlin2019generational}. Also, as pointed out in
+There are four main limitations of the data used in this study and data from
+financial aggregator apps more genarally\citet{baker2022household}. The first
+is that users self-select into using the app, leading to a non-representative
+sample of the population. It has been well documented that financial management
+app users tend to be male and younger and higher-income earners than the
+average citizen \citet{carlin2019generational}. Also, as pointed out in
 \citet{gelman2014harnessing}, a willingness to share financial information with
 a third party might not only select on demographic characteristics, but also
 for an increased need for financial management or a higher degree of financial
 sophistication. Because our analysis does not rely on representativeness, we do
 not address this.\footnote{For an example of how re-weighing can be used to
-mitigate the non-representative issue, see \citet{bourquin2020effects}.}
+mitigate the non-representative issue, see \citet{bourquin2020effects}.} A
+second limitation is that while we can observe user's complete financial
+behaviour if they add all their financial accounts to the app, it is not
+trivial to distinguish between users who do and do not do that. I address this
+challenge in the sample selection process documented below. The third issue is
+that while the app is able to classify many transactions into types, it
+misclassifies some transactions and cannot classify others altogether. I
+address this as part of the cleaning process documented below. Finally,
+replication of the analysis is not possible because the data is proprietary.
 
 
 \paragraph{Cleaning:}%
@@ -52,7 +64,7 @@ the app. Dropping these transactions makes is likely that we will underestimate
 amounts spent and saved, but minimises the risk of incorrectly classified
 transactions. I group transactions into transaction, spend, and income
 subgroups. Spend subgroups are defined following \citet{muggleton2020evidence};
-income subgroups, following \citet{hacioglu2020distributional}.\footnote{Link
+income subgroups, following \citet{hacioglu2021distributional}.\footnote{Link
 to classification file:
 \href{https://github.com/fabiangunzinger/mdb_eval/blob/92af366d4c4052cc7a7f78a6178086de8ecdfb75/src/data/txn_classifications.py}{\faGithub}}
 Finally, I classify as duplicates and drop transactions with identical user ID,
