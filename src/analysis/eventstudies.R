@@ -485,7 +485,7 @@ ggsave(glue("{FIGDIR}/netflows_cond_unbal_es.png"))
 
 # Reprint balanced result with different title for easy comparison
 ggdid(
-  dspend_cond_es,
+  netflows_cond_es,
   title = " ",
   ylab = "Net-inflows into savings accounts",
   xlab = "Months since app signup",
@@ -556,19 +556,19 @@ for (y in yvars) {
 # Disaggregated dspend ------------------------------------------------------------
 
 yvars <- c(
+  "dspend",   # recalculate for consistent plot output
   "dspend_groceries",
   "dspend_entertainment",
   "dspend_food",
   "dspend_clothes",
-  "dspend_others",
+  "dspend_other",
   "dspend_dd"
 )
 
 for (y in yvars) {
   
   print(glue("Computing results for {y}..."))
-  
-  # Calculate group-time treatment effects
+
   gt <- att_gt(
     yname = y,
     gname = "user_reg_ym",
@@ -582,7 +582,6 @@ for (y in yvars) {
     cores = 4
   )
   
-  # Aggregate to event-study parameters
   es <- aggte(
     gt,
     type = "dynamic",
@@ -592,22 +591,26 @@ for (y in yvars) {
     balance_e = 5
   )
   
-  # Export plot
   ylabs <- c(
-    "dspend_groceries" = "Groceries",
-    "dspend_entertainment" = "Entertainment",
-    "dspend_food" = "Food",
-    "dspend_clothes" = "Clothes",
-    "dspend_other" = "Other",
+    "dspend" = "Discretionary spend",
+    "dspend_groceries" = "Discretionary spend (groceries)",
+    "dspend_entertainment" = "Discretionary spend (entertainment)",
+    "dspend_food" = "Discretionary spend (food)",
+    "dspend_clothes" = "Discretionary spend (clothes)",
+    "dspend_other" = "Discretionary spend (other)",
     "dspend_dd" = "Discretionary spend (debit-direct)"
   )
+  
   ggdid(
     es,
     title = " ",
     ylab = ylabs[[y]],
-    xlab = "Months since app signup"
+    xlab = "Months since app signup",
+    ylim = c(-210, 100)
   ) + cstheme
-  ggsave(glue("{FIGDIR}/{y}_cond_es.png"))
+  
+  ggsave(glue("{FIGDIR}/disag_{y}_cond_es.png"))
 }
+
 
 

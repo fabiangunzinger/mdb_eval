@@ -3,6 +3,25 @@
 \section{Results}%
 \label{sec:results}
 
+The main outcome variables in my analysis are ``discretionary spend'', defined
+as spend transactions over which users likely have a lot of control, and
+``net-inflows into savings-accounts'', defined as the difference between
+inflows into and outflows from all of a user's savings accounts.\footnote{I do
+    not include gasoline expenses in discretionary spend because many people
+    use their car to commute to work so that it is unclear how much of these
+    expenses is discretionary. When creating discretionary spend subgroups, I
+    classify transactions tagged by MDB as ``entertainment'' as ``other''
+    discretionary spend, since many such transactions are purchses with Amazon,
+    which we cannot precisely classify. A list of transaction tags used to
+    identify discretionary spend transactions and the code used create the
+    variable are available on Github
+    (\href{https://github.com/fabiangunzinger/mdb_eval/blob/f31bfcd7a330188cdd27968d41957ebf5b454099/src/data/aggregators.py#L389}{\faGithub}.
+    To capture only user-generated savings-account flows and not interest
+    payments and similar automated transactions I include only transaction with
+an absolute value of \pounds5 or higher. The code used to calculate savings
+account flows is also available on Github
+(\href{https://github.com/fabiangunzinger/mdb_eval/blob/f31bfcd7a330188cdd27968d41957ebf5b454099/src/data/aggregators.py#L89}{\faGithub}.}
+
 
 \subsection{Main results}%
 \label{sub:main_results}
@@ -229,13 +248,13 @@
     \centering
     \caption{Disaggregated discretionary spend}%
     \label{fig:disagg_dspend}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_dd_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_groceries_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_entertainment_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_food_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_clothes_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_other_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_dd_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_groceries_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_entertainment_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_food_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_clothes_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_other_cond_es.png}
     \fignote{\textwidth}{Effect of app use on total discretionary spend (for
         reference) and its subgroups. Point estimates represent
         group-time average treatment effects aggregated to periods since

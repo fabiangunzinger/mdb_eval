@@ -3,12 +3,6 @@
 \section{Data}%
 \label{sec:data}
 
-This section introduces that dataset used for the analysis, discusses
-preprocessing steps and variable construction, and presents summary statistics.
-
-
-
-
 \subsection{Dataset description}%
 \label{sub:dataset_description}
 
@@ -147,100 +141,6 @@ size significantly.
 transaction volume in millions of British Pounds left in our sample after each
 sample selection step.}
 \end{table}
-
-
-\subsection{Variable construction}%
-\label{sub:variable_construction}
-
-\paragraph{Outcomes:}%
-\label{par:outcomes}
-
-The main outcome variables used in the analysis are ``discretionary spend'' and
-``net-inflows into saving accounts''. 
-
-
-
-
-
-dspend:
-\begin{itemize}
-    \item I do not include gas because (i) many people use car to drive to
-        work, so it's not obvious how much of gas spend is really
-        discretionary, and (ii) gas prices are highly volatile.
-
-    \item I classify "entertainment" as "other" because most Amazon
-        transactions are classified as "entertainment", though probably most of
-        them are shopping purchases. Either way, we do not know what they are.
-
-\end{itemize}
-
-
-Savings... see Table~\ref{tab:vars} for details.
-
-Net savings (\textit{netflows\_norm})
-Inflows into minus outflows out of all of a user's savings accounts divided
-by monthly income. To capture only ``user-generated'' flows, we exclude
-interest and ``save the change'' transactions, as well as transactions of
-less than \pounds5 in absolute
-value. Monthly income and raw inflows and outflows are winsorised at the 1
-percent level.
-We focus on net inflows to capture effective savings.
-
-
-\paragraph{Treatment}%
-\label{par:treatment}
-
-A user changes treatment status from untreated to treated when they start using
-the app. Figure~\ref{fig:treatplot_sample_raw} shows the treatment history for
-200 randomly selected users.
-
-\begin{figure}[H]
-    \centering
-    \caption{Treatment assignment plot}%
-    \includegraphics[width=0.8\linewidth]{\figdir/treatplot_sample_raw.png}
-    \label{fig:treatplot_sample_raw}
-
-    \fignote{\textwidth}{Each horizontal line shows the observed pre and post
-        signup periods in blue and red, respectively, for one of 200 randomly
-        selected users. The faint vertical white lines indicate month borders,
-        whitespace indicates periods in which we do not observe the user. To
-    the left of the observed period, this is because the app cannot access data
-before that point when the user signs up; to the right, because they have
-stopped using the app.}
-
-\end{figure}
-
-
-
-\paragraph{Covariates}%
-\label{par:covariates}
-
-We control for baseline behaviour, events, and personal characteristics that,
-to various degrees, capture a person's need, capacity, motivation, and
-awareness to save. Table~\ref{tab:vars} lists all covariates used
-together with their definition and the rationale for including them. For all
-variables, we include contemporaneous values as well as lags for up to 6
-periods. In addition, we control for the previous six months of savings to
-capture time-invariant unobserved drivers of savings behaviour (in
-specifications without fixed effects) as well as a possible signal for a higher
-or lower need for future savings.
-
-Following \citet{vanderweele2019principles} we include covariates that affect
-either outcomes or the propensity for treatment or both, exclude from this
-set of variables those that are instruments (affect the outcome only through their effect on
-treatment propensity) and add to it proxies for unobserved variables that are a
-common cause of both outcomes and treatment propensity.\footnote{
-\citet{vanderweele2019principles} calls this the ``modified disjunctive cause
-criterion'' for covariate selection, as it includes the set of variables that are causally
-related to either outcomes, or treatment propensity, or both, but modified to
-account for potential bias by excluding instruments and including proxies of
-unobserved causes of both outcomes and treatment.}
-
-The table below describes the construction and rationale for including of all
-variables used. The code used to construct the variables is available on
-\href{https://github.com/fabiangunzinger/mdb_eval/blob/d094f8cd364f64bbe3d4e644abbff726af86de2f/src/data/aggregators.py}{GitHub}.
-
-\input{sections/covar_table.tex}
 
 
 \subsection{Summary statistics}%
