@@ -492,3 +492,122 @@ ggdid(
   ylim = c(-450, 300)
 ) + cstheme
 ggsave(glue("{FIGDIR}/netflows_cond_bal_es.png"))
+
+
+# Where did money go? -------------------------------------------------------------
+
+yvars <- c(
+  "investments",
+  "up_savings",
+  "ca_transfers",
+  "cc_payments",
+  "loan_funds",
+  "loan_rpmts"
+)
+
+for (y in yvars) {
+  
+  print(glue("Computing results for {y}..."))
+  
+  # Calculate group-time treatment effects
+  gt <- att_gt(
+    yname = y,
+    gname = "user_reg_ym",
+    idname = "user_id",
+    tname = "ym",
+    xformla = xformla,
+    data = df,
+    est_method = "reg",
+    control_group = "notyettreated",
+    allow_unbalanced_panel = T,
+    cores = 4
+  )
+  
+  # Aggregate to event-study parameters
+  es <- aggte(
+    gt,
+    type = "dynamic",
+    na.rm = T,
+    min_e = -6,
+    max_e = 5,
+    balance_e = 5
+  )
+  
+  # Export plot
+  ylabs <- list(
+    "investments" = "Investments",
+    "up_savings" = "Savings (user defined)",
+    "ca_transfers" = "Tranfsers from current accounts",
+    "cc_payments" = "Credit card payments",
+    "loan_funds" = "Loan funds",
+    "loan_rpmts" = "Loan repayment"
+  )
+  ggdid(
+    es,
+    title = " ",
+    ylab = ylabs[[y]],
+    xlab = "Months since app signup"
+  ) + cstheme
+  ggsave(glue("{FIGDIR}/{y}_cond_es.png"))
+}
+
+
+
+# Disaggregated dspend ------------------------------------------------------------
+
+yvars <- c(
+  "dspend_groceries",
+  "dspend_entertainment",
+  "dspend_food",
+  "dspend_clothes",
+  "dspend_others",
+  "dspend_dd"
+)
+
+for (y in yvars) {
+  
+  print(glue("Computing results for {y}..."))
+  
+  # Calculate group-time treatment effects
+  gt <- att_gt(
+    yname = y,
+    gname = "user_reg_ym",
+    idname = "user_id",
+    tname = "ym",
+    xformla = xformla,
+    data = df,
+    est_method = "reg",
+    control_group = "notyettreated",
+    allow_unbalanced_panel = T,
+    cores = 4
+  )
+  
+  # Aggregate to event-study parameters
+  es <- aggte(
+    gt,
+    type = "dynamic",
+    na.rm = T,
+    min_e = -6,
+    max_e = 5,
+    balance_e = 5
+  )
+  
+  # Export plot
+  ylabs <- c(
+    "dspend_groceries" = "Groceries",
+    "dspend_entertainment" = "Entertainment",
+    "dspend_food" = "Food",
+    "dspend_clothes" = "Clothes",
+    "dspend_other" = "Other",
+    "dspend_dd" = "Discretionary spend (debit-direct)"
+  )
+  ggdid(
+    es,
+    title = " ",
+    ylab = ylabs[[y]],
+    xlab = "Months since app signup"
+  ) + cstheme
+  ggsave(glue("{FIGDIR}/{y}_cond_es.png"))
+}
+
+

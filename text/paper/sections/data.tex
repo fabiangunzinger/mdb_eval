@@ -1,0 +1,294 @@
+% !TEX root = ../eval.tex
+
+\section{Data}%
+\label{sec:data}
+
+This section introduces that dataset used for the analysis, discusses
+preprocessing steps and variable construction, and presents summary statistics.
+
+
+
+
+\subsection{Dataset description}%
+\label{sub:dataset_description}
+
+I use data from Money Dashboard (MDB), a UK-based financial aggregation app that
+allows users to link accounts from different banks to obtain an integrated view
+of their finances. The complete dataset contains more than 500 million
+transactions made between 2012 and June 2020 by about 270,000 users, and
+provides information such as date, amount, and description of the transaction
+as well as account and user-level information. Crucially, for this paper, MDB
+can access up to three years of historic data for each linked account.
+
+The data's main advantage for the study of consumer financial behaviour is that
+it allows us to observe all savings and spending transactions for users who
+linked all their financial accounts. This means that for such users, we can be
+sure that any reduction in spending we observe is not offset by an increase in
+spending in unliked accounts. Furthermore, data is collected automatically and
+in real-time rather than through surveys that collect data with a time-lag and
+often rely on consumers's ability and willingness to provide accurate
+information.
+
+The data's main limitation is that because users's self select into using MDB,
+the sample is not representative of the wider UK population: it is well
+documented that FinTech app users are more likely to be male, younder, and
+higher-income earners than the average person \citet{carlin2019generational}.
+Also, as pointed out in \citet{gelman2014harnessing}, a willingness to share
+financial information with a third party might not only select on demographic
+characteristics, but also for an increased need for financial management or a
+higher degree of financial sophistication. However, because, as discussed in
+the introduction, the aim of this paper is to assess the effect of MDB on
+people who choose to use it, the lack of representativeness is not an
+issue.\footnote{For an example of how re-weighing can be used to mitigate the
+non-representative issue, see \citet{bourquin2020effects}.} A second limitation
+is that while we can observe user's complete financial behaviour if they add
+all their financial accounts to the app, it is not trivial to distinguish
+between users who do and do not do that. I address this challenge in the sample
+selection process documented below. A third issue is that while the app is able
+to classify many transactions into types, it misclassifies some transactions
+and cannot classify others altogether. I address this as part of the cleaning
+process documented below.
+
+\subsection{Preprocessing}%
+\label{sub:preprocessing}
+
+\paragraph{Data cleaning}%
+\label{par:data_cleaning}
+
+I use the dataset described above for a number of projects, and perform a
+number of steps to create a minimally cleaned version of the dataset that is
+the basis for all such projects. These steps are performed in a dedicated data
+repository and not run as part of this project, but the module with all
+cleaning functions is available on Github 
+(\href{https:/egithub.com/fabiangunzinger/mdb_eval/blob/f51e49c95c5884d2dc417be23921a8acd85aec9d/src/data/clean.py}{\faGithub}).
+Here, I briefly describe the main cleaning steps and their rationale. I drop
+all transactions with a missing description string because these cannot be
+categoriesed, and all transactions that are not automatically categoriesed by
+the app. Dropping these transactions makes it likely that I will underestimate
+amounts spent and saved, but minimises the risk of incorrectly classified
+transactions. I also group transactions into transfer, spend, and income
+subgroups, following \citet{muggleton2020evidence} to define spend subgroups
+and \citet{hacioglu2021distributional} to define income subgroups. The precise
+list used to classify transactions is available on Github
+(\href{https://github.com/fabiangunzinger/mdb_eval/blob/92af366d4c4052cc7a7f78a6178086de8ecdfb75/src/data/txn_classifications.py}{\faGithub}).
+Finally, I classify as duplicates and drop transactions with identical user ID,
+account ID, date, amount, and transaction description. This will drop some
+genuine transactions, such as when a user buys two identical cups of coffees at
+the same coffee shop on the same day. However, data inspection suggests that in
+most cases, we remove genuine duplicates.
+
+To minimise the influence of outliers, I winsorise all variables at the 1
+percent level or -- if we winsorise on both ends of the distribution -- at the
+0.5 percent level. The functions that perform the winsorisation are available
+on Github
+(\href{https://github.com/fabiangunzinger/mdb_eval/blob/d04fe186bb5cca884af2b7c1c7ad429674ef701d/src/data/transformers.py}{\faGithub}).
+I rely on winsorisation (replacing top values with percentile values) instead
+of trimming (replacing top values with missing values) because data inspection
+suggests that in most cases, very large (absolute) values are not the result of
+data errors, which would call for trimming, but reflect genuine outcomes,
+which makes winsorising appropriate because it leaves these observations in the
+data while lowering their leverage to influence results.
+
+
+\paragraph{Sample selection:}%
+\label{par:sample_selection_}
+
+The three main goals of sample selection are to select a sample of users for whom I
+can be reasonably certain to observe all relevant financial
+accounts,\footnote{Relevant accounts include all current, savings, and
+credit-card accounts, but exclude long-term savings and investment accounts.}
+account histories of at least 12 months, and who are not using MDB for business
+purposes. Table~\ref{tab:selection} lists the precise conditions I apply to implement
+these criteria and their effect on sample size. The code that implements the
+selection criteria is available on Github
+(\href{https://github.com/fabiangunzinger/mdb_eval/blob/main/src/data/selectors.py}{\faGithub}).
+
+In my main analysis, I show effects of app use for the 12-months period from 6
+months before and 5 months after MDB signup, treating the month of signup as
+period 0. To ensure that results are not affected by the number of accounts we
+observe for an individual, it is thus critical that we can observe at least 12
+months of history for all accounts a user adds to the platform. This ensures
+that in the extreme case where a user adds an account they had used for some
+time in the fifth month after they signed up, I observe all transactions on
+that account throughout the 12-month period of interest.\footnote{For example:
+    if a user has made monthly payments of \pounds100 into a savings account
+    for two years by the time they sign up to MDB but links that account five
+    months after joining, we can only observe the historical payments if MDB
+    can access at least 12 months of history. If this is not the case, and MDB
+    can only, say, access 6 months of history, we would erroneously conclude
+that the user started saving \pounds100 more starting in the month they signed
+up.} Data exploration
+(\href{https://github.com/fabiangunzinger/mdb_eval/blob/d04fe186bb5cca884af2b7c1c7ad429674ef701d/notebooks/available_account_history.ipynb}{\faGithub})
+suggests that all major banks start providing 12 months of historical data from
+April 2017 onwards, which is why include only users who sign up after that
+data.
+
+To ensure that I can be reasonably certain to observe users have added all
+their financial accounts to the app, I restrict our sample to users with at
+least one savings and current account, with an annual income of at least
+\pounds5,000, and a minimum of 10 transactions and a spend of \pounds200 every
+month. To remove users who might use the app for business purposes, I drop
+users with more than 10 active accounts in any given month.
+
+Finally, I drop test users and users that are not of working age (younger than
+18 or older than 65) because these groups might have objectives other than to
+reduce spending and increase savings.\footnote{We cannot identify test users
+    precisely, but drop users who signed up prior to or during 2011, the first
+year the app was in operation.} And I retain only users for whom we can observe
+the complete set of demographic covariates (gender, age, region) to ensure all
+users can be used throughout the analysis. These steps do impact the sample
+size significantly.
+
+\begin{table}
+\centering
+\caption{Sample selection}\label{tab:selection}
+\input{\tabdir/sample_selection.tex}
+\tabnote{.95\textwidth}{Number of users, user-months, transactions, and
+transaction volume in millions of British Pounds left in our sample after each
+sample selection step.}
+\end{table}
+
+
+\subsection{Variable construction}%
+\label{sub:variable_construction}
+
+\paragraph{Outcomes:}%
+\label{par:outcomes}
+
+The main outcome variables used in the analysis are ``discretionary spend'' and
+``net-inflows into saving accounts''. 
+
+
+
+
+
+dspend:
+\begin{itemize}
+    \item I do not include gas because (i) many people use car to drive to
+        work, so it's not obvious how much of gas spend is really
+        discretionary, and (ii) gas prices are highly volatile.
+
+    \item I classify "entertainment" as "other" because most Amazon
+        transactions are classified as "entertainment", though probably most of
+        them are shopping purchases. Either way, we do not know what they are.
+
+\end{itemize}
+
+
+Savings... see Table~\ref{tab:vars} for details.
+
+Net savings (\textit{netflows\_norm})
+Inflows into minus outflows out of all of a user's savings accounts divided
+by monthly income. To capture only ``user-generated'' flows, we exclude
+interest and ``save the change'' transactions, as well as transactions of
+less than \pounds5 in absolute
+value. Monthly income and raw inflows and outflows are winsorised at the 1
+percent level.
+We focus on net inflows to capture effective savings.
+
+
+\paragraph{Treatment}%
+\label{par:treatment}
+
+A user changes treatment status from untreated to treated when they start using
+the app. Figure~\ref{fig:treatplot_sample_raw} shows the treatment history for
+200 randomly selected users.
+
+\begin{figure}[H]
+    \centering
+    \caption{Treatment assignment plot}%
+    \includegraphics[width=0.8\linewidth]{\figdir/treatplot_sample_raw.png}
+    \label{fig:treatplot_sample_raw}
+
+    \fignote{\textwidth}{Each horizontal line shows the observed pre and post
+        signup periods in blue and red, respectively, for one of 200 randomly
+        selected users. The faint vertical white lines indicate month borders,
+        whitespace indicates periods in which we do not observe the user. To
+    the left of the observed period, this is because the app cannot access data
+before that point when the user signs up; to the right, because they have
+stopped using the app.}
+
+\end{figure}
+
+
+
+\paragraph{Covariates}%
+\label{par:covariates}
+
+We control for baseline behaviour, events, and personal characteristics that,
+to various degrees, capture a person's need, capacity, motivation, and
+awareness to save. Table~\ref{tab:vars} lists all covariates used
+together with their definition and the rationale for including them. For all
+variables, we include contemporaneous values as well as lags for up to 6
+periods. In addition, we control for the previous six months of savings to
+capture time-invariant unobserved drivers of savings behaviour (in
+specifications without fixed effects) as well as a possible signal for a higher
+or lower need for future savings.
+
+Following \citet{vanderweele2019principles} we include covariates that affect
+either outcomes or the propensity for treatment or both, exclude from this
+set of variables those that are instruments (affect the outcome only through their effect on
+treatment propensity) and add to it proxies for unobserved variables that are a
+common cause of both outcomes and treatment propensity.\footnote{
+\citet{vanderweele2019principles} calls this the ``modified disjunctive cause
+criterion'' for covariate selection, as it includes the set of variables that are causally
+related to either outcomes, or treatment propensity, or both, but modified to
+account for potential bias by excluding instruments and including proxies of
+unobserved causes of both outcomes and treatment.}
+
+The table below describes the construction and rationale for including of all
+variables used. The code used to construct the variables is available on
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/d094f8cd364f64bbe3d4e644abbff726af86de2f/src/data/aggregators.py}{GitHub}.
+
+\input{sections/covar_table.tex}
+
+
+\subsection{Summary statistics}%
+\label{sub:summary_statistics}
+
+Figure~\ref{fig:sample_description} provides a view of some salient sample
+characteristics. Panels A and B show that while distributions of disposable
+income and total spend in 2019 broadly mirror that of the ONS Living Cost and
+Food Survey (LCFS) data, the MDB data tends to slightly underestimate incomes
+and overestimate spending.\footnote{I accessed the LCFS data via the UK Data
+Service at the following url:
+\url{https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=8686}.}
+Given that our sample is likely biased towards high-earners, as discussed
+above, we would expect both income and spend to be higher than in the LCFS. Two
+likely caveats to the data probably create discrepancies relative to the LCFS
+data. First, as discussed in Section~\ref{sub:preprocessing}, I drop
+unclassified transactions from the data, which biases both income and spending
+downwards (i.e. spending would probably be even higher compared to the LCFS).
+Second, it is likely that it is more challenging to automatically classify
+income transactions than spend transactions, which might create an additional
+downward bias on the income distribution.\footnote{\citet{bourquin2020effects}
+    present an alternative algorithm to identify income transactions and find
+that this leads to higher estimated incomes. I do not use their algorithm
+because I only use disposable income as a covariate to capture relative income
+differences between users.} Panels C, D, and E show that, as discussed in
+Section~\ref{sub:dataset_description}, the sample is skewed towards users that
+are younger, male, and live in the South East. Finally, Panel D shows that most
+users use transact with one or two accounts per month.
+
+\begin{figure}[H]
+    \centering
+    \caption{Sample characteristics}
+    \includegraphics[width=\linewidth]{\figdir/sample_description.png}
+    \label{fig:sample_description}
+    \fignote{\textwidth}{Panels A and B show the distribution of disposable
+        income and total spending in 2019, respectively, benchmarked against
+        the 2018/19 wave of the ONS Living Cost and Food Survey (LCFS). The
+        remaining panels show the data distributions of age, gender, region,
+    and the number of active accounts.}%
+\end{figure}
+
+Table~\ref{tab:sumstats} provides additional summary statistics. It shows, for
+instance, that the average number of monthly transactions is slightly above 100
+(with a mean of 112 and a median of 101), that half of all user-month incomes
+lie between \pounds1,407 and \pounds3,596, and that inflows into savings
+accounts closely mirror outflows. It also suggests that highly discretionary
+spend accounts for about 30 percent of total monthly spend
+
+\input{\tabdir/sumstats.tex}
+
+

@@ -1,3 +1,81 @@
+# Subgroups -----------------------------------------------------------------------
+
+
+groupvars <- c("generation", "is_female")
+yvars <- c("dspend")
+
+for (v in groupvars) {
+  groups <- as.character(unique(df[[v]]))
+  for (g in groups) {
+    for (y in yvars) {
+      
+      print(glue("Computing results for {v}, {g}, {y}..."))  
+      
+      # Use only observations for desired group
+      data <- df %>% filter(.data[[v]] == g)
+      print(nrow(data))
+      
+      # Calculate group-time treatment effects
+      gt <- att_gt(
+        yname = y,
+        gname = "user_reg_ym",
+        idname = "user_id",
+        tname = "ym",
+        xformla = xformla,
+        data = data,
+        est_method = "reg",
+        control_group = "notyettreated",
+        allow_unbalanced_panel = T,
+        cores = 4
+      )
+      
+      # Aggregate to event-study parameters
+      es <- aggte(
+        gt,
+        type = "dynamic",
+        na.rm = T,
+        min_e = -6,
+        max_e = 5,
+        balance_e = 5
+      )
+      
+      # Export plot
+      titles <- list(
+        "generation" = list(
+          "Boomers" = "Boomers",
+          "Gen X" = "Gen X",
+          "Millennials" = "Millennials",
+          "Gen Z" = "Gen Z"
+        ),
+        "is_female" = list(
+          "0" = "Men",
+          "1" = "Women"
+        )
+      )
+      title <- titles[[v]][[g]]
+      
+      ylabs <- list(
+        "dspend" = "Discretionary spend",
+        "netflows" = "Net-inflows into savings account"
+      )
+      ylab <- ylabs[[y]]
+      
+      ggdid(
+        es,
+        title = title,
+        ylab = ylab,
+        xlab = "Months since app signup"
+      ) + cstheme
+      
+      proper_title <- tolower(gsub(" ", "", title))
+      fn <- glue("{FIGDIR}/{v}_{proper_title}_{y}_es.png")
+      ggsave(fn)
+      
+    }
+  }
+}
+
+
 # Rambachan and Roth (2021) sensitivity analysis ----------------------------------
 
 ## Discretionary spend ##
