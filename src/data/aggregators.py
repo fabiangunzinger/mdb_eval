@@ -278,48 +278,6 @@ def proportion_credit(df):
 
 @aggregator
 @hh.timer(on=TIMER_ON)
-def discretionary_spend(df):
-    """Highly discretionary spend."""
-    tags = [
-        "accessories",
-        "appearance",
-        "beauty products",
-        "beauty treatments",
-        "clothes",
-        "clothes - designer or other",
-        "clothes - everyday or work",
-        "clothes - other",
-        "designer clothes",
-        "food, groceries, household",
-        "groceries",
-        "supermarket",
-        "jewellery",
-        "personal electronics",
-        "shoes",
-        "cinema",
-        "concert & theatre",
-        "dining and drinking",
-        "dining or going out",
-        "enjoyment",
-        "entertainment, tv, media",
-        "gambling",
-        "games and gaming",
-        "hotel/b&b",
-        "lunch or snacks",
-        "sports event",
-        "take-away",
-    ]
-    group_cols = [df.user_id, df.ym]
-    is_disc_spend = df.tag_auto.isin(tags) & df.is_debit
-    return (
-        df.amount.where(is_disc_spend, np.nan)
-        .groupby(group_cols)
-        .agg([("dspend", "sum"), ("dspend_count", "count"), ("dspend_mean", "mean")])
-    )
-
-
-@aggregator
-@hh.timer(on=TIMER_ON)
 def num_accounts(df):
     """Number of active accounts."""
     group_cols = [df.user_id, df.ym]
@@ -426,5 +384,91 @@ def loan_repayments(df):
     is_loan_rpmt = df.tag_auto.isin(LOAN_RPMT_TAGS) & df.is_debit
     loan_rpmts = df.amount.where(is_loan_rpmt, 0)
     return loan_rpmts.groupby(group_vars).sum().rename("loan_rpmts")
+
+
+DSPEND_GROUPS = {
+    "other": [
+        "beauty products",
+        "beauty treatments",
+        "appearance",
+        "accessories",
+        "jewellery",
+        "personal electronics",
+        "hotel/b&b",
+        "gambling",
+        "games and gaming",
+        "enjoyment",
+    ],
+    "clothes": [
+        "clothes",
+        "clothes - designer or other",
+        "clothes - everyday or work",
+        "clothes - other",
+        "designer clothes",
+        "shoes",
+    ],
+    "groceries": [
+        "food, groceries, household",
+        "groceries",
+        "supermarket",
+    ],
+    "entertainment": [
+        "cinema",
+        "concert & theatre",
+        "entertainment, tv, media",
+        "sports event",
+    ],
+    "food": [
+        "dining and drinking",
+        "dining or going out",
+        "lunch or snacks",
+        "take-away",
+    ],
+}
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def dspend(df):
+    """Discretionary spend."""
+    group_cols = [df.user_id, df.ym]
+    dspend_tags = [tag for group, tags in DSPEND_GROUPS.items() for tag in tags]
+    is_dspend = df.tag_auto.isin(dspend_tags) & df.is_debit
+    dspend = df.amount.where(is_dspend, np.nan)
+    return (
+        dspend
+        .groupby(group_cols)
+        .agg([("dspend", "sum"), ("dspend_count", "count"), ("dspend_mean", "mean")])
+    )
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def dspend_groups(df):
+    """Spends on discretionary spend groups."""
+    # Classify dspends
+    df["dspend"] = np.nan
+    for group, tags in DSPEND_GROUPS.items():
+        mask = df.tag_auto.isin(tags) & df.is_debit
+        df.loc[mask, "dspend"] = "_".join(["dspend", group])
+
+    group_cols = [df.user_id, df.ym, df.dspend]
+    is_dspend = df.dspend.notna()
+    dspend = df.amount.where(is_dspend, np.nan)
+    return dspend.groupby(group_cols).sum().unstack().fillna(0)
+
+
+@aggregator
+@hh.timer(on=TIMER_ON)
+def dspend_direct_debit(df):
+    """Discretionary spend paid by debit direct."""
+    group_cols = [df.user_id, df.ym]
+    dd_pattern = "direct debit|dd$|d/d$|ddr$"
+    dspend_tags = [tag for group, tags in DSPEND_GROUPS.items() for tag in tags]
+    is_dd_dspend = (
+        df.desc.str.contains(dd_pattern) & df.tag_auto.isin(dspend_tags) & df.is_debit
+    )
+    dd_dspend = df.amount.where(is_dd_dspend, np.nan)
+    return dd_dspend.groupby(group_cols).sum().rename("dspend_dd")
 
 
