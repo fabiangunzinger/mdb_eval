@@ -46,15 +46,15 @@ process documented below.
 \subsection{Preprocessing}%
 \label{sub:preprocessing}
 
-\paragraph{Data cleaning}%
+\paragraph{Data cleaning:}%
 \label{par:data_cleaning}
 
 I use the dataset described above for a number of projects, and perform a
 number of steps to create a minimally cleaned version of the dataset that is
 the basis for all such projects. These steps are performed in a dedicated data
-repository and not run as part of this project, but the module with all
-cleaning functions is available on Github 
-(\href{https:/egithub.com/fabiangunzinger/mdb_eval/blob/f51e49c95c5884d2dc417be23921a8acd85aec9d/src/data/clean.py}{\faGithub}).
+repository and not run as part of this project.\footnote{The module with all
+cleaning functions is available on
+\href{https:/egithub.com/fabiangunzinger/mdb_eval/blob/f51e49c95c5884d2dc417be23921a8acd85aec9d/src/data/clean.py}{Github}.}
 Here, I briefly describe the main cleaning steps and their rationale. I drop
 all transactions with a missing description string because these cannot be
 categoriesed, and all transactions that are not automatically categoriesed by
@@ -62,9 +62,9 @@ the app. Dropping these transactions makes it likely that I will underestimate
 amounts spent and saved, but minimises the risk of incorrectly classified
 transactions. I also group transactions into transfer, spend, and income
 subgroups, following \citet{muggleton2020evidence} to define spend subgroups
-and \citet{hacioglu2021distributional} to define income subgroups. The precise
-list used to classify transactions is available on Github
-(\href{https://github.com/fabiangunzinger/mdb_eval/blob/92af366d4c4052cc7a7f78a6178086de8ecdfb75/src/data/txn_classifications.py}{\faGithub}).
+and \citet{hacioglu2021distributional} to define income subgroups.\footnote{
+The precise list used to classify transactions is available on
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/92af366d4c4052cc7a7f78a6178086de8ecdfb75/src/data/txn_classifications.py}{Github}.}
 Finally, I classify as duplicates and drop transactions with identical user ID,
 account ID, date, amount, and transaction description. This will drop some
 genuine transactions, such as when a user buys two identical cups of coffees at
@@ -73,29 +73,29 @@ most cases, we remove genuine duplicates.
 
 To minimise the influence of outliers, I winsorise all variables at the 1
 percent level or -- if we winsorise on both ends of the distribution -- at the
-0.5 percent level. The functions that perform the winsorisation are available
-on Github
-(\href{https://github.com/fabiangunzinger/mdb_eval/blob/d04fe186bb5cca884af2b7c1c7ad429674ef701d/src/data/transformers.py}{\faGithub}).
+0.5 percent level.\footnote{The code that performs the winsorisation are
+    available on
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/d04fe186bb5cca884af2b7c1c7ad429674ef701d/src/data/transformers.py}{Github}.}
 I rely on winsorisation (replacing top values with percentile values) instead
 of trimming (replacing top values with missing values) because data inspection
 suggests that in most cases, very large (absolute) values are not the result of
-data errors, which would call for trimming, but reflect genuine outcomes,
-which makes winsorising appropriate because it leaves these observations in the
-data while lowering their leverage to influence results.
+data errors, which would call for trimming, but reflect genuine outcomes, which
+makes winsorising appropriate because it leaves these observations in the data
+while lowering their leverage to influence results.
 
 
 \paragraph{Sample selection:}%
 \label{par:sample_selection_}
 
-The three main goals of sample selection are to select a sample of users for whom I
-can be reasonably certain to observe all relevant financial
+The three main goals of sample selection are to select a sample of users for
+whom I can be reasonably certain to observe all relevant financial
 accounts,\footnote{Relevant accounts include all current, savings, and
 credit-card accounts, but exclude long-term savings and investment accounts.}
 account histories of at least 12 months, and who are not using MDB for business
-purposes. Table~\ref{tab:selection} lists the precise conditions I apply to implement
-these criteria and their effect on sample size. The code that implements the
-selection criteria is available on Github
-(\href{https://github.com/fabiangunzinger/mdb_eval/blob/main/src/data/selectors.py}{\faGithub}).
+purposes. Table~\ref{tab:selection} lists the precise conditions I apply to
+implement these criteria and their effect on sample size.\footnote{The code
+that implements the selection criteria is available on
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/main/src/data/selectors.py}{Github}.}
 
 In my main analysis, I show effects of app use for the 12-months period from 6
 months before and 5 months after MDB signup, treating the month of signup as
@@ -111,11 +111,11 @@ that account throughout the 12-month period of interest.\footnote{For example:
     can access at least 12 months of history. If this is not the case, and MDB
     can only, say, access 6 months of history, we would erroneously conclude
 that the user started saving \pounds100 more starting in the month they signed
-up.} Data exploration
-(\href{https://github.com/fabiangunzinger/mdb_eval/blob/d04fe186bb5cca884af2b7c1c7ad429674ef701d/notebooks/available_account_history.ipynb}{\faGithub})
-suggests that all major banks start providing 12 months of historical data from
-April 2017 onwards, which is why include only users who sign up after that
-data.
+up.} Data exploration suggests that all major banks start providing 12 months
+of historical data from April 2017 onwards, which is why include only users who
+sign up after that data.\footnote{The Jupyter Notebook containing the data
+exporation is available on
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/371493bd78870cab7a303edb70687287e5bca4a9/notebooks/available_account_history.ipynb}{Github}.}
 
 To ensure that I can be reasonably certain to observe users have added all
 their financial accounts to the app, I restrict our sample to users with at
