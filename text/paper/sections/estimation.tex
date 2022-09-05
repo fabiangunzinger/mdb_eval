@@ -37,7 +37,9 @@ baker2022much}.}
 Because of this, I use a new estimator proposed by
 \citet{callaway2021difference}, which allows for arbitrary treatment effect
 heterogeneity across treatment adoption cohorts and time, and allows for the
-incorporation of a parallel trends assumption conditional on covariates. In
+incorporation of a parallel trends assumption conditional on
+covariates.\footnote{I implement the estimator using the R package
+\href{https://bcallaway11.github.io/did/}{`did`}.} In
 describing the estimator, I follow the approach of
 \citet{callaway2021difference} of first defining the causal parameter of
 interest, and then discussing identification, estimation, and inference, while
@@ -132,28 +134,6 @@ effect, and since they are not useful as a control group themselves. Similarly,
 unit treated in the very last period in the data are also dropped, since there
 exists no ``not-yet-treated`` group that could serve as a comparison group for
 them.
-
-\begin{figure}[h]
-\centering
-\caption{Pre and post-signup data availability}%
-\includegraphics[width=0.8\linewidth]{\figdir/treatplot_sample_raw.png}
-\label{fig:treatplot}
-\fignote{\textwidth}{Each horizontal line shows the observed pre and post
-    signup periods in blue and red, respectively, for one of 200 randomly
-    selected users. The faint vertical white lines indicate month borders,
-    whitespace indicates periods in which we do not observe the user. To
-the left of the observed period, this is because the app cannot access data
-before that point when the user signs up; to the right, because they have
-stopped using the app.}
-\end{figure}
-
-Figure~\ref{fig:treatplot} shows how we can leverage
-pre-signup data provided in the MDB data to construct valid control groups.
-Each row of cells shows data for one of 200 randomly selected users, with red
-cells indicating data from pre-signup months and blue cells indicating data
-from post-signup months. Signup thus occured sometime during the first blue
-coloured month, and we can use users who have not yet signed up (whose cells
-are still red) as a comparison group.
 
 
 \paragraph{Estimation:}%

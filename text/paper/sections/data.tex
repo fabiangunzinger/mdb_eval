@@ -11,14 +11,41 @@ allows users to link accounts from different banks to obtain an integrated view
 of their finances. The complete dataset contains more than 500 million
 transactions made between 2012 and June 2020 by about 270,000 users, and
 provides information such as date, amount, and description of the transaction
-as well as account and user-level information. Crucially, for this paper, MDB
-can access up to three years of historic data for each linked account.
+as well as account and user-level information.
+
+Crucially, for this paper, MDB can access up to three years of historic data
+for each linked account. Figure~\ref{fig:treatplot} shows how we can leverage
+pre-signup data provided in the MDB data to construct valid control groups.
+Each row of cells shows data for one of 200 randomly selected users, with red
+cells indicating data from pre-signup months and blue cells indicating data
+from post-signup months. Signup thus occured sometime during the first blue
+coloured month, and we can use users who have not yet signed up (whose cells
+are still red) as a comparison group. In my analysis below, I will use this
+data structure to compare the outcomes of users who start using the Money
+Dashboard app at a particular point in time with users who have not yet started
+using the app at that time.
+
+\begin{figure}[h]
+\centering
+\caption{Pre and post-signup data availability}%
+\includegraphics[width=0.8\linewidth]{\figdir/treatplot_sample_raw.png}
+\label{fig:treatplot}
+\fignote{\textwidth}{Each horizontal line shows the observed pre and post
+    signup periods in blue and red, respectively, for one of 200 randomly
+    selected users. The faint vertical white lines indicate month borders,
+    whitespace indicates periods in which we do not observe the user. To
+the left of the observed period, this is because the app cannot access data
+before that point when the user signs up; to the right, because they have
+stopped using the app.}
+\end{figure}
 
 The data's main advantage for the study of consumer financial behaviour is that
 it allows us to observe all savings and spending transactions for users who
-linked all their financial accounts. This means that for such users, we can be
-sure that any reduction in spending we observe is not offset by an increase in
-spending in unliked accounts. Furthermore, data is collected automatically and
+linked all their financial accounts. This is important since it means that we
+can be sure that any changes we observe in some of a user's account are not
+offset by changes in unliked accounts.\footnote{For an example where debt-reduction in
+one set of accounts is offset by an increase in debt by another set of account,
+see \citet{medina2021side}.} Furthermore, data is collected automatically and
 in real-time rather than through surveys that collect data with a time-lag and
 often rely on consumers's ability and willingness to provide accurate
 information.
