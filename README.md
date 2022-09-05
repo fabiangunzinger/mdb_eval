@@ -1,6 +1,3 @@
-
-
-## Analysis
-
-- R settings and global variables are set in `src/config.R`, Python settings and global variables in `src/config.py`.
+This repo contains all code used to produce the "Do Money Dashboard users spend
+less and save more?" paper.
 

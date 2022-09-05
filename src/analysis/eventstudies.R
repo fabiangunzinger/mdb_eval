@@ -368,68 +368,6 @@ ggdid(
 ggsave(glue("{FIGDIR}/outflows_cond_es.png"))
 
 
-
-# Anticipation effects ------------------------------------------------------------
-
-antic_periods <- 3
-yvars <- c("dspend", "netflows")
-
-
-for (i in 0:antic_periods) {
-  for (y in yvars) {
-
-    print(glue("Computing antic {i} for {y}..."))
-    
-    # Calculate group-time treatment effects
-    antic_gt <- att_gt(
-      yname = y,
-      gname = "user_reg_ym",
-      idname = "user_id",
-      tname = "ym",
-      xformla = xformla,
-      anticipation = i,
-      data = df,
-      est_method = "reg",
-      control_group = "notyettreated",
-      allow_unbalanced_panel = T,
-      cores = 4
-    )
-    
-    # Aggregate to event-study parameters
-    antic_es <- aggte(
-      antic_gt,
-      type = "dynamic",
-      na.rm = T,
-      min_e = -6,
-      max_e = 5,
-      balance_e = 5
-    )
-    
-    # Export plot
-    ylabs <- list(
-      "dspend" = "Discretionary spend",
-      "netflows" = "Net-inflows into savings account"
-    )
-    ylims <- list(
-      "dspend" = c(-200, 100),
-      "netflows" = c(-400, 400)
-    )
-    titles <- list(
-      "dspend" = glue("Anticipation periods: {i}"),
-      "netflows" = " "
-    )
-    ggdid(
-      antic_es,
-      title = titles[[y]],
-      ylab = ylabs[[y]],
-      xlab = "Months since app signup",
-      ylim = ylims[[y]]
-    ) + cstheme
-    ggsave(glue("{FIGDIR}/{y}_antic{i}_es.png"))
-  }
-}
-
-
 # Unbalanced aggregation ----------------------------------------------------------
 
 ## Discretionary spend ##

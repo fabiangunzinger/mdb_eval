@@ -10,13 +10,9 @@ sumstats:
 	@Rscript src/analysis/sumstats.R
 
 
-.PHONY: figures sampdesc treathist savpat
+.PHONY: figures sampdesc treathist
 
-figures: sampdesc treathist savpat
-
-savpat:
-	@printf '\n Updating savings patterns plots...\n'
-	@Rscript src/figures/savings_patterns.R
+figures: sampdesc treathist
 
 sampdesc:
 	@printf '\n Updating sample description plots...\n'

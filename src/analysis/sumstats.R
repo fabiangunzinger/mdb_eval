@@ -1,3 +1,8 @@
+# 
+# Code to produce summary statistics table
+# 
+
+
 library(stargazer)
 
 source('./src/config.R')

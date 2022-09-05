@@ -1,3 +1,8 @@
+# 
+# Code to produce sample characteristics plot
+# 
+
+
 library(cowplot)
 library(dplyr)
 library(ggplot2)

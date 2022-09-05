@@ -1,5 +1,11 @@
-# Subgroups -----------------------------------------------------------------------
+# 
+# Code I played around with but ultimately didn't use for the final paper. Collected
+# here for easy future access.
+# 
 
+
+
+# Subgroups -----------------------------------------------------------------------
 
 groupvars <- c("generation", "is_female")
 yvars <- c("dspend")
@@ -72,6 +78,67 @@ for (v in groupvars) {
       ggsave(fn)
       
     }
+  }
+}
+
+
+# Anticipation effects ------------------------------------------------------------
+
+antic_periods <- 3
+yvars <- c("dspend", "netflows")
+
+
+for (i in 0:antic_periods) {
+  for (y in yvars) {
+    
+    print(glue("Computing antic {i} for {y}..."))
+    
+    # Calculate group-time treatment effects
+    antic_gt <- att_gt(
+      yname = y,
+      gname = "user_reg_ym",
+      idname = "user_id",
+      tname = "ym",
+      xformla = xformla,
+      anticipation = i,
+      data = df,
+      est_method = "reg",
+      control_group = "notyettreated",
+      allow_unbalanced_panel = T,
+      cores = 4
+    )
+    
+    # Aggregate to event-study parameters
+    antic_es <- aggte(
+      antic_gt,
+      type = "dynamic",
+      na.rm = T,
+      min_e = -6,
+      max_e = 5,
+      balance_e = 5
+    )
+    
+    # Export plot
+    ylabs <- list(
+      "dspend" = "Discretionary spend",
+      "netflows" = "Net-inflows into savings account"
+    )
+    ylims <- list(
+      "dspend" = c(-200, 100),
+      "netflows" = c(-400, 400)
+    )
+    titles <- list(
+      "dspend" = glue("Anticipation periods: {i}"),
+      "netflows" = " "
+    )
+    ggdid(
+      antic_es,
+      title = titles[[y]],
+      ylab = ylabs[[y]],
+      xlab = "Months since app signup",
+      ylim = ylims[[y]]
+    ) + cstheme
+    ggsave(glue("{FIGDIR}/{y}_antic{i}_es.png"))
   }
 }
 
@@ -230,3 +297,295 @@ cs_HDiD_relmag <- createSensitivityPlot_relativeMagnitudes(hd_cs_rm_never$robust
 cs_HDiD_relmag
 fn <- glue("{FIGDIR}/cs_hdid_relmag.png")
 ggsave(fn)
+
+
+# Matching ------------------------------------------------------------------------
+
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(PanelMatch)
+
+source('./src/config.R')
+source('./src/helpers/helpers.R')
+
+
+df <- read_analysis_data()
+
+# Specify covariates as vector and fml
+covs <- c("month_income", "month_spend", "is_female",
+          "generation_code", "is_urban", "accounts_active")
+fml <- reformulate(covs)
+
+# Perform matching
+pm_ps_nn <- PanelMatch(
+  data = df,
+  time.id = "ym",
+  unit.id = "user_id",
+  treatment = "t",
+  outcome.var = "netflows",
+  lag = 5,
+  lead = 0:5,  
+  qoi = "att",
+  forbid.treatment.reversal = T,
+  refinement.method = "ps.match",
+  covs.formula = fml,
+  size.match = 1
+)
+
+
+# Frequency distribution of matched sets
+set_sizes <- summary(pm_ps_nn$att)$overview$matched.set.size
+png(
+  file.path(FIGDIR, "hist_matchset_size.png"),
+  width     = 10,
+  height    = 6,
+  units     = "cm",
+  res       = 1200,
+  pointsize = 6
+)
+plot(pm_ps_nn$att, main = NULL)
+dev.off()
+
+
+# Inspect covariate balance 1
+ylim <- c(-1, 1)
+png(
+  file.path(FIGDIR, "covar_balance.png"),
+  width     = 12,
+  height    = 6,
+  units     = "cm",
+  res       = 1200,
+  pointsize = 6
+)
+par(mfrow=c(1,2))
+get_covariate_balance(
+  pm_ps_nn$att,
+  data = df,
+  use.equal.weights = T,
+  covariates = covs,
+  plot = T,
+  ylim = ylim
+)
+get_covariate_balance(
+  pm_ps_nn$att,
+  data = df,
+  use.equal.weights = F,
+  covariates = covs,
+  plot = T,
+  ylim = ylim
+)
+dev.off()
+
+
+# Check for parallel pre-treatment trend assumption
+# tbd
+
+
+# Estimates
+pe <- PanelEstimate(sets = pm_ps_nn, data = df)
+summary(pe)
+png(
+  file.path(FIGDIR, "match_estimates.png"),
+  width     = 12,
+  height    = 6,
+  units     = "cm",
+  res       = 1200,
+  pointsize = 6
+)
+plot(pe, main = NULL)
+dev.off()
+
+
+# Visualise matchset examples
+
+disptreat <- function(matched_set) {
+  DisplayTreatment(
+    data = df,
+    unit.id = "user_id",
+    time.id = "ym",
+    treatment = "t",
+    legend.position = "right",
+    xlab = "Year-months",
+    ylab = "User",
+    hide.x.axis.label = T,
+    hide.y.axis.label = T,
+    matched.set = matched_set,
+    show.set.only = T,
+  ) + labs(title = "") + theme(legend.position = "none") 
+}
+a <- disptreat(pm_ps_nn$att[100])
+b <- disptreat(pm_ps_nn$att[200])
+g <- arrangeGrob(a, b, ncol = 2)
+ggsave(file = file.path(FIGDIR, 'matchset_examples_new.png'), g)
+
+
+# Fixest settings -----------------------------------------------------------------
+
+library(fixest)
+
+
+# conveniently set fontsize of latex table produced by etable
+set_font = function(x, fontsize){
+  if(missing(fontsize)) return(x)
+  dreamerr::check_arg_plus(
+    fontsize, 
+    "match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)"
+  )
+  x[x == "%start:tab\n"] = paste0("\\begin{", fontsize, "}")
+  x[x == "%end:tab\n"] = paste0("\\end{", fontsize, "}")
+  return(x)
+}
+
+setFixest_etable(
+  postprocess.tex = set_font,
+  se.below = T,
+  digits = 'r2',
+  coefstat = 'confint',
+  style.tex = style.tex(
+    main = "base",
+    tpt = TRUE,
+    notes.tpt.intro = '\\footnotesize'
+  )
+)
+
+setFixest_coefplot(
+  # pt.col = "steelblue4",
+  # ci.col = "steelblue4",
+  pt.join = TRUE
+)
+
+setFixest_dict(c(
+  has_sa_inflows = "Has savings",
+  inflows = "Inflows",
+  outflows = "Outflows",
+  netflows = "Net-inflows",
+  inflows_norm = "Inflows / Income",
+  outflows_norm = "Outflows / Income",
+  netflows_norm = "Net-inflows / Income",
+  has_pos_netflows = "Has positive net-inflows",
+  pos_netflows = "Positive net-inflows",
+  t = "App use",
+  tt = "Months relative to app use",
+  
+  month_income = "Month income",
+  month_spend = 'Month spend',
+  dspend = "Discretionary spend",
+  dspend_count = "Discretionary spend txns",
+  dspend_mean = "Mean discretionary spend txn",
+  is_female = 'Female',
+  age = 'Age',
+  is_urban = 'Urban',
+  generation = "Generation",
+  region_code = "Region",
+  accounts_active = "Active accounts",
+  
+  user_id = "User ID",
+  ym = "Year-month",
+  
+  '(Intercept)' = 'Intercept'
+))
+
+
+fcoefplot <- function(model, ...) {
+  # wrapper around coefplot with custom settings
+  coefplot(
+    model,
+    lab.fit = "tilted",
+    ylab = 'Change in __depvar__',
+    main = "",
+    col = c(1, 2, 4, 3, 5, 6, 7, 8),
+    pt.pch = c(20, 15, 17, 21, 24, 22),
+    ...
+  )
+}
+
+
+fiplot <- function(model, ...) {
+  # wrapper around iplot with custom settings
+  iplot(
+    model,
+    ylab = '__depvar__',
+    main = "",
+    col = c(1, 2, 4, 3, 5, 6, 7, 8),
+    pt.pch = c(20, 15, 17, 21, 24, 22),
+    ...
+  )
+}
+
+
+
+# Savings patterns ----------------------------------------------------------------
+
+
+library(cowplot)
+library(tidyverse)
+library(lubridate)
+
+source('./src/config.R')
+source('./src/helpers/helpers.R')
+
+theme_set(theme_minimal())
+
+
+df <- read_analysis_data()
+
+
+flows <- "^(in|out|net)flows$"
+
+inflow_amounts <- df %>%
+  select(matches(flows)) %>%
+  pivot_longer(everything()) %>%
+  filter(name == "inflows") %>% 
+  count(value) %>%
+  mutate(prop = n / sum(n)) %>% 
+  filter(between(value, 1, 1000)) %>% 
+  ggplot() +
+  geom_bar(aes(value, prop), stat = "identity", colour = palette[1]) +
+  scale_x_continuous(breaks = seq(0, 1000, 100)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Amount (£)", y = "Percent of inflow transactions") +
+  coord_cartesian(xlim = c(0, 1000))
+
+
+flows_tt <- df %>%
+  select(tt, matches(flows)) %>% 
+  filter(between(tt, -6, 5)) %>%
+  pivot_longer(matches(flows)) %>%
+  mutate(name = factor(
+    name, 
+    levels = c("inflows", "outflows", "netflows"), 
+    labels = c("Inflows", "Outflows", "Netflows")
+  )) %>% 
+  ggplot(aes(tt, value, colour = name, shape = name)) +
+  geom_point(stat = "summary", fun = "mean") +
+  labs(x = "Time to app use", y = "Amount (£)", colour = NULL, shape = NULL) +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 12)
+  )
+
+
+
+# Combine plots and add legend
+
+p <- plot_grid(
+  inflow_amounts + theme(legend.position = "none"),
+  flows_tt + theme(legend.position = "none"),
+  labels = "AUTO",
+  label_x = 0,
+  label_y = 0,
+  hjust = -0.5, vjust = -1
+)
+
+legend <- get_legend(flows_tt)
+plot_grid(p, legend, ncol = 1, rel_heights = c(1, .1))
+
+
+figname <- 'savings_patterns.png'
+ggsave(
+  file.path(FIGDIR, figname),
+  height = 1000,
+  width = 2000,
+  units = "px"
+)
