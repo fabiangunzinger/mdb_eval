@@ -1,0 +1,15 @@
+name: mdb_eval
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - jupyterlab
+  - seaborn
+  - pandas
+  - python=3.9
+  - s3fs
+  - pyarrow
+  - jupyterlab_code_formatter
+  - black
+  - isort
+prefix: /Users/fgu/miniconda3/envs/mdb_eval
