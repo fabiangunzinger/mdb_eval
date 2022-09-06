@@ -6,12 +6,25 @@
 \subsection{Dataset description}%
 \label{sub:dataset_description}
 
-I use data from Money Dashboard (MDB), a UK-based financial aggregation app that
-allows users to link accounts from different banks to obtain an integrated view
-of their finances. The complete dataset contains more than 500 million
-transactions made between 2012 and June 2020 by about 270,000 users, and
-provides information such as date, amount, and description of the transaction
-as well as account and user-level information.
+I use data from Money Dashboard (MDB), a UK-based financial aggregation app
+that allows users to link accounts from different banks to obtain an integrated
+view of their finances in order to help them to reduce their spending and
+increase their savings. Figure~\ref{fig:mdb} shows a screenshot from MDB's
+website (left) and an example of its user interface (right). The complete
+dataset contains more than 500 million transactions made between 2012 and June
+2020 by about 270,000 users, and provides information such as date, amount, and
+description of the transaction as well as account and user-level information.
+
+\begin{figure}[h]
+    \centering
+    \caption{Money Dashboard website and user interface}%
+    \includegraphics[width=0.49\linewidth]{\figdir/mdb_website}
+    \includegraphics[width=0.49\linewidth]{\figdir/mdb_ui}
+    \label{fig:mdb_website}
+    \fignote{\textwidth}{Screenshot from the top of the Money Dashboard website
+    (left) and example of its user interface (right), illustrating some of the
+transaction grouping and budgeting functions.} 
+\end{figure}
 
 Crucially, for this paper, MDB can access up to three years of historic data
 for each linked account. Figure~\ref{fig:treatplot} shows how we can leverage
