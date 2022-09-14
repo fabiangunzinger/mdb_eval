@@ -1,5 +1,3 @@
-% !TEX root = ../eval.tex
-
 \section{Results}%
 \label{sec:results}
 
@@ -175,7 +173,26 @@ between individuals.
 
 Another question of interest based on the main findings above is along what
 dimensions users reduce their discretionary spend. There are three dimensions of
-interest. First, users can achieve the persistent reduction in discretionary
+interest.
+
+\begin{figure}[h]
+    \centering
+    \caption{Change in direct-debit discretionary spend}%
+    \label{fig:disagg_dd}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_dd_cond_es.png}
+    \fignote{\textwidth}{Effect of app use on total discretionary spend (for
+        reference) and discretionary spend paid via debit-direct contracts.
+        Point estimates represent group-time average treatment effects
+        aggregated to periods since treatment exposure, as defined in
+        Section~\ref{sec:estimation}. Red lines represent point estimates and
+        uniform 95\% confidence bands for pre-treatment periods allowing for
+        clustering at the user level. If the null hypothesis that parallel
+        trends hold in all periods is correct, these should be equal to zero.
+    Blue lines provide similar information for post-treatment periods.}
+\end{figure}
+
+First, users can achieve the persistent reduction in discretionary
 spend seen in Figure~\ref{fig:main_results} by either maintaining a change in
 behaviour consistently month-to-month by, for instance, making fewer purchases
 or spending less on certain items, or, alternatively, make a decision during
@@ -198,19 +215,23 @@ debit-direct discretionary spend is available on
 
 \begin{figure}[h]
     \centering
-    \caption{Change in direct-debit discretionary spend}%
-    \label{fig:disagg_dd}
+    \caption{Change in discretionary spend by subgroup}%
+    \label{fig:disagg_groups}
     \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_dd_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_groceries_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_entertainment_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_food_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_clothes_cond_es.png}
+    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_other_cond_es.png}
     \fignote{\textwidth}{Effect of app use on total discretionary spend (for
-        reference) and discretionary spend paid via debit-direct contracts.
-        Point estimates represent group-time average treatment effects
-        aggregated to periods since treatment exposure, as defined in
-        Section~\ref{sub:estimation}. Red lines represent point estimates and
-        uniform 95\% confidence bands for pre-treatment periods allowing for
-        clustering at the user level. If the null hypothesis that parallel
-        trends hold in all periods is correct, these should be equal to zero.
-    Blue lines provide similar information for post-treatment periods.}
+        reference) and its subgroups. Point estimates represent
+        group-time average treatment effects aggregated to periods since
+        treatment exposure, as defined in Section~\ref{sec:estimation}. Red
+        lines represent point estimates and uniform 95\% confidence bands for
+        pre-treatment periods allowing for clustering at the user level. If the
+        null hypothesis that parallel trends hold in all periods is correct,
+        these should be equal to zero. Blue lines provide similar information
+    for post-treatment periods.}
 \end{figure}
 
 The second interesting way to disaggregate discretionary spend is into
@@ -231,40 +252,6 @@ spend results from changes along all these margins.
 
 \begin{figure}[h]
     \centering
-    \caption{Change in discretionary spend by subgroup}%
-    \label{fig:disagg_groups}
-    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_groceries_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_entertainment_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_food_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_clothes_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_other_cond_es.png}
-    \fignote{\textwidth}{Effect of app use on total discretionary spend (for
-        reference) and its subgroups. Point estimates represent
-        group-time average treatment effects aggregated to periods since
-        treatment exposure, as defined in Section~\ref{sub:estimation}. Red
-        lines represent point estimates and uniform 95\% confidence bands for
-        pre-treatment periods allowing for clustering at the user level. If the
-        null hypothesis that parallel trends hold in all periods is correct,
-        these should be equal to zero. Blue lines provide similar information
-    for post-treatment periods.}
-\end{figure}
-
-
-Finally, it is interesting to consider whether users reduce discretionary spend
-along the extensive or the intensive margin -- whether they make fewer
-transactions or reduce the average spend per transaction.
-Figure~\ref{fig:int_ext_results} shows the number of transactions (the
-extensive margin) in the left panel and the average spend per transaction (the
-intensive margin) in the right panel. We can see that the reduction in spend is
-clearly the result of changes along the extensive margin -- on average, users
-make about five fewer discretionary spend purchases per month once they sign up
-to MDB. The average transaction value of a discretionary spend purchase in the
-data is about \pounds25, adding up to the total effect we find in
-Figure~\ref{fig:main_results}.
-
-\begin{figure}[h]
-    \centering
     \caption{Intensive and extensive margin}%
     \label{fig:int_ext_results}
     \includegraphics[width=.49\textwidth]{\figdir/dspend_extens_es.png}
@@ -278,7 +265,7 @@ Figure~\ref{fig:main_results}.
         and the intensive margin is the average value of a discretionary spend
         transaction. Point estimates represent
         group-time average treatment effects aggregated to periods since
-        treatment exposure, as defined in Section~\ref{sub:estimation}. Red
+        treatment exposure, as defined in Section~\ref{sec:estimation}. Red
         lines represent point estimates and uniform 95\% confidence bands for
         pre-treatment periods allowing for clustering at the user level. If the
         null hypothesis that parallel trends hold in all periods is correct,
@@ -286,4 +273,15 @@ Figure~\ref{fig:main_results}.
     for post-treatment periods.}
 \end{figure}
 
+Finally, it is interesting to consider whether users reduce discretionary spend
+along the extensive or the intensive margin -- whether they make fewer
+transactions or reduce the average spend per transaction.
+Figure~\ref{fig:int_ext_results} shows the number of transactions (the
+extensive margin) in the left panel and the average spend per transaction (the
+intensive margin) in the right panel. We can see that the reduction in spend is
+clearly the result of changes along the extensive margin -- on average, users
+make about five fewer discretionary spend purchases per month once they sign up
+to MDB. The average transaction value of a discretionary spend purchase in the
+data is about \pounds25, adding up to the total effect we find in
+Figure~\ref{fig:main_results}.
 
