@@ -48,10 +48,7 @@ stargazer(
   digits = 1,
   keep = vars,
   covariate.labels = var_labs,
-  title = 'Summary statistics',
-  label = 'tab:sumstats',
-  font.size = 'footnotesize',
-  table.placement = "H",
+  float = F,
   out = file.path(TABDIR, tabname)
 )
 
