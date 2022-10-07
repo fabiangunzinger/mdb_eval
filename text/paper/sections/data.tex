@@ -31,7 +31,7 @@ for each linked account. Figure~\ref{fig:treatplot} shows how we can leverage
 pre-signup data provided in the MDB data to construct valid control groups.
 Each row of cells shows data for one of 200 randomly selected users, with red
 cells indicating data from pre-signup months and blue cells indicating data
-from post-signup months. Signup thus occured sometime during the first blue
+from post-signup months. Signup thus occurred sometime during the first blue
 coloured month, and we can use users who have not yet signed up (whose cells
 are still red) as a comparison group. In my analysis below, I will use this
 data structure to compare the outcomes of users who start using the Money
@@ -56,16 +56,16 @@ The data's main advantage for the study of consumer financial behaviour is that
 it allows us to observe all savings and spending transactions for users who
 linked all their financial accounts. This is important since it means that we
 can be sure that any changes we observe in some of a user's account are not
-offset by changes in unliked accounts.\footnote{For an example where debt-reduction in
+offset by changes in unlinked accounts.\footnote{For an example where debt-reduction in
 one set of accounts is offset by an increase in debt by another set of account,
 see \citet{medina2021side}.} Furthermore, data is collected automatically and
 in real-time rather than through surveys that collect data with a time-lag and
-often rely on consumers's ability and willingness to provide accurate
+often rely on consumer's ability and willingness to provide accurate
 information.
 
 The data's main limitation is that because users's self select into using MDB,
 the sample is not representative of the wider UK population: it is well
-documented that FinTech app users are more likely to be male, younder, and
+documented that FinTech app users are more likely to be male, younger, and
 higher-income earners than the average person \citet{carlin2019generational}.
 Also, as pointed out in \citet{gelman2014harnessing}, a willingness to share
 financial information with a third party might not only select on demographic
@@ -79,7 +79,7 @@ is that while we can observe user's complete financial behaviour if they add
 all their financial accounts to the app, it is not trivial to distinguish
 between users who do and do not do that. I address this challenge in the sample
 selection process documented below. A third issue is that while the app is able
-to classify many transactions into types, it misclassifies some transactions
+to classify many transactions into types, it misclassified some transactions
 and cannot classify others altogether. I address this as part of the cleaning
 process documented below.
 
@@ -97,7 +97,7 @@ cleaning functions is available on
 \href{https:/egithub.com/fabiangunzinger/mdb_eval/blob/f51e49c95c5884d2dc417be23921a8acd85aec9d/src/data/clean.py}{Github}.}
 Here, I briefly describe the main cleaning steps and their rationale. I drop
 all transactions with a missing description string because these cannot be
-categoriesed, and all transactions that are not automatically categoriesed by
+categorised, and all transactions that are not automatically categorised by
 the app. Dropping these transactions makes it likely that I will underestimate
 amounts spent and saved, but minimises the risk of incorrectly classified
 transactions. I also group transactions into transfer, spend, and income
@@ -154,7 +154,7 @@ that the user started saving \pounds100 more starting in the month they signed
 up.} Data exploration suggests that all major banks start providing 12 months
 of historical data from April 2017 onwards, which is why include only users who
 sign up after that data.\footnote{The Jupyter Notebook containing the data
-exporation is available on
+exploration is available on
 \href{https://github.com/fabiangunzinger/mdb_eval/blob/371493bd78870cab7a303edb70687287e5bca4a9/notebooks/available_account_history.ipynb}{Github}.}
 
 To ensure that I can be reasonably certain to observe users have added all

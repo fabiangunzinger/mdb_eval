@@ -6,7 +6,7 @@ as spend transactions over which users likely have a lot of control, and
 ``net-inflows into savings-accounts'', defined as the difference between
 inflows into and outflows from all of a user's savings
 accounts.\footnote{Discretionary spend is calculated solely based on card
-    transactioins, while cash transactions are excluded. This is because cash
+    transactions, while cash transactions are excluded. This is because cash
     transactions are recorded in the MDB data as ATM withdrawals, and it is
     impossible to know what these funds were used for. Furthermore, I do
     not include gasoline expenses in discretionary spend because many people
@@ -76,7 +76,7 @@ assumptions are very similar but not identical is not surprising. Conditional
 parallel trends are important in contexts when (i) there are covariate specific
 trends in outcome paths and (ii) the distribution of covariates differs between
 treatment and control groups. A classic example of the latter would be
-comparing individuals wo did and did not sign up for a job-training program,
+comparing individuals who did and did not sign up for a job-training program,
 where characteristics such as age and employment history are often quite
 different \citep{heckman1997matching}. In our context, however, where all
 individuals eventually sign up to Money Dashboard and our comparison group is a
@@ -106,9 +106,9 @@ Finally, we can see that, in contrast to discretionary spending, net-inflows
 into savings accounts do not change once users start using the app. This is
 somewhat surprising, since we might have expected that users transfer at least
 some of their saved funds into their savings accounts to either build up a
-``rainy-day'' savings cushion or as a contribution towards specific savings
-goals. The absence of such transfers naturally begs the question ``where does
-the money go?'', to which I turn in the next section.
+emergency savings cushion or as a contribution towards specific savings goals.
+The absence of such transfers naturally begs the question ``where does the
+money go?'', to which I turn in the next section.
 
 
 \subsection{Where do additional funds go?}%
@@ -132,10 +132,10 @@ rejecting the idea that users systematically move additional funds into either
 investment vehicles or other savings accounts. An exception is the spikes in
 user-labelled savings in the month just before and the month of signup. Rather
 than suggesting an additional inflow of funds, however, this is is more likely
-to be an artifact of users only manully labelling transactions during active
-app use rather than also labelling historical transctions.\footnote{The pattern
+to be an artefact of users only manually labelling transactions during active
+app use rather than also labelling historical transactions.\footnote{The pattern
     could be explained in two ways: either users can see the entire account
-    historey available to MDB after linking an account but only label
+    history available to MDB after linking an account but only label
     transactions during periods of active app use and the period immediately
 before signup, or MDB only shows users data from the month before signup
 onwards, so that users are unable to manually label transactions in earlier
@@ -196,7 +196,7 @@ First, users can achieve the persistent reduction in discretionary
 spend seen in Figure~\ref{fig:main_results} by either maintaining a change in
 behaviour consistently month-to-month by, for instance, making fewer purchases
 or spending less on certain items, or, alternatively, make a decision during
-the month of signup that automates the reductin in spend by cancelling
+the month of signup that automates the reduction in spend by cancelling
 debit-direct contracts. Figure~\ref{fig:disagg_dd} shows in the left panel the
 reduction of discretionary spending shows in Figure~\ref{fig:main_results}
 above for reference, and in the right panel discretionary spend paid via
@@ -241,12 +241,12 @@ group transactions into ``groceries'', ``clothes'', ``entertainment'',
 ``other''.\footnote{The list used to classify transactions is available on
     \href{https://github.com/fabiangunzinger/mdb_eval/blob/f31bfcd7a330188cdd27968d41957ebf5b454099/src/data/aggregators.py\#L389}{Github}.
     I classify transactions tagged by MDB as ``entertainment'' as ``other
-discretionary spend'', since many such transactions are purchses with Amazon,
+discretionary spend'', since many such transactions are purchases with Amazon,
 which we cannot precisely classify.} Figure~\ref{fig:disagg_groups} again
 reproduces the plot from the main results in the top-left panel for reference
 and then plots results for each of the five subgroups. While we can see that users
 mainly reduce spending on groceries and the residual category ``other'',
-followed by food and clothes, the overall picture that emergest is that these
+followed by food and clothes, the overall picture that emerges is that these
 differences are quite small, and that the overall reduction in discretionary
 spend results from changes along all these margins.
 
@@ -256,8 +256,6 @@ spend results from changes along all these margins.
     \label{fig:int_ext_results}
     \includegraphics[width=.49\textwidth]{\figdir/dspend_extens_es.png}
     \includegraphics[width=.49\textwidth]{\figdir/dspend_intens_es.png}
-    % \includegraphics[width=.49\textwidth]{\figdir/netflows_extens_es.png}
-    % \includegraphics[width=.49\textwidth]{\figdir/netflows_intens_es.png}
     \fignote{\textwidth}{The effect of app use on monthly discretionary spend 
         disaggregated into the effect on the extensive (left column) and
         intensive (right column) margins. The
