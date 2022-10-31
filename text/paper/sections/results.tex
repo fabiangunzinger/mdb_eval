@@ -95,7 +95,7 @@ number of accounts.\footnote{As discussed in Section~\ref{sec:data}, users
 accounts after joining, I cannot rule out that some users do add account after
 signup and MDB is unable to capture the complete history.}
 
-We can also see that in two periods, the null-hypothesis of identical
+We can also see that in periods -4 and -3, the null-hypothesis of identical
 pre-signup trends is being rejected (both under conditional and unconditional
 trends). The estimated differences from zero are not large, but a sign that the
 results should be interpreted with caution. In future work, I plan to use the
@@ -103,12 +103,18 @@ approach introduced by \citet{rambachan2022more} to test how sensitive my
 results are to deviations from parallel trends.
 
 Finally, we can see that, in contrast to discretionary spending, net-inflows
-into savings accounts do not change once users start using the app. This is
-somewhat surprising, since we might have expected that users transfer at least
-some of their saved funds into their savings accounts to either build up a
-emergency savings cushion or as a contribution towards specific savings goals.
-The absence of such transfers naturally begs the question ``where does the
-money go?'', to which I turn in the next section.
+into savings accounts do not change once users start using the app. Confidence
+intervals are much larger than for discretionary spend because -- as can be
+seen in Table~\ref{tab:sumstats} -- savings account inflows are often zero,
+which leads to a normalised standard deviation much larger than that for
+discretionary spend.
+
+The absence of an increase in savings is somewhat surprising, since we might
+have expected that users transfer at least some of their saved funds into their
+savings accounts to either build up a emergency savings cushion or as a
+contribution towards specific savings goals.  The absence of such transfers
+naturally raises the question ``where does the money go?'', to which I turn in
+the next section.
 
 
 \subsection{Where do additional funds go?}%
@@ -186,7 +192,8 @@ interest.
     \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_cond_es.png}
     \includegraphics[width=.49\textwidth]{\figdir/disag_dspend_dd_cond_es.png}
     \fignote{\textwidth}{Effect of app use on total discretionary spend (for
-        reference) and discretionary spend paid via debit-direct contracts.
+        reference) on the left and discretionary spend paid via debit-direct
+        contracts on the right.
         Point estimates represent group-time average treatment effects
         aggregated to periods since treatment exposure, as defined in
         Section~\ref{sec:estimation}. Red lines represent point estimates and
