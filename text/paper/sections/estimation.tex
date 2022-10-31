@@ -7,7 +7,7 @@ We want to estimate the effect of app use over time. Given our data, a natural
 way to do this would be to use a dynamic two-way fixed effects model that
 includes user and year-month fixed effects and dummies indicating time since
 app signup. The estimated coefficients on these dummies are then conventionally
-interpreted as dynamic treatment effects. However, a series of papers in
+interpreted as dynamic treatment effects. However, a series of recent papers in
 econometric research demonstrate that while this approach is extremely common
 in applied research, two-way fixed effects models do not produce valid
 estimates of dynamic treatment effects in most settings
@@ -30,9 +30,8 @@ assumption.\footnote{The problem is exacerbated in static two-way fixed effects
     of zero). These negative weights, in turn, can lead to situations where the
     treatment effect estimate is negative even though all unit-level treatment
     effects are positive. The dynamic specification suffers from very similar
-    problems, as shown in \citet{sun2021estimating}. For two excellent
-    reviews of this new literature, see \citet{roth2022trending,
-baker2022much}.}
+    problems, as shown in \citet{sun2021estimating}. For two excellent reviews
+of this new literature, see \citet{roth2022trending, baker2022much}.}
 
 Because of this, I use a new estimator proposed by
 \citet{callaway2021difference}, which allows for arbitrary treatment effect
@@ -49,17 +48,33 @@ using the simplified notation used in \citet{roth2022trending}.
 \label{par:causal_parameter_of_interest_}
 
 The basic building block of the framework, and the causal effect of interest,
-is the group-time average treatment effect: the average treatment effect at
-time $t$ for the group of individuals first treated at time $g$, defined as:
+is a generalised version of the average treatment effect of the treated (ATT)
+of the difference-in-differences framework, which the authors call the
+group-time average treatment effect: the average treatment effect at time $t$
+for the group (or cohort) of individuals first treated at time $g$, defined as:
 
 \begin{equation}
+    \label{equ:att}
     ATT(g,t) = \mathop{\mathbb{E}}[Y_{i,t}(g) - Y_{i,t}(0)|G_i =
     g],
 \end{equation}
 
 \noindent where $Y_{i,t}(g)$ is the potential outcome in time period $t$ of an individual
 $i$ in group $g$, and $Y_{i,t}(0)$ is the (counterfactual) potential outcome of that same
-individual if they had remained untreated.
+individual if they had remained untreated. $G_i$ indicates the first period in
+which individual $i$ was first exposed to the treatment.
+
+A key feature of these group-time average treatment effects is that they allow
+for heterogeneous treatment effects both across time and across groups. To see
+this, first consider, for example, the group of individuals first treated in
+April 2019 (i.e. $G_i = \textit{2019-04}$, for all individuals in the group) at
+two different points in time, June and July 2019, say, and notice that
+Equation~\ref{equ:att} allows for $ATT(\textit{2019-04}, \textit{2019-06}) \neq
+ATT(\textit{2019-04}, \textit{2019-07})$: hence, $ATT(g,t)$ allows for
+heterogeneity across time. Similarly, consider also another group of individuals
+first treated in March 2018, and notice that Equation~\ref{equ:att} allows for
+$ATT(\textit{2019-04}, \textit{2019-06}) \neq ATT(\textit{2018-03},
+\textit{2019-06})$: hence, $ATT(g,t)$ allows for heterogeneity across groups.
 
 
 \paragraph{Identification:}%
@@ -104,8 +119,8 @@ estimator throughout for all results shown in this paper. See
 
 Given these two assumptions, \citet{callaway2021difference} show that
 $ATT(g,t)$ is identified by comparing the expected change of group $g$ between
-periods $t$ and $g-1$ with that of a comparison group that is not yet treated
-at time $t$:
+periods $t$ and $g-1$ with that of a comparison group, $g'$, that is not yet
+treated at time $t$:
 
 \begin{equation}
     ATT(g,t) = \mathop{\mathbb{E}}[Y_{i,t} - Y_{i,g-1}|G_i = g] -
@@ -127,13 +142,14 @@ individuals that have not yet been treated at time $t$ are a valid comparison
 group for estimating treatment effects in time $t$.\footnote{If a group of
 never-treated individuals is available, then these could also serve as a
 comparison group. But because my dataset does not contain such individuals, I
-do not discuss this case.} As a result of this, units who are treated in the
-very first period in the dataset are dropped from the sample, since there
-exists no possible control group based on which to identify their treatment
-effect, and since they are not useful as a control group themselves. Similarly,
-unit treated in the very last period in the data are also dropped, since there
-exists no ``not-yet-treated`` group that could serve as a comparison group for
-them.
+do not discuss this case.}
+
+As a result of this, units who are treated in the very first period in the
+dataset are dropped from the sample, since there exists no possible control
+group based on which to identify their treatment effect, and since they are not
+useful as a control group themselves. Similarly, unit treated in the very last
+period in the data are also dropped, since there exists no ``not-yet-treated``
+group that could serve as a comparison group for them.
 
 
 \paragraph{Estimation:}%
@@ -144,8 +160,12 @@ analogues,
 
 \begin{equation}
     \widehat{ATT(g,t)} = \frac{1}{N_g}\sum_{i:G_i=g}[Y_{i,t} - Y_{i, g-1}] -
-    \frac{1}{N_\mathcal{G}}\sum_{i:G_i \in \mathcal{G}}[Y_{i,t} - Y_{i, g-1}].
+    \frac{1}{N_\mathcal{G}}\sum_{i:G_i \in \mathcal{G}}[Y_{i,t} - Y_{i, g-1}],
 \end{equation}
+
+\noindent where $N_g$ is the number of individuals first treated at time $g$
+(i.e. members of group $g$), and $N_\mathcal{G}$ is the number of individuals
+not yet treated at time $t$ (i.e. all members of all groups in $\mathcal{G}$).
 
 Once these building blocks are estimated, aggregating them to event-study type treatment effects that provide the (weighted)
 average treatment effect $l$ periods away from treatment adoption across
@@ -156,11 +176,11 @@ different adoption groups can be achieved by calculating
     ATT_l = \sum_g w_gATT(g,g+l),
 \end{equation}
 
-\noindent where $w_g = P(G = g | g \in \mathcal{G})$ are the groups relative frequencies in the
-treated population. When calculating these event study parameters, I use a
-panel balanced in event times, with all units being observed for at least 5
-treatment periods. This avoids the $ATT_l$ being influenced by different
-group compositions at different periods $l$.\footnote{See Section 3.1.1 in
+\noindent where $w_g$ are the groups' relative frequencies in the treated
+population. When calculating these event study parameters, I use a panel
+balanced in event times, with all units being observed for at least 5 treatment
+periods. This avoids the $ATT_l$ being influenced by different group
+compositions at different periods $l$.\footnote{See Section 3.1.1 in
 \citet{callaway2021difference} for a more detailed discussion.}
 
 
