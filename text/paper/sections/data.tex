@@ -97,8 +97,8 @@ cleaning functions is available on
 \href{https:/egithub.com/fabiangunzinger/mdb_eval/blob/f51e49c95c5884d2dc417be23921a8acd85aec9d/src/data/clean.py}{Github}.}
 Here, I briefly describe the main cleaning steps and their rationale. I drop
 all transactions with a missing description string because these cannot be
-categorised, and all transactions that are not automatically categorised by
-the app. Dropping these transactions makes it likely that I will underestimate
+categorised, and all transactions that are not automatically categorised by the
+app. Dropping these transactions makes it likely that I will underestimate
 amounts spent and saved, but minimises the risk of incorrectly classified
 transactions. I also group transactions into transfer, spend, and income
 subgroups, following \citet{muggleton2020evidence} to define spend subgroups
@@ -170,8 +170,7 @@ reduce spending and increase savings.\footnote{We cannot identify test users
     precisely, but drop users who signed up prior to or during 2011, the first
 year the app was in operation.} And I retain only users for whom we can observe
 the complete set of demographic covariates (gender, age, region) to ensure all
-users can be used throughout the analysis. These steps do impact the sample
-size significantly.
+users can be used throughout the analysis. 
 
 \begin{table}
 \centering\footnotesize
@@ -181,6 +180,19 @@ size significantly.
 transaction volume in millions of British Pounds left in our sample after each
 sample selection step.}
 \end{table}
+
+These steps do impact the sample size significantly. In fact, while it is not
+surprising that only considering users that signed up after March 2017 would
+reduce the sample size considerably, the large reduction in users due to
+requiring at least one savings account, an annual income of at least
+\pounds5,000, and at least 10 monthly transactions are surprising, and suggest
+that the raw dataset contains a large number of users that do not use Money
+Dashboard as intended. The drastic effect of the selection procedure on sample
+size also underlines how important careful sample selection is to ensure that
+we can be reasonably sure to observe all relevant financial
+transactions for all users in the sample, and thus to be confident that
+observed changes in financial behaviour do not reflect a shift of transactions
+between observable and unobservable accounts.
 
 
 \subsection{Summary statistics}%
