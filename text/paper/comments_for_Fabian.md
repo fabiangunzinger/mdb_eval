@@ -69,7 +69,7 @@ x How is Figure 6 panel A different to the basic result in Figure 4? Oh, it's a 
 
 x "food" might be called "eating out"?
 
-Check references. "Journal of _p_olitical Economy", "Journal of _m_onetary Economics"
+x Check references. "Journal of _p_olitical Economy", "Journal of _m_onetary Economics"
 
-Regression tables are needed I think, perhaps in an appendix.
+Regression tables are needed I think, perhaps in an appendix. -- (Not adding them because they take a lot of work -- will take the risk that they won't be asked for!)
 
