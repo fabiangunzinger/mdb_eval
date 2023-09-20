@@ -1,16 +1,16 @@
 library(ggsci)
 library(ggthemes)
-library(ggthemr)
-library(RColorBrewer)
-library(scales)
-library(wesanderson)
+# library(ggthemr)
+# library(RColorBrewer)
+# library(scales)
+# library(wesanderson)
 
 
 # Environment variable
 Sys.setenv(AWS_PROFILE='3di', AWS_DEFAULT_REGION='eu-west-2')
 
 # Global variables
-ROOT <- '/Users/fgu/dev/projects/mdb_eval'
+ROOT <- '/Users/fgu/dev/personal/mdb_eval'
 FIGDIR <- file.path(ROOT, 'output/figures')
 TABDIR <- file.path(ROOT, 'output/tables')
 
