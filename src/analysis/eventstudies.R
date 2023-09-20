@@ -5,12 +5,16 @@ library(gridExtra)
 library(lubridate)
 
 source('./src/config.R')
-source('./src/helpers/fixest_settings.R')
+# source('./src/helpers/fixest_settings.R')
 source('./src/helpers/helpers.R')
 
 
 df <- read_analysis_data()
 names(df)
+
+users <- unique(df$user_id)[1:500]
+dfs <- df[df$user_id %in% users, ]
+
 
 # Customise Callaway & Sant'Anna event study plot theme
 cstheme <- theme(
@@ -18,7 +22,7 @@ cstheme <- theme(
   plot.title.position = "plot",
   panel.grid.major.y = element_line(colour = "snow2"),
   panel.grid.minor.y = element_line(colour = "snow2"),
-  axis.title=element_text(size = 20, colour = "black", face = "plain"),
+  axis.title=element_text(size = 50, colour = "black", face = "plain"),
   axis.text = element_text(size = 20),
   legend.text = element_text(size = 20),
   legend.position = "none"
@@ -35,7 +39,7 @@ dspend_uncond_gt <- att_gt(
   gname = "user_reg_ym",
   idname = "user_id",
   tname = "ym",
-  data = df,
+  data = dfs,
   est_method = "reg",
   control_group = "notyettreated",
   allow_unbalanced_panel = T,
@@ -52,14 +56,22 @@ dspend_uncond_es <- aggte(
   balance_e = 5
 )
 
+summary(dspend_uncond_es)
+
+
+ggdid(dspend_uncond_es)
+
 # Export plot
 ggdid(
   dspend_uncond_es,
-  title = "Unconditional parallel trends",
-  ylab = 'Discretionary spend',
-  xlab = "Months since app signup",
-  ylim = c(-210, 100)
-  ) + cstheme
+  # title = "Unconditional parallel trends",
+  # ylab = 'Discretionary spend',
+  # xlab = "Months since app signup",
+  # ylim = c(-210, 100)
+  ) 
+
+
+# + cstheme
 
 ggsave(glue("{FIGDIR}/dspend_uncond_es.png"))
 
