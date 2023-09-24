@@ -2,6 +2,7 @@
 tags
 .DS_Store
 docs/
+*.pdf
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/r,python
