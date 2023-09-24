@@ -5,6 +5,12 @@ docs/
 *.pdf
 eval.Rproj
 
+# Selected sections
+*abstract.tex
+conclusion.tex
+intro.tex
+results.tex
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/r,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=r,python
