@@ -417,7 +417,7 @@ netflows_cond_unbal_es <- aggte(
 ggdid(
   netflows_cond_unbal_es,
   title = " ",
-  ylab = "Net savings",
+  ylab = "Savings",
   xlab = "Months since app signup",
   ylim = c(-450, 300)
 ) + cstheme
@@ -427,7 +427,7 @@ ggsave(glue("{FIGDIR}/netflows_cond_unbal_es.png"))
 ggdid(
   netflows_cond_es,
   title = " ",
-  ylab = "Net savings",
+  ylab = "Savings",
   xlab = "Months since app signup",
   ylim = c(-450, 300)
 ) + cstheme
