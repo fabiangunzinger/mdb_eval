@@ -1,5 +1,5 @@
 library(did)
-library(tidyverse)
+library(ggplot2)
 library(glue)
 library(gridExtra)
 library(lubridate)
@@ -12,19 +12,17 @@ source('./src/helpers/helpers.R')
 df <- read_analysis_data()
 names(df)
 
-users <- unique(df$user_id)[1:500]
-dfs <- df[df$user_id %in% users, ]
 
-
-# Customise Callaway & Sant'Anna event study plot theme
+# Customise event study plot theme
+size <- 24
 cstheme <- theme(
-  plot.title = element_text(size = 22, color = "black", hjust = 0.5),
+  plot.title = element_text(size = size, color = "black", hjust = 0.5),
   plot.title.position = "plot",
   panel.grid.major.y = element_line(colour = "snow2"),
   panel.grid.minor.y = element_line(colour = "snow2"),
-  axis.title=element_text(size = 50, colour = "black", face = "plain"),
-  axis.text = element_text(size = 20),
-  legend.text = element_text(size = 20),
+  axis.title=element_text(size = size, colour = "black", face = "plain"),
+  axis.text = element_text(size = size),
+  legend.text = element_text(size = size),
   legend.position = "none"
 )
 
@@ -39,7 +37,7 @@ dspend_uncond_gt <- att_gt(
   gname = "user_reg_ym",
   idname = "user_id",
   tname = "ym",
-  data = dfs,
+  data = df,
   est_method = "reg",
   control_group = "notyettreated",
   allow_unbalanced_panel = T,
@@ -56,22 +54,14 @@ dspend_uncond_es <- aggte(
   balance_e = 5
 )
 
-summary(dspend_uncond_es)
-
-
-ggdid(dspend_uncond_es)
-
 # Export plot
 ggdid(
   dspend_uncond_es,
-  # title = "Unconditional parallel trends",
-  # ylab = 'Discretionary spend',
-  # xlab = "Months since app signup",
-  # ylim = c(-210, 100)
-  ) 
-
-
-# + cstheme
+  title = "Unconditional parallel trends",
+  ylab = 'Discretionary spend',
+  xlab = "Months since app signup",
+  ylim = c(-210, 100)
+  ) + cstheme
 
 ggsave(glue("{FIGDIR}/dspend_uncond_es.png"))
 
@@ -105,7 +95,7 @@ netflows_uncond_es <- aggte(
 ggdid(
   netflows_uncond_es,
   title = " ",
-  ylab = 'Net-inflows into savings accounts',
+  ylab = 'Savings',
   xlab = "Months since app signup",
   ylim = c(-450, 300)
   ) + cstheme
@@ -176,7 +166,7 @@ netflows_cond_es <- aggte(
 ggdid(
   netflows_cond_es,
   title = " ",
-  ylab = 'Net-inflows into savings accounts',
+  ylab = 'Savings',
   xlab = "Months since app signup",
   ylim = c(-450, 300)
   ) + cstheme
@@ -213,7 +203,7 @@ dspend_extens_es <- aggte(
 ggdid(
   dspend_extens_es,
   title = "Extensive margin",
-  ylab = 'Discretionary spend (# of txns)',
+  ylab = 'Number of spending txns',
   xlab = "Months since app signup"
   ) + cstheme
 ggsave(glue("{FIGDIR}/dspend_extens_es.png"))
@@ -244,7 +234,7 @@ dspend_intens_es <- aggte(
 ggdid(
   dspend_intens_es,
   title = "Intensive margin",
-  ylab = 'Discretionary spend (mean txn value)',
+  ylab = 'Mean spend txn value (£)',
   xlab = "Months since app signup"
   ) + cstheme
 ggsave(glue("{FIGDIR}/dspend_intens_es.png"))
@@ -277,7 +267,7 @@ netflows_extens_es <- aggte(
 ggdid(
   netflows_extens_es,
   title = " ",
-  ylab = 'P(net-inflows > 0)',
+  ylab = 'P(Savings > 0)',
   xlab = "Months since app signup"
   ) + cstheme
 ggsave(glue("{FIGDIR}/netflows_extens_es.png"))
@@ -308,7 +298,7 @@ netflows_intens_es <- aggte(
 ggdid(
   netflows_intens_es,
   title = " ",
-  ylab = 'Net-inflows if net-inflows > 0',
+  ylab = 'Savings | savings > 0',
   xlab = "Months since app signup"
   ) + cstheme
 ggsave(glue("{FIGDIR}/netflows_intens_es.png"))
@@ -341,7 +331,7 @@ inflows_cond_es <- aggte(
 ggdid(
   inflows_cond_es,
   title = " ",
-  ylab = 'Inflows into savings accounts',
+  ylab = 'Savings account inflows',
   xlab = "Months since app signup",
   ylim = c(-450, 300)
   ) + cstheme
@@ -373,7 +363,7 @@ outflows_cond_es <- aggte(
 ggdid(
   outflows_cond_es,
   title = " ",
-  ylab = 'Outflows from savings accounts',
+  ylab = 'Savings account outflows',
   xlab = "Months since app signup",
   ylim = c(-450, 300)
   ) + cstheme
@@ -427,7 +417,7 @@ netflows_cond_unbal_es <- aggte(
 ggdid(
   netflows_cond_unbal_es,
   title = " ",
-  ylab = "Net-inflows into savings accounts",
+  ylab = "Net savings",
   xlab = "Months since app signup",
   ylim = c(-450, 300)
 ) + cstheme
@@ -437,7 +427,7 @@ ggsave(glue("{FIGDIR}/netflows_cond_unbal_es.png"))
 ggdid(
   netflows_cond_es,
   title = " ",
-  ylab = "Net-inflows into savings accounts",
+  ylab = "Net savings",
   xlab = "Months since app signup",
   ylim = c(-450, 300)
 ) + cstheme
@@ -450,9 +440,9 @@ yvars <- c(
   "investments",
   "up_savings",
   "ca_transfers",
-  "cc_payments",
-  "loan_funds",
   "loan_rpmts"
+  # "cc_payments",
+  # "loan_funds",
 )
 
 for (y in yvars) {
@@ -486,8 +476,8 @@ for (y in yvars) {
   # Export plot
   ylabs <- list(
     "investments" = "Investments",
-    "up_savings" = "Savings (user defined)",
-    "ca_transfers" = "Tranfsers from current accounts",
+    "up_savings" = "Unliked savings",
+    "ca_transfers" = "Current account tfrs",
     "cc_payments" = "Credit card payments",
     "loan_funds" = "Loan funds",
     "loan_rpmts" = "Loan repayment"
@@ -500,7 +490,6 @@ for (y in yvars) {
   ) + cstheme
   ggsave(glue("{FIGDIR}/{y}_cond_es.png"))
 }
-
 
 
 # Disaggregated dspend ------------------------------------------------------------
@@ -542,13 +531,13 @@ for (y in yvars) {
   )
   
   ylabs <- c(
-    "dspend" = "Discretionary spend",
-    "dspend_groceries" = "Discretionary spend (groceries)",
-    "dspend_entertainment" = "Discretionary spend (entertainment)",
-    "dspend_food" = "Discretionary spend (food)",
-    "dspend_clothes" = "Discretionary spend (clothes)",
-    "dspend_other" = "Discretionary spend (other)",
-    "dspend_dd" = "Discretionary spend (debit-direct)"
+    "dspend" = "Total",
+    "dspend_groceries" = "Groceries",
+    "dspend_entertainment" = "Entertainment",
+    "dspend_food" = "Food",
+    "dspend_clothes" = "Clothes",
+    "dspend_other" = "Other",
+    "dspend_dd" = "Debit-direct"
   )
   
   ggdid(

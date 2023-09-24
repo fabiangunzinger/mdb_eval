@@ -5,56 +5,108 @@
 
 This paper evaluates whether using Money Dashboard, a UK-based financial
 aggregator app, is associated with a reduction in discretionary spend and an
-increase in \textit{emergency savings} -- short-term savings intended as a
-buffer against unexpected financial shocks.
+increase in emergency savings -- short-term savings intended as a buffer
+against unexpected financial shocks.
 
 The question is important because a large number of adults in the UK and the US
 do not have enough savings to cover unexpected expenses like car or medical
 bills: in the UK, 25 percent of adults would be unable to cover an unexpected
 bill of \pounds300 \citep{phillips2021supporting}, while in the US, about 30
-percent would be unable to cover a \$400 bill \citep{fed2022economic}. But
-while there is a large body of research that studies reasons for why savings
-are low, little is known about what could help people save
-more.\footnote{Well-documented behavioural biases that help explain undersaving
-    are, among others, present bias \citep{laibson1997golden,
-    ericson2019intertemporal}, inertia \citep{madrian2001power},
-    over-extrapolation \citep{choi2009reinforcement}, and limited self-control
-    and willpower \citep{thaler1981economic, benhabib2005modeling,
-    fudenberg2006dual, loewenstein2004animal, gul2001temptation}. One danger of
-    viewing low savings mainly as a result of behavioural biases is that while
-    these biases likely do play some role and designing environments and tools
-    to help correct them are thus part of the solution, it is at least
-    conceivable that this is an area where the focus on behaviour-level
-    solutions distracts from an effort to find more effective society-level
-    solutions, a danger inherent in behavioural science research convincingly
-    highlighted in \citet{chater2022frame}: if the main problem is that many
-people are unable to earn enough to save, then the effectiveness of helping
-them manage their low incomes more effectively pales in comparison with efforts
-to help them earn more.}
+percent would be unable to cover a \$400 bill \citep{fed2022economic}.
 
-FinTech aggregator apps like Money Dashboard are promising because they provide
-easy access to financial information that makes it easier to monitor one's
-spending and saving, and often also offer tools such as budgeting and the
-setting of spending goals. Financial information that
-is more easily accessible and is aggregated in ways that help people keep track
-of their goals might be beneficial because rational inattention theory predicts
-that it makes people more likely to access that information, which, in turn,
-might lead to better consumption decisions. Similarly, tools that help with
-budgeting and with setting spending goals have the potential to help users make
-consumption decisions more in line with their intentions because such tools can
-act as commitment devices that -- if users experience disutility from falling
-short of their goals -- introduce a cognitive cost to overspending or
-undersaving.\footnote{On rational inattention theory, see, for instance,
-    \citet{brunnermeier2008wealth, dellavigna2009psychology,
-    sims2003implications}. On commitment devices see, among others,
-    \citet{thaler1981economic, laibson1997golden, o1999doing} for theoretical
-    foundations, and \citet{beshears2016beyond, hsiaw2013goal} for a discussion
-of soft commitment devices.}
+A large literature has documented a variety of factors that can influence
+undersaving and financial decision-making more generally: time-preferences and
+present bias \citep{laibson1997golden, frederick2002time,
+read2018intertemporal, ericson2019intertemporal, cohen2020measuring}, inertia
+\citep{madrian2001power}, over-extrapolation \citep{choi2009reinforcement},
+limited self-control and willpower \citep{thaler1981economic,
+  benhabib2005modeling, o1999doing, fudenberg2006dual, loewenstein2004animal,
+gul2001temptation}, cognitive limitations and financial literacy
+\citep{agarwal2009age, agarwal2013cognitive, korniotis2011older,
+agarwal2010learning, fernandes2014financial, jorring2020financial}, attitude
+towards money and spending \citep{rick2008tightwads, rick2011fatal}, one's
+perceived locus of control \citep{perry2005control}, degree of optimism
+\citep{puri2007optimism}, the ability to frame decisions broadly rather than
+narrowly \citep{kumar2008decision}, propensity to gamble
+\citep{kumar2009gambles}, one's social network \citep{bailey2018economic,
+kuchler2021social}, the degree of one's financial planning
+\citep{ameriks2003wealth}, and habits \citep{blumenstock2018defaults,
+schaner2018persistent, de2013deposit}.\footnote{For two thorough reviews of the
+literature, see \citet{agarwal2017shapes} and \citet{greenberg2019financial}.}
 
-In this paper, I specifically test whether using Money Dashboard is associated
-with a reduction in discretionary spending and an increase in emergency
-savings. I use a new estimator proposed by \citet{callaway2021difference} that
-corrects for recently identified problems in two-way fixed effects estimates.
+Researchers have also identified a number of tools that can help people
+overcome some of these biases. Probably the most studied approach is changing
+default options. Changes in defaults are consequential and often successful
+because people often stick with the status quo \citep{samuelson1988status},
+interpret defaults as a recommendation \citep{mckenzie2006recommendations},
+implicitly view them as reference points they do not want to move away from
+\citep{johnson2003defaults, kahneman1979prospect}, and often end up sticking
+with them even if they intend to to otherwise because of procrastination
+\citep{carroll2009optimal, ericson2017interaction}. Default options have been
+applied across range of areas and have, for instance, been found to increase
+retirement savings contributions \citep{thaler2004save, madrian2001power,
+beshears2009importance} and organ donations \citep{johnson2003defaults,
+gimbel2003presumed, abadie2006impact}.
+
+Another extensively studied approach is the commitment device, whereby an
+individual restricts their future choice set in order to avoid choosing a
+self-defeating action. Not everyone makes use of these devices when they are
+offered \citep{bryan2010commitment} and they do not work in all contexts
+\citep{laibson2015don,robinson2018some}, but they have been found to help
+individuals increase their savings rates \citep{ashraf2006tying}, quit smoking
+\citep{gine2010put}, make healthier food choices \citep{schwartz2014healthier},
+and exercise more regularly \citep{royer2015incentives}.
+
+A third approach are implementation intentions, a particular type of planning
+for the achievement of one's goals that involves ``if-then'' intentions, such
+as ``if I get paid, then I transfer 10 percent of it into my savings account''
+\citep{gollwitzer2006implementation, rogers2015beyond}. Such intentions have
+been found to support perseverance in pursuing one's goals
+\citep{oettingen2010strategies} and to increase overall goal attainment across
+different age groups, life domains, and types of obstacles
+\citep{gollwitzer2006implementation}.
+
+Finally, social norms messaging, whereby people are informed about how their
+own behaviour compares to that of a relevant peer group, has been successful in
+inducing high-energy-use households to lower their energy consumption
+\citep{schultz2007constructive, allcott2011social, allcott2014short,
+brandon2017effects}. Such information can be especially useful for domains
+where people usually are uninformed about the behaviour of their peers and do
+thus not have a reference point against which to calibrate their own behaviour
+-- a situation most people find themselves in when it comes to discretionary
+spending and saving. However, social norms messaging can also backfire and has
+been found to lower participation in pension savings plans
+\citep{beshears2015effect} and completion rates of an online course
+\citep{rogers2016discouraged}, making it important to test messages before
+deploying them on a large scale to avoid unintended consequences.
+
+FinTech aggregator apps such as Money Dashboard are a promising mean to help
+people manage their spending and savings for two reasons: eventually, as these
+apps become more sophisticated, they can be used to implement and test the
+above mentioned tools at a large scale, and thus potentially bring their
+benefit from research labs or specifically designed tools used by a small
+minority to the broader population. In the meantime, they provide additional
+features that -- on their own -- can help people manage their finances more
+successfully. In particular, they provide easy access to financial information
+that makes it easier to monitor one's spending and saving, and often also offer
+tools such as budgeting and the setting of spending goals. Financial
+information that is more easily accessible and is aggregated in ways that help
+people keep track of their goals might be beneficial because rational
+inattention theory predicts that it makes people more likely to access that
+information, which, in turn, might lead to better consumption decisions
+\citet{brunnermeier2008wealth, dellavigna2009psychology, sims2003implications}.
+Tools that help with budgeting and with setting spending goals have the
+potential to help users make consumption decisions more in line with their
+intentions because such tools can act as commitment devices that -- if users
+experience disutility from falling short of their goals -- introduce a
+cognitive cost to overspending or undersaving.
+
+In this paper, I specifically test whether using Money Dashboard -- an
+aggregator app that offers aggregation of all financial accounts and budgeting
+features -- is associated with a reduction in discretionary spending and an
+increase in emergency savings. I use a new estimator proposed by
+\citet{callaway2021difference} that corrects for recently identified problems
+in two-way fixed effects estimates.
 
 I find that users reduce their discretionary spend by between \pounds100 and
 \pounds150 per month (11-17\% of average discretionary spend) once they start

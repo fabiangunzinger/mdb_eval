@@ -142,17 +142,17 @@ observe for an individual, it is thus critical that we can observe at least 12
 months of history for all accounts a user adds to the platform. This ensures
 that in the extreme case where a user adds an account they had used for some
 time in the fifth month after they signed up, I observe all transactions on
-that account throughout the 12-month period of interest.\footnote{For example:
-    if a user has made monthly payments of \pounds100 into a savings account
-    for two years by the time they sign up to MDB but links that account five
-    months after joining, we can only observe the historical payments if MDB
-    can access at least 12 months of history. If this is not the case, and MDB
-    can only, say, access 6 months of history, we would erroneously conclude
-that the user started saving \pounds100 more starting in the month they signed
-up.} Data exploration suggests that all major banks start providing 12 months
-of historical data from April 2017 onwards, which is why include only users who
-sign up after that data.\footnote{The Jupyter Notebook containing the data
-exploration is available on
+that account throughout the 12-month period of interest. To see why this is
+important, consider a user who has made monthly payments of \pounds100 into a
+savings account for two years by the time they sign up to MDB but links that
+account only five months after joining. In this case, we can only observe the
+historical payments if MDB can access at least 12 months of history. If this
+were not the case, and MDB can only, say, access 6 months of history, we would
+erroneously conclude that the user started saving \pounds100 starting in the
+month they signed up. Data exploration suggests that all major banks start
+providing 12 months of historical data from April 2017 onwards, which is why
+include only users who sign up after that data.\footnote{The Jupyter Notebook
+containing the data exploration is available on
 \href{https://github.com/fabiangunzinger/mdb_eval/blob/371493bd78870cab7a303edb70687287e5bca4a9/notebooks/available_account_history.ipynb}{Github}.}
 
 To ensure that I can be reasonably certain to observe users who have added all
@@ -192,6 +192,31 @@ we can be reasonably sure to observe all relevant financial transactions for
 all users in the sample, and thus to be confident that observed changes in
 financial behaviour do not reflect a shift of transactions between observable
 and unobservable accounts.
+
+
+\subsection{Variable definitions}%
+
+The main outcome variables in my analysis are \textit{discretionary spend} and
+textit{savings}.
+
+\paragraph{Discretionary spend:} Discretionary spend aims to capture spend
+transactions over which users have a lot of control. It is calculated solely
+based on card transactions with cash transactions excluded. This is because
+cash transactions are recorded in the MDB data as ATM withdrawals, and it is
+impossible to know what these funds were used for. Furthermore, I do not
+include gasoline expenses in discretionary spend because many people use their
+car to commute to work so that it is unclear what proportion of these expenses
+are discretionary. A list of transaction tags used to identify discretionary
+spend transactions and the code used create the variable are available on
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/f31bfcd7a330188cdd27968d41957ebf5b454099/src/data/aggregators.py\#L389}{Github}.
+
+\paragraph{Savings:} Savings are calculated as net-inflows into all of a user's
+savings accounts that are linked to Money Dashboard. To capture only
+user-generated savings-account flows and not interest payments and similar
+automated transactions, I include only transaction with an absolute value of
+\pounds5 or higher. The code used to calculate savings account flows is also
+available on
+\href{https://github.com/fabiangunzinger/mdb_eval/blob/f31bfcd7a330188cdd27968d41957ebf5b454099/src/data/aggregators.py#L89}{Github}.
 
 
 \subsection{Summary statistics}%

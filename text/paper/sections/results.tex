@@ -1,63 +1,20 @@
 \section{Results}%
 \label{sec:results}
 
-The main outcome variables in my analysis are ``discretionary spend'', defined
-as spend transactions over which users likely have a lot of control, and
-``net-inflows into savings-accounts'', defined as the difference between
-inflows into and outflows from all of a user's savings
-accounts.\footnote{Discretionary spend is calculated solely based on card
-    transactions, while cash transactions are excluded. This is because cash
-    transactions are recorded in the MDB data as ATM withdrawals, and it is
-    impossible to know what these funds were used for. Furthermore, I do
-    not include gasoline expenses in discretionary spend because many people
-    use their car to commute to work so that it is unclear what proportion of
-    these expenses are discretionary. A list of transaction tags used to
-    identify discretionary spend transactions and the code used create the
-    variable are available on
-    \href{https://github.com/fabiangunzinger/mdb_eval/blob/f31bfcd7a330188cdd27968d41957ebf5b454099/src/data/aggregators.py\#L389}{Github}.
-    To capture only user-generated savings-account flows and not interest
-    payments and similar automated transactions, I include only transaction
-with an absolute value of \pounds5 or higher. The code used to calculate
-savings account flows is also available on
-\href{https://github.com/fabiangunzinger/mdb_eval/blobf31bfcd7a330188cdd27968d41957ebf5b454099/src/data/aggregators.py\#L89}{Github}.}
-
-
 \subsection{Main results}%
 \label{sub:main_results}
 
-\begin{figure}[h]
-    \centering 
-    \caption{Main results}
-    \label{fig:main_results}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_uncond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/dspend_cond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/netflows_uncond_es.png}
-    \includegraphics[width=.49\textwidth]{\figdir/netflows_cond_es.png}
-    \fignote{\textwidth}{The effect of app use on monthly discretionary
-        spending (top row) and monthly net-inflows into savings accounts
-        (bottom row) under the unconditional (left column) and conditional
-        (right column) parallel trends assumption. Point estimates represent
-        group-time average treatment effects aggregated to periods since
-        treatment exposure, as defined in Section~\ref{sec:estimation}. Red
-        lines represent point estimates and uniform 95\% confidence bands for
-        pre-treatment periods allowing for clustering at the user level. If the
-        null hypothesis that parallel trends hold in all periods is correct,
-        these should be equal to zero. Blue lines provide similar information
-    for post-treatment periods.}
-\end{figure}
-
 Figure~\ref{fig:main_results} shows the effect of app use on monthly
-discretionary spend (top row) and monthly net-inflows into savings accounts
-(bottom row) under the unconditional (left column) and conditional (right
-column) parallel trends assumptions. As discussed in
-Section~\ref{sec:estimation}, the conditional parallel trends assumption states
-that the outcome variable of treatment and control units with the same set of
-covariates would have evolved in parallel fashion. Throughout my analysis, the
-set of covariates I use are month income, month spend, the number of active
-accounts, and age. Estimates are group-time average treatment effects
-aggregated by time since treatment exposure, as defined in
-Equation~\ref{eq:att_es}. All results are presented with a uniform 95\%
-confidence band, based on bootstrapped standard errors that account for
+discretionary spend (top row) and monthly savings (bottom row) under the
+unconditional (left column) and conditional (right column) parallel trends
+assumptions. As discussed in Section~\ref{sec:estimation}, the conditional
+parallel trends assumption states that the outcome variable of treatment and
+control units with the same set of covariates would have evolved in parallel
+fashion. Throughout my analysis, the set of covariates I use are month income,
+month spend, the number of active accounts, and age. Estimates are group-time
+average treatment effects aggregated by time since treatment exposure, as
+defined in Equation~\ref{eq:att_es}. All results are presented with a uniform
+95\% confidence band, based on bootstrapped standard errors that account for
 autocorrelation in the data and are clustered at the user level, as discussed
 in Section~\ref{sec:estimation}.
 
@@ -71,9 +28,26 @@ reduction in discretionary spend following the use of an aggregator app.
 Interestingly, we can also see that at least for the first six months of app
 use, the effect is persistent.
 
+\begin{figure}[h] \centering \caption{Main results} \label{fig:main_results}
+  \includegraphics[width=.49\textwidth]{\figdir/dspend_uncond_es.png}
+  \includegraphics[width=.49\textwidth]{\figdir/dspend_cond_es.png}
+  \includegraphics[width=.49\textwidth]{\figdir/netflows_uncond_es.png}
+  \includegraphics[width=.49\textwidth]{\figdir/netflows_cond_es.png}
+  \fignote{\textwidth}{The effect of app use on monthly discretionary
+    spending (top row) and monthly savings (bottom row) under the
+    unconditional (left column) and conditional (right column) parallel
+    trends assumption. Point estimates represent group-time average
+    treatment effects aggregated to periods since treatment exposure, as
+    defined in Section~\ref{sec:estimation}. Red lines represent point
+    estimates and uniform 95\% confidence bands for pre-treatment periods
+    allowing for clustering at the user level. If the null hypothesis that
+parallel trends hold in all periods is correct, these should be equal to zero.
+Blue lines provide similar information for post-treatment periods.}
+\end{figure}
+
 That the results based on the unconditional and the conditional parallel trends
 assumptions are very similar but not identical is not surprising. Conditional
-parallel trends are important in contexts when (i) there are covariate specific
+parallel trends are important in contexts where (i) there are covariate specific
 trends in outcome paths and (ii) the distribution of covariates differs between
 treatment and control groups. A classic example of the latter would be
 comparing individuals who did and did not sign up for a job-training program,
@@ -88,12 +62,7 @@ income and total spend, then we would expect parallel trends only for
 individuals with similar incomes and total spend. Similarly, if we think that
 discretionary spend increases in the number of accounts we observe per user,
 then parallel trends in spend only holds for users for whom we observe the same
-number of accounts.\footnote{As discussed in Section~\ref{sec:data}, users
-    choose which accounts to link to Money Dashboard, and while I select for
-    users that appear to have linked all their accounts and for whom we could
-    observe the complete account history even if they added some of their
-accounts after joining, I cannot rule out that some users do add account after
-signup and MDB is unable to capture the complete history.}
+number of accounts.
 
 We can also see that in periods -4 and -3, the null-hypothesis of identical
 pre-signup trends is being rejected (both under conditional and unconditional
@@ -102,12 +71,12 @@ results should be interpreted with caution. In future work, I plan to use the
 approach introduced by \citet{rambachan2022more} to test how sensitive my
 results are to deviations from parallel trends.
 
-Finally, we can see that, in contrast to discretionary spending, net-inflows
-into savings accounts do not change once users start using the app. Confidence
-intervals are much larger than for discretionary spend because -- as can be
-seen in Table~\ref{tab:sumstats} -- savings account inflows are often zero,
-which leads to a normalised standard deviation much larger than that for
-discretionary spend.
+Finally, we can see that, in contrast to discretionary spending, savings do not
+change once users start using the app. Confidence intervals are much larger
+than for discretionary spend because -- as can be seen in
+Table~\ref{tab:sumstats} -- savings account inflows are often zero, which leads
+to a standard deviation much larger than that for discretionary
+spend.
 
 The absence of an increase in savings is somewhat surprising, since we might
 have expected that users transfer at least some of their saved funds into their
@@ -139,13 +108,12 @@ investment vehicles or other savings accounts. An exception is the spikes in
 user-labelled savings in the month just before and the month of signup. Rather
 than suggesting an additional inflow of funds, however, this is is more likely
 to be an artefact of users only manually labelling transactions during active
-app use rather than also labelling historical transactions.\footnote{The pattern
-    could be explained in two ways: either users can see the entire account
-    history available to MDB after linking an account but only label
-    transactions during periods of active app use and the period immediately
-before signup, or MDB only shows users data from the month before signup
-onwards, so that users are unable to manually label transactions in earlier
-periods.}
+app use rather than also labelling historical transactions. This could happen
+in two ways: either users can see the entire account history available to MDB
+after linking an account but only label transactions during periods of active
+app use and the period immediately before signup, or MDB only shows users data
+from the month before signup onwards, so that users are unable to manually
+label transactions in earlier periods.
 
 \begin{figure}[h]
     \centering
@@ -176,6 +144,15 @@ saved funds across a large number of different uses in amounts I am not powered
 to detect, (iii) users are heterogeneous and allocate funds across a small
 number of uses that differ between users, so that, in the aggregate, I am not
 powered to detect these changes either.
+
+Explanations (ii) and (iii) seem plausible and would make for interesting
+future research. But why would users just let accumulate funds in their current
+accounts instead of moving funds into higher-interest savings accounts? One
+possible explanation is that people intend to make these transfers but that
+intertia and procrastination from following through. Another explanation is
+that historically low interest rates during the entire sample period did not
+provide much of an incentive to save in the first place. Both of these
+explanations could be explored futher in future researcher.
 
 
 \subsection{Disaggregated discretionary spend}%

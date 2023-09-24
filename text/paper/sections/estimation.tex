@@ -16,33 +16,34 @@ assignment, where units are first exposed to treatment at different points in
 time (as is the case in our setting), dynamic two-way fixed effects are valid
 only if there is homogeneity in treatment effects across treatment adoption
 cohorts. In most settings, including my own, this is a very strong
-assumption.\footnote{The problem is exacerbated in static two-way fixed effects
-    models, which require homogeneity in treatment effects across treatment
-    adoption cohorts and in time since treatment. \citet{goodman2021difference}
-    shows that the static two-way fixed effect DiD estimator is a weighted
-    average of all possible two-units and two-time-periods
-    difference-in-differences in which one unit changes its treatment status
-    and the other does not. Because this includes ``forbidden comparisons'',
-    where already treated units are used as control units, this can lead to a
-    scenario where the treatment effect of some units has a negative weight,
-    unless one makes the additional assumption of time-invariant treatment
-    effects (in which case, the ``forbidden'' comparisons have an effect size
-    of zero). These negative weights, in turn, can lead to situations where the
-    treatment effect estimate is negative even though all unit-level treatment
-    effects are positive. The dynamic specification suffers from very similar
-    problems, as shown in \citet{sun2021estimating}. For two excellent reviews
-of this new literature, see \citet{roth2022trending, baker2022much}.}
+assumption.
+
+The problem is exacerbated in static two-way fixed effects models, which
+require homogeneity in treatment effects across treatment adoption cohorts and
+in time since treatment. \citet{goodman2021difference} shows that the static
+two-way fixed effect DiD estimator is a weighted average of all possible
+two-units and two-time-periods difference-in-differences in which one unit
+changes its treatment status and the other does not. Because this includes
+``forbidden comparisons'', where already treated units are used as control
+units, this can lead to a scenario where the treatment effect of some units has
+a negative weight, unless one makes the additional assumption of time-invariant
+treatment effects (in which case, the ``forbidden'' comparisons have an effect
+size of zero). These negative weights, in turn, can lead to situations where
+the treatment effect estimate is negative even though all unit-level treatment
+effects are positive. \citet{sun2021estimating} show that the dynamic
+specification suffers from very similar problems.\footnote{For two excellent
+reviews of this new literature, see \citet{roth2022trending, baker2022much}}
 
 Because of this, I use a new estimator proposed by
 \citet{callaway2021difference}, which allows for arbitrary treatment effect
 heterogeneity across treatment adoption cohorts and time, and allows for the
-incorporation of a parallel trends assumption conditional on
-covariates.\footnote{I implement the estimator using the R package
-\href{https://bcallaway11.github.io/did/}{`did`}.} In
-describing the estimator, I follow the approach of
-\citet{callaway2021difference} of first defining the causal parameter of
-interest, and then discussing identification, estimation, and inference, while
-using the simplified notation used in \citet{roth2022trending}.
+incorporation of a parallel trends assumption conditional on covariates. I
+implement the estimator using the author-provided R package
+\href{https://bcallaway11.github.io/did/}{`did`}. In describing the estimator,
+I follow the approach of \citet{callaway2021difference} of first defining the
+causal parameter of interest, and then discussing identification, estimation,
+and inference, while using the simplified notation used in
+\citet{roth2022trending}.
 
 \paragraph{Causal parameter of interest:}%
 \label{par:causal_parameter_of_interest_}
@@ -80,42 +81,43 @@ $ATT(\textit{2019-04}, \textit{2019-06}) \neq ATT(\textit{2018-03},
 \paragraph{Identification:}%
 \label{par:identification_}
 
-These effects are identified if two main assumptions hold: if there is limited
-and known anticipation of treatment, and if the assumption of parallel trends
-between treatment and comparison groups holds either unconditionally or
-conditionally on a set of covariates.\footnote{Additional assumptions are (i)
-    that the treatment is absorbing in the sense that once an individual is
-    treated they will remain treated forever, (ii) that individuals in the data
-    are randomly and independently drawn from a larger population, and (iii) an
-    overlap condition that ensures that there is a positive number of users
-    that is first exposed to the treatment at any period and that -- under the
-    conditional parallel trends assumption -- propensity scores for initial
-    treatment times based on covariates are bounded away from zero. The first
-    assumption could be violated only if a user closes their account on the app
-    and then signed up again later on, all within the roughly within the
-    two-year data periods I use. This cannot be more than a tiny minority of
-    users. The second assumption holds less trivially. One way to think of a
-    super population from which the users in the dataset are drawn is to think
-of knowledge about the app as partially random, and about the super population
-of all individuals who would have signed up had they learned about the apps
-existence.} Because the purpose of this section is to convey the core idea of
-the estimation approach, I keep things as simple as possible and discuss only
-the case with no anticipation effects and where the parallel trend assumption
-holds unconditionally. \citet{callaway2021difference} show that the same
-overall approach also works when allowing for known anticipation and
-conditional parallel trends.\footnote{Intuitively, known anticipation merely
-    shifts the reference period from the period immediately before treatment to
-    the period before anticipation of treatment begins. When relying on the
-    conditional parallel trends assumption, the overall the group-time average
-    treatment effect $ATT(g, t)$ is the average of unconditional group-time
-    average treatment effects for each value of the covariate vector $X_i$. As
-    discussed in \citet{roth2022trending}, estimation is challenging when $X_i$
-    is continuous or can take on a large number of values, since then we will
-    typically lack data to estimate unconditional group-time treatment effects
-    for each value of $X_i$. There are different semi- and non-parametric
-    approaches that can be used in such cases. I use the first step regression
-estimator throughout for all results shown in this paper. See
-\citet{callaway2021difference, roth2022trending} for more details.}
+These effects are identified if two main assumptions hold: there is limited and
+known anticipation of treatment, and the assumption of parallel trends between
+treatment and comparison groups holds either unconditionally or conditionally
+on a set of covariates. Additional assumptions are (i) that the treatment is
+absorbing in the sense that once an individual is treated they will remain
+treated forever, (ii) that individuals in the data are randomly and
+independently drawn from a larger population, and (iii) an overlap condition
+that ensures that there is a positive number of users that is first exposed to
+the treatment at any period and that -- under the conditional parallel trends
+assumption -- propensity scores for initial treatment times based on covariates
+are bounded away from zero. In my context, the first additional assumption
+could be violated only if a user closes their account on the app and then
+signed up again later on, all within the roughly within the two-year data
+periods I use. This cannot be more than a tiny minority of users. The second
+assumption holds less trivially. One way to think of a super population from
+which the users in the dataset are drawn is to think of knowledge about the app
+as partially random, and about the super population of all individuals who
+would have signed up had they learned about the apps existence.
+
+Because the purpose of this section is to convey the core idea of the
+estimation approach, I keep things as simple as possible and discuss only the
+case with no anticipation effects and where the parallel trend assumption holds
+unconditionally. \citet{callaway2021difference} show that the same overall
+approach also works when allowing for known anticipation and conditional
+parallel trends. Intuitively, known anticipation merely shifts the reference
+period from the period immediately before treatment to the period before
+anticipation of treatment begins. When relying on the conditional parallel
+trends assumption, the overall group-time average treatment effect $ATT(g, t)$
+is the average of unconditional group-time average treatment effects for each
+value of the covariate vector $X_i$. As discussed in \citet{roth2022trending},
+estimation is challenging when $X_i$ is continuous or can take on a large
+number of values, since then we will typically lack data to estimate
+unconditional group-time treatment effects for each value of $X_i$. There are
+different semi- and non-parametric approaches that can be used in such cases. I
+use the first-step regression estimator throughout for all results shown in
+this paper.\footnote{See \citet{callaway2021difference, roth2022trending} for more
+details on the estimator.}
 
 Given these two assumptions, \citet{callaway2021difference} show that
 $ATT(g,t)$ is identified by comparing the expected change of group $g$ between
@@ -136,14 +138,14 @@ for an average over all such groups, collected in set $\mathcal{G}$, so that
     \mathop{\mathbb{E}}[Y_{i,t} - Y_{i,g-1}|G_i \in \mathcal{G}].
 \end{equation}
 
-This equation encapsulates two main results:\footnote{The results are formally
-proven in Section 2 of \citet{callaway2021difference}.} that the period just before
+This equation encapsulates two main results, which are formally proven in
+Section 2 of \citet{callaway2021difference}: that the period just before
 treatment, $g-1$, is a valid reference period, and that the group of all
 individuals that have not yet been treated at time $t$ are a valid comparison
-group for estimating treatment effects in time $t$.\footnote{If a group of
-never-treated individuals is available, then these could also serve as a
-comparison group. But because my dataset does not contain such individuals, I
-do not discuss this case.}
+group for estimating treatment effects in time $t$. If a group of never-treated
+individuals is available, then these could also serve as a comparison group.
+But because my dataset does not contain such individuals, I do not discuss this
+case here.
 
 As a result of this, units who are treated in the very first period in the
 dataset are dropped from the sample, since there exists no possible control
@@ -188,18 +190,14 @@ compositions at different periods $l$.\footnote{See Section 3.1.1 in
 \paragraph{Inference:}%
 \label{par:inference_}
 
-Inference is based on a bootstrap procedure that can account for clustering
-and produces simultaneous (or uniform) confidence bands that account for
-multiple hypothesis testing.\footnote{For more details on the inference
-    procedure, see Section 4.1 in \citet{callaway2021difference}. The
-    interpretation of uniform and pointwise confidence intervals differ in the
-    following way: a uniform 95\% confidence band accounts for multiple
-    hypothesis testing in that it is constructed such that \textit{all} shown
-    coefficients cover their corresponding true value 95 percent of the time.
-    In contrast, a more commonly used pointwise 95\% confidence band is
-    constructed such that the confidence interval for each parameter covers the
-true parameter 95 percent of the time.} 
-
-
-
+Inference is based on a bootstrap procedure that can account for clustering and
+produces simultaneous (or uniform) confidence bands that account for multiple
+hypothesis testing.\footnote{For more details on the inference procedure, see
+Section 4.1 in \citet{callaway2021difference}.} The interpretation of uniform
+and pointwise confidence intervals differ in the following way: a uniform 95\%
+confidence band accounts for multiple hypothesis testing in that it is
+constructed such that \textit{all} shown coefficients cover their corresponding
+true value 95 percent of the time. In contrast, a more commonly used pointwise
+95\% confidence band is constructed such that the confidence interval for each
+parameter covers the true parameter 95 percent of the time.
 
