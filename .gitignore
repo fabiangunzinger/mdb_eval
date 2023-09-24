@@ -4,6 +4,8 @@ tags
 docs/
 *.pdf
 eval.Rproj
+figures/
+tables/
 
 # Selected sections
 *abstract.tex
